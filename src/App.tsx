@@ -125,12 +125,10 @@ export default App
 
 */
 
-
+import AnadirHabilidades from "./pages/añadirhabilidades";
 
 export default function App() {
   return (
-    <h1 className="text-5xl font-bold text-blue-500">
-      Tailwind funciona
-    </h1>
+    <AnadirHabilidades />
   )
 }

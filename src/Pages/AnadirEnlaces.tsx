@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface UserLink {
   id: string;
@@ -9,6 +10,7 @@ interface UserLink {
 export default function AnadirEnlaces() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Estado dinámico para los enlaces
   const [enlaces, setEnlaces] = useState<UserLink[]>([
@@ -110,7 +112,7 @@ export default function AnadirEnlaces() {
   const ProfileImage = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80";
 
   return (
-    <div className="min-h-screen bg-[#DBDFE4] flex flex-col font-sans w-full overflow-hidden">
+    <div className="min-h-screen bg-[#DBDFE4] flex flex-col font-sans w-full">
       
       {/* Top Header 1 (Dark) */}
       <header className="bg-[#2B354F] text-white py-[6px] px-8 flex justify-between items-center shadow-sm z-10">
@@ -147,12 +149,13 @@ export default function AnadirEnlaces() {
       {/* Breadcrumbs */}
       <div className="bg-[#364359] text-gray-200 py-2.5 px-8 text-[14px] font-medium flex gap-3 shadow-md z-10 border-b border-black/10">
         <span className="hover:text-white cursor-pointer hover:underline">Navegación</span> <span>&gt;</span>
+        <span className="hover:text-white cursor-pointer hover:underline" onClick={() => navigate('/perfil')}>Perfil</span> <span>&gt;</span>
         <span className="hover:text-white cursor-pointer hover:underline">Enlaces</span>
         {isModalOpen && <> <span className="text-gray-400">&gt;</span> <span className="font-semibold text-white">Añadir enlace</span> </>}
       </div>
 
       {/* Main Layout Area */}
-      <div className="flex flex-1 h-0">
+      <div className="flex flex-1">
         
         {/* Left Sidebar */}
         <aside className="w-[280px] bg-[#1D4A76] text-white flex flex-col items-center py-12 shadow-inner h-full">
@@ -173,7 +176,7 @@ export default function AnadirEnlaces() {
         </aside>
 
         {/* Right Content Area */}
-        <main className="flex-1 overflow-y-auto bg-[#E5E9EC] p-8 px-12 relative">
+        <main className="flex-1 bg-[#E5E9EC] p-8 px-12 relative">
           
           {/* Profile Details Card */}
           <div className="mb-6">
@@ -195,9 +198,9 @@ export default function AnadirEnlaces() {
             </div>
             
             {/* Nav Tabs */}
-            <div className="bg-white rounded-full px-6 py-2 flex gap-10 items-center text-[15px] shadow-sm w-max mb-6">
-              <button className="text-gray-500 font-semibold hover:text-gray-800 transition-colors">Proyectos</button>
-              <button className="text-gray-500 font-semibold hover:text-gray-800 transition-colors">Habilidades</button>
+            <div className="bg-white rounded-[20px] px-8 py-3 flex gap-12 items-center text-[15px] shadow-sm w-full mt-8 mb-6">
+              <button onClick={() => navigate('/proyectos')} className="text-gray-500 font-semibold hover:text-gray-800 transition-colors">Proyectos</button>
+              <button onClick={() => navigate('/habilidades')} className="text-gray-500 font-semibold hover:text-gray-800 transition-colors">Habilidades</button>
               <button className="text-gray-900 font-bold px-2 border-b-2 border-transparent">Enlaces</button>
             </div>
           </div>
@@ -216,7 +219,6 @@ export default function AnadirEnlaces() {
                 <select className="bg-white border-none rounded-full pl-4 pr-9 py-[8px] text-[14px] text-gray-500 font-semibold shadow-sm outline-none cursor-pointer appearance-none">
                   <option>más recientes</option>
                   <option>más antiguas</option>
-                  <option>alfabético</option>
                 </select>
                 <svg className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -235,12 +237,9 @@ export default function AnadirEnlaces() {
                     <span className="font-bold text-gray-900 text-[16px]">{enlace.title}</span>
                   </div>
                   <div className="flex gap-4">
-                    <button className="text-[#3b82f6] text-[14px] font-semibold hover:underline">
-                      Editar
-                    </button>
                     <button 
                       onClick={() => handleDelete(enlace.id)}
-                      className="text-red-500 text-[14px] font-semibold hover:underline"
+                      className="text-gray-900 text-[14px] font-bold hover:underline"
                     >
                       Eliminar
                     </button>
@@ -280,7 +279,7 @@ export default function AnadirEnlaces() {
                    required
                    value={nuevoTitulo}
                    onChange={(e) => setNuevoTitulo(e.target.value)}
-                   className="w-full px-4 py-[14px] border border-gray-300 rounded-[14px] text-[15px] focus:ring-2 focus:ring-[#2563eb] focus:border-transparent focus:outline-none placeholder-gray-400 font-sans transition-all"
+                   className="w-full px-4 py-[14px] border border-gray-300 bg-white text-gray-900 rounded-[14px] text-[15px] focus:ring-2 focus:ring-[#2563eb] focus:border-transparent focus:outline-none placeholder-gray-400 font-sans transition-all"
                    placeholder="Escribe el titulo del enlace"
                  />
                </div>
@@ -295,7 +294,7 @@ export default function AnadirEnlaces() {
                    required
                    value={nuevaUrl}
                    onChange={(e) => setNuevaUrl(e.target.value)}
-                   className="w-full px-4 py-[14px] border border-gray-300 rounded-[14px] text-[15px] focus:ring-2 focus:ring-[#2563eb] focus:border-transparent focus:outline-none placeholder-gray-400 font-sans transition-all"
+                   className="w-full px-4 py-[14px] border border-gray-300 bg-white text-gray-900 rounded-[14px] text-[15px] focus:ring-2 focus:ring-[#2563eb] focus:border-transparent focus:outline-none placeholder-gray-400 font-sans transition-all"
                    placeholder="http://ejemplo.com"
                  />
                </div>

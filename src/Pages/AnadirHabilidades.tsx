@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Skill {
   id: string;
@@ -29,6 +30,7 @@ const initialSkills: Skill[] = [
 export default function AnadirHabilidades() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const navigate = useNavigate();
 
   const [skills, setSkills] = useState<Skill[]>(initialSkills);
 
@@ -202,9 +204,9 @@ export default function AnadirHabilidades() {
             
             {/* Nav Tabs */}
             <div className="bg-white rounded-full px-10 py-[10px] flex gap-24 items-center text-[15px] shadow-sm w-full mb-6">
-              <button className="text-gray-500 font-semibold hover:text-gray-800 transition-colors">Proyectos</button>
+              <button onClick={() => navigate('/proyectos')} className="text-gray-500 font-semibold hover:text-gray-800 transition-colors">Proyectos</button>
               <button className="text-gray-900 font-bold">Habilidades</button>
-              <button className="text-gray-500 font-semibold hover:text-gray-800 transition-colors">Enlaces</button>
+              <button onClick={() => navigate('/enlaces')} className="text-gray-500 font-semibold hover:text-gray-800 transition-colors">Enlaces</button>
             </div>
           </div>
 

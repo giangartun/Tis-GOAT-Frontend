@@ -4,6 +4,7 @@ import HomePage from "./Pages/Home";
 import MisProyectosPage from "./Pages/MisProyectos";
 import { Login } from "./Pages/Login";
 import { Register } from "./Pages/Register";
+import { VerificarEmail } from "./Pages/VerificarEmail";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/verificar-email/:token" element={<VerificarEmail />} />
 
         <Route element={<Layout />}>
           <Route path="/" element={<HomePage />} />

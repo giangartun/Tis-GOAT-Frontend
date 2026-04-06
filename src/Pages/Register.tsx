@@ -87,8 +87,10 @@ export const Register: React.FC<RegisterProps> = ({
       const data = await response.json();
 
       if (response.ok) {
+        // Mostrar mensaje de éxito
         setMessage(data.message || 'Revisa tu correo para completar el registro. El enlace expira en 5 minutos.');
         
+        // Limpiar formulario
         setFormData({
           nombre: '',
           apellido_paterno: '',
@@ -98,11 +100,18 @@ export const Register: React.FC<RegisterProps> = ({
           contrasena_confirmation: ''
         });
         
-        if (onRegisterSuccess) {
-          setTimeout(() => onRegisterSuccess(), 3000);
-        } else {
-          setTimeout(() => navigate('/login'), 3000);
-        }
+        // Redirigir al Login después de 3 segundos con un mensaje
+        setTimeout(() => {
+          if (onRegisterSuccess) {
+            onRegisterSuccess();
+          } else {
+            navigate('/login', { 
+              state: { 
+                message: '✅ Registro exitoso. Revisa tu correo electrónico para verificar tu cuenta antes de iniciar sesión.' 
+              }
+            });
+          }
+        }, 3000);
       } else {
         if (data.errors) {
           setErrors(data.errors);
@@ -153,12 +162,17 @@ export const Register: React.FC<RegisterProps> = ({
               <p className="text-gray-500 text-sm mt-1">Regístrate para empezar</p>
             </div>
 
+            {/* Mensaje de éxito */}
             {message && (
               <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-sm">
                 {message}
+                <div className="text-xs mt-1 text-green-600">
+                  Redirigiendo al login en 3 segundos...
+                </div>
               </div>
             )}
 
+            {/* Mensaje de error general */}
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
                 {error}

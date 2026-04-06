@@ -60,7 +60,7 @@ export const VerificarEmail: React.FC<VerificarEmailProps> = () => {
           {/* Logo */}
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-[#2E3A4D]">GOAT</h1>
-            <p className="text-gray-500 text-sm mt-1">Sistema Generador de Portafolios Digitales</p>
+            <p className="text-gray-500 text-sm mt-1">Sistema de Portafolios Digitales</p>
           </div>
 
           {/* Estado de verificación */}

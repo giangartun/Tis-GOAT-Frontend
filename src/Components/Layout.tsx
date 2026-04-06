@@ -1,8 +1,34 @@
-import { Outlet, useNavigate } from "react-router-dom";
-import { Home, Settings, UserRound } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Outlet, useNavigate, Link } from "react-router-dom";
+import { Home, Settings, UserRound, LogOut } from "lucide-react";
+
+interface Usuario {
+  nombre?: string;
+  apellido_paterno?: string;
+  email?: string;
+}
 
 function Layout() {
   const navigate = useNavigate();
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('usuario');
+    if (storedUser) {
+      setUsuario(JSON.parse(storedUser));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+    setUsuario(null);
+    navigate('/login');
+  };
+
+  const nombreCompleto = usuario 
+    ? `${usuario.nombre || ''} ${usuario.apellido_paterno || ''}`.trim()
+    : '';
 
   return (
     <div className="min-h-screen bg-app-bg font-inter text-app-text">
@@ -16,26 +42,43 @@ function Layout() {
           </h1>
         </div>
 
-        <button
-          onClick={() => navigate("/login")}
-          className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium hover:bg-white/20"
-        >
-          <UserRound size={18} />
-          Registrarse
-        </button>
+        {/* Botón de usuario - Cambia según autenticación */}
+        {usuario ? (
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="text-sm font-medium">{nombreCompleto}</p>
+              <p className="text-xs text-white/70">{usuario.email}</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium hover:bg-white/20"
+            >
+              <LogOut size={18} />
+              Cerrar Sesión
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => navigate("/register")}
+            className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium hover:bg-white/20"
+          >
+            <UserRound size={18} />
+            Registrarse
+          </button>
+        )}
       </header>
 
       <nav className="flex items-center justify-center border-b border-app-border bg-app-topbar px-6 py-3 text-sm text-white">
         <div className="flex gap-8 font-medium">
-          <a href="/" className="hover:text-white/80">Inicio</a>
+          <Link to="/" className="hover:text-white/80">Inicio</Link>
           <a href="#" className="hover:text-white/80">Mi perfil</a>
-          <a href="/mis-proyectos" className="font-semibold text-white">Mis proyectos</a>
+          <Link to="/mis-proyectos" className="font-semibold text-white">Mis proyectos</Link>
         </div>
       </nav>
 
       <nav className="border-b border-app-border bg-app-surface px-6 py-3">
         <div className="flex items-center gap-2 text-sm text-app-muted">
-          <a href="/" className="hover:text-app-text">Inicio</a>
+          <Link to="/" className="hover:text-app-text">Inicio</Link>
           <span>&gt;</span>
           <span className="text-app-text">Navegación</span>
         </div>

@@ -112,7 +112,7 @@ export const Register: React.FC<RegisterProps> = ({
               }
             });
           }
-        }, 4000); // 👈 AUMENTADO A 4 SEGUNDOS
+        }, 7000); // AUMENTADO de SEGUNDOS
       } else {
         if (data.errors) {
           setErrors(data.errors);
@@ -165,7 +165,7 @@ export const Register: React.FC<RegisterProps> = ({
               <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-sm">
                 {message}
                 <div className="text-xs mt-1 text-green-600">
-                  Redirigiendo al login en 4 segundos...
+                  Redirigiendo al login en 7 segundos...
                 </div>
               </div>
             )}

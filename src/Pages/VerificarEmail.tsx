@@ -31,15 +31,7 @@ export const VerificarEmail: React.FC<VerificarEmailProps> = () => {
         if (response.ok) {
           setStatus('success');
           setMessage(data.message || '✅ ¡Email verificado exitosamente!');
-          
-          // Redirigir al login después de 3 segundos
-          setTimeout(() => {
-            navigate('/login', { 
-              state: { 
-                message: '✅ Cuenta verificada exitosamente. Ya puedes iniciar sesión.' 
-              }
-            });
-          }, 3000);
+          //  ELIMINADO: setTimeout con navigate
         } else {
           setStatus('error');
           setMessage(data.message || '❌ Error al verificar el email. El enlace pudo haber expirado.');
@@ -52,6 +44,16 @@ export const VerificarEmail: React.FC<VerificarEmailProps> = () => {
 
     verificarEmail();
   }, [token, navigate]);
+
+  const handleGoToLogin = () => {
+    navigate('/login', { 
+      state: { 
+        message: status === 'success' 
+          ? '✅ Cuenta verificada exitosamente. Ya puedes iniciar sesión.' 
+          : '⚠️ Por favor regístrate nuevamente.'
+      }
+    });
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -81,7 +83,13 @@ export const VerificarEmail: React.FC<VerificarEmailProps> = () => {
               </div>
               <h2 className="text-xl font-semibold text-green-600 mb-2">¡Verificación exitosa!</h2>
               <p className="text-gray-600 mb-4">{message}</p>
-              <p className="text-gray-400 text-sm">Redirigiendo al login...</p>
+              {/* NUEVO BOTÓN EN VEZ DE REDIRECCIÓN AUTOMÁTICA */}
+              <button
+                onClick={handleGoToLogin}
+                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition cursor-pointer"
+              >
+                Ir al inicio de sesión
+              </button>
             </>
           )}
 
@@ -94,12 +102,12 @@ export const VerificarEmail: React.FC<VerificarEmailProps> = () => {
               </div>
               <h2 className="text-xl font-semibold text-red-600 mb-2">Error de verificación</h2>
               <p className="text-gray-600 mb-4">{message}</p>
-              <Link
-                to="/login"
-                className="inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+              <button
+                onClick={handleGoToLogin}
+                className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition cursor-pointer"
               >
                 Volver al login
-              </Link>
+              </button>
             </>
           )}
         </div>

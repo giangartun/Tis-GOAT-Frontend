@@ -25,6 +25,10 @@ export const Register: React.FC<RegisterProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // 👇 NUEVOS: estados para mostrar/ocultar contraseñas
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -87,10 +91,8 @@ export const Register: React.FC<RegisterProps> = ({
       const data = await response.json();
 
       if (response.ok) {
-        // Mostrar mensaje de éxito
         setMessage(data.message || 'Revisa tu correo para completar el registro. El enlace expira en 5 minutos.');
         
-        // Limpiar formulario
         setFormData({
           nombre: '',
           apellido_paterno: '',
@@ -100,7 +102,6 @@ export const Register: React.FC<RegisterProps> = ({
           contrasena_confirmation: ''
         });
         
-        // Redirigir al Login después de 3 segundos con un mensaje
         setTimeout(() => {
           if (onRegisterSuccess) {
             onRegisterSuccess();
@@ -111,7 +112,7 @@ export const Register: React.FC<RegisterProps> = ({
               }
             });
           }
-        }, 3000);
+        }, 4000); // 👈 AUMENTADO A 4 SEGUNDOS
       } else {
         if (data.errors) {
           setErrors(data.errors);
@@ -120,7 +121,7 @@ export const Register: React.FC<RegisterProps> = ({
         }
       }
     } catch (err) {
-      setError('Error de conexión con el servidor. Asegúrate de que el backend esté corriendo.');
+      setError('Error de conexión con el servidor.');
     } finally {
       setLoading(false);
     }
@@ -141,7 +142,6 @@ export const Register: React.FC<RegisterProps> = ({
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="w-full h-screen flex">
-        {/* Columna Izquierda - Color #2E3A4D */}
         <div className="w-1/2 bg-[#2E3A4D] p-8 flex flex-col justify-center items-center text-center text-white">
           <div className="max-w-sm">
             <h1 className="text-4xl font-bold mb-4">GOAT</h1>
@@ -154,7 +154,6 @@ export const Register: React.FC<RegisterProps> = ({
           </div>
         </div>
 
-        {/* Columna Derecha - Formulario de Registro */}
         <div className="w-1/2 p-8 flex flex-col justify-center">
           <div className="max-w-md mx-auto w-full">
             <div className="text-center mb-6">
@@ -162,17 +161,15 @@ export const Register: React.FC<RegisterProps> = ({
               <p className="text-gray-500 text-sm mt-1">Regístrate para empezar</p>
             </div>
 
-            {/* Mensaje de éxito */}
             {message && (
               <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-sm">
                 {message}
                 <div className="text-xs mt-1 text-green-600">
-                  Redirigiendo al login en 3 segundos...
+                  Redirigiendo al login en 4 segundos...
                 </div>
               </div>
             )}
 
-            {/* Mensaje de error general */}
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
                 {error}
@@ -260,16 +257,34 @@ export const Register: React.FC<RegisterProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Contraseña * (mínimo 6 caracteres)
                 </label>
-                <input
-                  type="password"
-                  name="contrasena"
-                  value={formData.contrasena}
-                  onChange={handleChange}
-                  placeholder="Elige una contraseña"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="contrasena"
+                    value={formData.contrasena}
+                    onChange={handleChange}
+                    placeholder="Elige una contraseña"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-600 hover:text-gray-800"
+                  >
+                    {showPassword ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
                 {errors.contrasena && (
                   <p className="text-red-500 text-xs mt-1">{errors.contrasena}</p>
                 )}
@@ -279,16 +294,34 @@ export const Register: React.FC<RegisterProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Confirmar Contraseña *
                 </label>
-                <input
-                  type="password"
-                  name="contrasena_confirmation"
-                  value={formData.contrasena_confirmation}
-                  onChange={handleChange}
-                  placeholder="Repite la contraseña"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="contrasena_confirmation"
+                    value={formData.contrasena_confirmation}
+                    onChange={handleChange}
+                    placeholder="Repite la contraseña"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-600 hover:text-gray-800"
+                  >
+                    {showConfirmPassword ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
 
               <button
@@ -300,7 +333,6 @@ export const Register: React.FC<RegisterProps> = ({
               </button>
             </form>
 
-            {/* Separador */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
@@ -310,7 +342,6 @@ export const Register: React.FC<RegisterProps> = ({
               </div>
             </div>
 
-            {/* Botón Google */}
             <button
               onClick={handleGoogleRegister}
               className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-md py-2 hover:bg-gray-50 transition"

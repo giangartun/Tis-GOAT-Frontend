@@ -60,6 +60,8 @@ export const Login: React.FC<LoginProps> = ({
       });
 
       const data = await response.json();
+      
+      //Guarda el Token en el localStorage cuando el login es exitoso
 
       if (response.ok) {
         if (data.token) {

@@ -1,39 +1,89 @@
-import { X } from "lucide-react";
+import { useState } from "react";
+
+type ProyectoLocal = {
+  nombre: string;
+  descripcion: string;
+  github: string;
+  demo: string;
+  fechaInicio: string;
+  fechaFin: string;
+  tecnologias: string;
+  imagen: string;
+};
 
 type NuevoProyectoModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  onSave: (form: ProyectoLocal) => Promise<void> | void;
 };
 
-function NuevoProyectoModal({ isOpen, onClose }: NuevoProyectoModalProps) {
+function NuevoProyectoModal({
+  isOpen,
+  onClose,
+  onSave,
+}: NuevoProyectoModalProps) {
+  const [form, setForm] = useState<ProyectoLocal>({
+    nombre: "",
+    descripcion: "",
+    github: "",
+    demo: "",
+    fechaInicio: "",
+    fechaFin: "",
+    tecnologias: "",
+    imagen: "",
+  });
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await onSave(form);
+
+    setForm({
+      nombre: "",
+      descripcion: "",
+      github: "",
+      demo: "",
+      fechaInicio: "",
+      fechaFin: "",
+      tecnologias: "",
+      imagen: "",
+    });
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-sm border border-app-border bg-app-bg shadow-2xl">
-        {/* Encabezado */}
-        <div className="flex items-center justify-between border-b border-app-border px-6 py-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <form
+        onSubmit={handleSubmit}
+        className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-sm border border-app-border bg-app-bg shadow-2xl"
+      >
+        <div className="shrink-0 border-b border-app-border px-6 py-4">
           <h2 className="text-3xl font-extrabold text-app-text">
             Nuevo Proyecto
           </h2>
-
-          <button
-            onClick={onClose}
-            className="rounded-full p-2 text-app-muted transition hover:bg-white/60 hover:text-app-text"
-            aria-label="Cerrar"
-          >
-            <X size={22} />
-          </button>
         </div>
 
-        {/* Formulario */}
-        <form className="px-8 py-6">
+        <div className="flex-1 overflow-y-auto px-8 py-6">
           <div className="space-y-5">
             <div>
               <label className="mb-1 block text-base font-medium text-app-text">
                 Nombre del proyecto:
               </label>
               <input
+                name="nombre"
+                value={form.nombre}
+                onChange={handleChange}
                 type="text"
                 placeholder="nombredelproyecto"
                 className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
@@ -45,17 +95,22 @@ function NuevoProyectoModal({ isOpen, onClose }: NuevoProyectoModalProps) {
                 Descripción:
               </label>
               <textarea
+                name="descripcion"
+                value={form.descripcion}
+                onChange={handleChange}
                 rows={5}
-                placeholder=""
                 className="w-full rounded-2xl border border-app-border bg-white px-4 py-3 text-sm outline-none"
               />
             </div>
 
             <div>
               <label className="mb-1 block text-base font-medium text-app-text">
-                Link del repositorio:
+                Link GitHub:
               </label>
               <input
+                name="github"
+                value={form.github}
+                onChange={handleChange}
                 type="text"
                 placeholder="https://github.com/usuario/proyecto"
                 className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
@@ -67,6 +122,9 @@ function NuevoProyectoModal({ isOpen, onClose }: NuevoProyectoModalProps) {
                 URL de la demo:
               </label>
               <input
+                name="demo"
+                value={form.demo}
+                onChange={handleChange}
                 type="text"
                 placeholder="https://demo.com"
                 className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
@@ -79,9 +137,11 @@ function NuevoProyectoModal({ isOpen, onClose }: NuevoProyectoModalProps) {
                   Fecha inicio:
                 </label>
                 <input
-                  type="text"
-                  placeholder="00/00/0000"
-                  className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
+                  name="fechaInicio"
+                  value={form.fechaInicio}
+                  onChange={handleChange}
+                  type="date"
+                  className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none"
                 />
               </div>
 
@@ -90,9 +150,11 @@ function NuevoProyectoModal({ isOpen, onClose }: NuevoProyectoModalProps) {
                   Fecha fin:
                 </label>
                 <input
-                  type="text"
-                  placeholder="00/00/0000"
-                  className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
+                  name="fechaFin"
+                  value={form.fechaFin}
+                  onChange={handleChange}
+                  type="date"
+                  className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none"
                 />
               </div>
             </div>
@@ -102,8 +164,11 @@ function NuevoProyectoModal({ isOpen, onClose }: NuevoProyectoModalProps) {
                 Tecnologías:
               </label>
               <input
+                name="tecnologias"
+                value={form.tecnologias}
+                onChange={handleChange}
                 type="text"
-                placeholder="React"
+                placeholder="React, Node, Mongo DB"
                 className="w-full rounded-md border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
               />
             </div>
@@ -113,15 +178,19 @@ function NuevoProyectoModal({ isOpen, onClose }: NuevoProyectoModalProps) {
                 Subir imagen:
               </label>
               <input
+                name="imagen"
+                value={form.imagen}
+                onChange={handleChange}
                 type="text"
-                placeholder="https://tutorial-como-copiar-direccion-url-de-imagen/"
+                placeholder="https://..."
                 className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
               />
             </div>
           </div>
+        </div>
 
-          {/* Botones */}
-          <div className="mt-8 flex items-center justify-between">
+        <div className="shrink-0 border-t border-app-border px-8 py-5">
+          <div className="flex items-center justify-between">
             <button
               type="button"
               onClick={onClose}
@@ -137,8 +206,8 @@ function NuevoProyectoModal({ isOpen, onClose }: NuevoProyectoModalProps) {
               Guardar
             </button>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 }

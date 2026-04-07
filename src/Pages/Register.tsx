@@ -26,17 +26,37 @@ export const Register: React.FC<RegisterProps> = ({
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   
-  // 👇 NUEVOS: estados para mostrar/ocultar contraseñas
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Función para validar que solo contenga letras y espacios
+  const soloLetras = (texto: string): boolean => {
+    const regex = /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]*$/;
+    return regex.test(texto);
+  };
+
+  // Función para limpiar números de un texto
+  const limpiarNumeros = (texto: string): string => {
+    return texto.replace(/[0-9]/g, '');
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    let nuevoValor = value;
+    
+    // Para campos de nombre y apellidos, filtrar números
+    if (name === 'nombre' || name === 'apellido_paterno' || name === 'apellido_materno') {
+      nuevoValor = limpiarNumeros(value);
+    }
+    
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: nuevoValor
     });
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: '' });
+    
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: '' });
     }
     if (error) setError('');
     if (message) setMessage('');
@@ -46,6 +66,24 @@ export const Register: React.FC<RegisterProps> = ({
     if (!formData.nombre || !formData.apellido_paterno || !formData.apellido_materno || 
         !formData.email || !formData.contrasena || !formData.contrasena_confirmation) {
       setError('Todos los campos son obligatorios');
+      return false;
+    }
+    
+    // Validación: solo letras para nombre
+    if (!soloLetras(formData.nombre)) {
+      setError('El nombre solo debe contener letras');
+      return false;
+    }
+    
+    // Validación: solo letras para apellido paterno
+    if (!soloLetras(formData.apellido_paterno)) {
+      setError('El apellido paterno solo debe contener letras');
+      return false;
+    }
+    
+    // Validación: solo letras para apellido materno
+    if (!soloLetras(formData.apellido_materno)) {
+      setError('El apellido materno solo debe contener letras');
       return false;
     }
     
@@ -112,7 +150,7 @@ export const Register: React.FC<RegisterProps> = ({
               }
             });
           }
-        }, 7000); // AUMENTADO de SEGUNDOS
+        }, 7000);
       } else {
         if (data.errors) {
           setErrors(data.errors);
@@ -142,6 +180,7 @@ export const Register: React.FC<RegisterProps> = ({
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="w-full h-screen flex">
+        {/* Columna Izquierda */}
         <div className="w-1/2 bg-[#2E3A4D] p-8 flex flex-col justify-center items-center text-center text-white">
           <div className="max-w-sm">
             <h1 className="text-4xl font-bold mb-4">GOAT</h1>
@@ -154,15 +193,16 @@ export const Register: React.FC<RegisterProps> = ({
           </div>
         </div>
 
-        <div className="w-1/2 p-8 flex flex-col justify-center">
-          <div className="max-w-md mx-auto w-full">
-            <div className="text-center mb-6">
+        {/* Columna Derecha - Ajustada para evitar desbordamiento */}
+        <div className="w-1/2 flex flex-col justify-center overflow-y-auto py-6">
+          <div className="max-w-md mx-auto w-full px-6">
+            <div className="text-center mb-4">
               <h2 className="text-2xl font-bold text-gray-800">Crea tu cuenta</h2>
               <p className="text-gray-500 text-sm mt-1">Regístrate para empezar</p>
             </div>
 
             {message && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-sm">
+              <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded mb-3 text-sm">
                 {message}
                 <div className="text-xs mt-1 text-green-600">
                   Redirigiendo al login en 7 segundos...
@@ -171,12 +211,12 @@ export const Register: React.FC<RegisterProps> = ({
             )}
 
             {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+              <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-3 text-sm">
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3">
               <div className="text-left">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Nombre *
@@ -186,8 +226,8 @@ export const Register: React.FC<RegisterProps> = ({
                   name="nombre"
                   value={formData.nombre}
                   onChange={handleChange}
-                  placeholder="Ingresa tu nombre"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Ingresa tu nombre (solo letras)"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                   required
                 />
@@ -205,8 +245,8 @@ export const Register: React.FC<RegisterProps> = ({
                   name="apellido_paterno"
                   value={formData.apellido_paterno}
                   onChange={handleChange}
-                  placeholder="Ingresa tu apellido paterno"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Ingresa tu apellido paterno (solo letras)"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                   required
                 />
@@ -224,8 +264,8 @@ export const Register: React.FC<RegisterProps> = ({
                   name="apellido_materno"
                   value={formData.apellido_materno}
                   onChange={handleChange}
-                  placeholder="Ingresa tu apellido materno"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Ingresa tu apellido materno (solo letras)"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                   required
                 />
@@ -244,7 +284,7 @@ export const Register: React.FC<RegisterProps> = ({
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Ingresa tu correo electrónico"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                   required
                 />
@@ -264,7 +304,7 @@ export const Register: React.FC<RegisterProps> = ({
                     value={formData.contrasena}
                     onChange={handleChange}
                     placeholder="Elige una contraseña"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                     required
                   />
@@ -301,7 +341,7 @@ export const Register: React.FC<RegisterProps> = ({
                     value={formData.contrasena_confirmation}
                     onChange={handleChange}
                     placeholder="Repite la contraseña"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                     required
                   />
@@ -327,13 +367,13 @@ export const Register: React.FC<RegisterProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50 font-medium"
+                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50 font-medium mt-2"
               >
                 {loading ? 'Registrando...' : 'Registrarse'}
               </button>
             </form>
 
-            <div className="relative my-6">
+            <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
               </div>
@@ -367,7 +407,7 @@ export const Register: React.FC<RegisterProps> = ({
               <span className="text-sm text-gray-600">Registrarse con Google</span>
             </button>
 
-            <div className="text-center mt-6">
+            <div className="text-center mt-4">
               <button
                 onClick={handleSwitchToLogin}
                 className="text-sm text-blue-600 hover:underline"

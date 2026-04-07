@@ -19,11 +19,27 @@ function Layout() {
     }
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('usuario');
-    setUsuario(null);
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        await fetch('http://127.0.0.1:8000/api/usuario/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error en logout:', error);
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('usuario');
+      setUsuario(null);
+      navigate('/login');
+    }
   };
 
   const nombreCompleto = usuario 
@@ -42,7 +58,7 @@ function Layout() {
           </h1>
         </div>
 
-        {/* Botón de usuario - Cambia según autenticación */}
+        {/* Botones de usuario */}
         {usuario ? (
           <div className="flex items-center gap-4">
             <div className="text-right">
@@ -58,13 +74,21 @@ function Layout() {
             </button>
           </div>
         ) : (
-          <button
-            onClick={() => navigate("/register")}
-            className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium hover:bg-white/20"
-          >
-            <UserRound size={18} />
-            Registrarse
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate("/login")}
+              className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
+            >
+              Iniciar Sesión
+            </button>
+            <button
+              onClick={() => navigate("/register")}
+              className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium hover:bg-white/20"
+            >
+              <UserRound size={18} />
+              Registrarse
+            </button>
+          </div>
         )}
       </header>
 

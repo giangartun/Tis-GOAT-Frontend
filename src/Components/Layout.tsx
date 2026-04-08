@@ -40,7 +40,7 @@ function Layout() {
     } finally {
       localStorage.removeItem('token');
       localStorage.removeItem('usuario');
-      localStorage.removeItem('id_portafolio');
+      localStorage.removeItem('portafolio');
       setUsuario(null);
 
       setLoadingLogout(false);

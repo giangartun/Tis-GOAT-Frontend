@@ -11,6 +11,7 @@ interface Usuario {
 function Layout() {
   const navigate = useNavigate();
   const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [loadingLogout, setLoadingLogout] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('usuario');
@@ -20,6 +21,8 @@ function Layout() {
   }, []);
 
   const handleLogout = async () => {
+    setLoadingLogout(true); // 🔴 activa bloqueo
+
     try {
       const token = localStorage.getItem('token');
       if (token) {
@@ -37,7 +40,10 @@ function Layout() {
     } finally {
       localStorage.removeItem('token');
       localStorage.removeItem('usuario');
+      localStorage.removeItem('id_portafolio');
       setUsuario(null);
+
+      setLoadingLogout(false);
       navigate('/login');
     }
   };
@@ -48,6 +54,23 @@ function Layout() {
 
   return (
     <div className="min-h-screen bg-app-bg font-inter text-app-text">
+
+      {loadingLogout && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[2px] pointer-events-auto">
+          <div className="flex flex-col items-center gap-3">
+            
+            {/* 🔄 Spinner moderno */}
+            <div className="relative h-10 w-10">
+              <div className="absolute inset-0 rounded-full border-2 border-white/30"></div>
+              <div className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-white"></div>
+            </div>
+
+            <p className="text-white text-sm tracking-wide">
+              Cerrando sesión...
+            </p>
+          </div>
+        </div>
+      )}
       <header className="flex items-center justify-between border-b border-app-border bg-app-header px-6 py-4 text-white">
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-md border border-white/20 bg-white/10 text-sm font-bold">

@@ -66,10 +66,7 @@ export const Login: React.FC<LoginProps> = ({
         if (data.token) {
           localStorage.setItem('token', data.token);
           localStorage.setItem('usuario', JSON.stringify(data.usuario));
-
-          if (data.id_portafolio) {
-            localStorage.setItem('id_portafolio', String(data.id_portafolio));
-          }
+          localStorage.setItem('portafolio', data.id_portafolio);
           
           if (onLoginSuccess) {
             onLoginSuccess();

@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import NuevoProyectoModal from "../Components/NuevoProyectoModal";
+import { crearProyecto, listarProyectos } from "../Services/proyectos";
 
-type Proyecto = {
+type ProyectoLocal = {
   nombre: string;
   descripcion: string;
   github: string;
@@ -15,11 +16,48 @@ type Proyecto = {
 
 function MisProyectos() {
   const [isOpen, setIsOpen] = useState(false);
-  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
+  const [proyectos, setProyectos] = useState<any[]>([]);
 
-  const handleSave = (nuevoProyecto: Proyecto) => {
-    setProyectos((prev) => [...prev, nuevoProyecto]);
-    setIsOpen(false);
+  const idPortafolio = Number(localStorage.getItem("id_portafolio") ?? 0);
+
+  useEffect(() => {
+    const cargar = async () => {
+      try {
+        if (!idPortafolio) return;
+
+        const data = await listarProyectos(idPortafolio);
+        setProyectos(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error cargando proyectos:", error);
+      }
+    };
+
+    cargar();
+  }, [idPortafolio]);
+
+  const handleSave = async (form: ProyectoLocal) => {
+    try {
+      const payload = {
+        id_portafolio: idPortafolio,
+        nombre: form.nombre,
+        descripcion: form.descripcion || null,
+        url_proyecto: form.github || null,
+        imagen_url: form.imagen || null,
+        fecha_ini: form.fechaInicio,
+        fecha_fin: form.fechaFin || null,
+        tecnologias: [],
+      };
+
+      const response = await crearProyecto(payload);
+
+      const nuevo = response.data?.data ?? response.data;
+      setProyectos((prev) => [...prev, { ...nuevo, demo: form.demo }]);
+      setIsOpen(false);
+    } catch (error: any) {
+        console.error(
+          "Error guardando proyecto:",
+          error?.response?.data || error);
+    }
   };
 
   return (
@@ -30,7 +68,7 @@ function MisProyectos() {
             <div>
               <h2 className="text-3xl font-bold text-app-text">Mis proyectos</h2>
               <p className="mt-2 text-base text-app-muted">
-               Gestiona tus proyectos como mas desees, registra el primero
+                Gestiona tus proyectos como mas desees, registra el primero
               </p>
             </div>
 
@@ -54,59 +92,73 @@ function MisProyectos() {
             </div>
           </div>
 
-        {proyectos.length === 0 ? (
-          <div className="mt-28 flex flex-col items-center text-center">
-            <p className="max-w-2xl text-lg text-app-text">
-              Empieza registrando tus proyectos de software para guardarlo en tu portafolio
-            </p>
+          {proyectos.length === 0 ? (
+            <div className="mt-28 flex flex-col items-center text-center">
+              <p className="max-w-2xl text-lg text-app-text">
+                Empieza registrando tus proyectos de software para guardarlo en tu portafolio
+              </p>
 
-            <button
-              onClick={() => setIsOpen(true)}
-              className="mt-8 flex items-center gap-2 rounded-full bg-app-topbar px-6 py-2 text-sm font-semibold text-white transition hover:opacity-90"
-            >
-              <Plus size={18} />
-              Nuevo Proyecto
-            </button>
-          </div>
-        ) : (
-          <div className="mt-8 space-y-5">
+              <button
+                onClick={() => setIsOpen(true)}
+                className="mt-8 flex items-center gap-2 rounded-full bg-app-topbar px-6 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+              >
+                <Plus size={18} />
+                Nuevo Proyecto
+              </button>
+            </div>
+          ) : (
+            <div className="mt-8 space-y-5">
               {proyectos.map((p, index) => (
                 <article
                   key={index}
                   className="rounded-2xl border-2 border-[#1f7fd1] bg-app-surface p-5"
                 >
                   <div className="flex gap-5">
-                    <div className="flex h-36 w-36 items-center justify-center rounded-xl border border-dashed border-app-border bg-app-card text-center text-sm text-app-muted">
-                      Captura o portada del proyecto
+                    <div className="flex h-36 w-36 items-center justify-center overflow-hidden rounded-xl border border-dashed border-app-border bg-app-card text-center text-sm text-app-muted">
+                      {p.imagen_url ? (
+                        <img
+                          src={p.imagen_url}
+                          alt={p.nombre}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <span>Captura o portada del proyecto</span>
+                      )}
                     </div>
 
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-app-text">{p.nombre}</h3>
-                      <p className="mt-1 text-sm text-app-muted">{p.descripcion}</p>
+                      <h3 className="text-lg font-bold text-app-text">
+                        {p.nombre}
+                      </h3>
+                      <p className="mt-1 text-sm text-app-muted">
+                        {p.descripcion}
+                      </p>
 
                       <div className="mt-3 space-y-1 text-sm">
-                        <a href={p.github} className="block text-blue-600 hover:underline">
+                        <a
+                          href={p.url_proyecto}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block text-blue-600 hover:underline"
+                        >
                           Link GitHub
                         </a>
-                        <a href={p.demo} className="block text-blue-600 hover:underline">
-                          Link Demo
-                        </a>
+
+                        {p.demo && (
+                          <a
+                            href={p.demo}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block text-blue-600 hover:underline"
+                          >
+                            Link Demo
+                          </a>
+                        )}
                       </div>
 
                       <div className="mt-3 flex flex-wrap gap-8 text-xs text-app-muted">
-                        <span>Fecha de inicio: {p.fechaInicio}</span>
-                        <span>Fecha de fin: {p.fechaFin}</span>
-                      </div>
-
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {p.tecnologias.split(",").map((tec) => (
-                          <span
-                            key={tec.trim()}
-                            className="rounded bg-app-card px-3 py-1 text-xs text-app-text"
-                          >
-                            {tec.trim()}
-                          </span>
-                        ))}
+                        <span>Fecha de inicio: {p.fecha_ini}</span>
+                        <span>Fecha de fin: {p.fecha_fin ?? "-"}</span>
                       </div>
                     </div>
 

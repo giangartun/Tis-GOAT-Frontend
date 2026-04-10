@@ -86,6 +86,7 @@ function NuevoProyectoModal({
                 onChange={handleChange}
                 type="text"
                 placeholder="nombredelproyecto"
+                required
                 className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
               />
             </div>
@@ -99,8 +100,14 @@ function NuevoProyectoModal({
                 value={form.descripcion}
                 onChange={handleChange}
                 rows={5}
+                maxLength={200}
+                required
+                placeholder="Máximo 200 caracteres"
                 className="w-full rounded-2xl border border-app-border bg-white px-4 py-3 text-sm outline-none"
               />
+              <p className="mt-1 text-xs text-app-muted">
+                {form.descripcion.length}/200 caracteres
+              </p>
             </div>
 
             <div>
@@ -111,8 +118,9 @@ function NuevoProyectoModal({
                 name="github"
                 value={form.github}
                 onChange={handleChange}
-                type="text"
+                type="url"
                 placeholder="https://github.com/usuario/proyecto"
+                required
                 className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
               />
             </div>
@@ -125,8 +133,9 @@ function NuevoProyectoModal({
                 name="demo"
                 value={form.demo}
                 onChange={handleChange}
-                type="text"
+                type="url"
                 placeholder="https://demo.com"
+                required
                 className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
               />
             </div>
@@ -141,6 +150,7 @@ function NuevoProyectoModal({
                   value={form.fechaInicio}
                   onChange={handleChange}
                   type="date"
+                  required
                   className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none"
                 />
               </div>
@@ -154,6 +164,7 @@ function NuevoProyectoModal({
                   value={form.fechaFin}
                   onChange={handleChange}
                   type="date"
+                  required
                   className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none"
                 />
               </div>
@@ -169,6 +180,7 @@ function NuevoProyectoModal({
                 onChange={handleChange}
                 type="text"
                 placeholder="React, Node, Mongo DB"
+                required
                 className="w-full rounded-md border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
               />
             </div>
@@ -182,7 +194,7 @@ function NuevoProyectoModal({
                 value={form.imagen}
                 onChange={handleChange}
                 type="text"
-                placeholder="https://..."
+                placeholder="Opcional"
                 className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
               />
             </div>

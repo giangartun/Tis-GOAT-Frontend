@@ -143,7 +143,7 @@ const PerfilUsuario = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#D9D9D9] flex flex-col font-inter">
+    <div className="min-h-screen bg-[#F5F5F5] flex flex-col font-inter">
       {/* Top Header 1 (Dark) */}
       <header className="bg-[#2E3A4D] text-white py-[10px] px-12 flex justify-between items-center shadow-sm z-30 shrink-0">
         <div className="flex items-center gap-6">

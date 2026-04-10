@@ -45,7 +45,7 @@ export default function AnadirEnlaces() {
   );
 
   return (
-    <div className="min-h-screen bg-[#D9D9D9] flex flex-col font-inter">
+    <div className="min-h-screen bg-[#F5F5F5] flex flex-col font-inter">
       {/* Top Header 1 (Dark) */}
       <header className="bg-[#2E3A4D] text-white py-[6px] px-8 flex justify-between items-center shadow-sm z-10 shrink-0">
         <div className="flex items-center gap-6">

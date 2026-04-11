@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Search } from "lucide-react";
 import NuevoProyectoModal from "../Components/NuevoProyectoModal";
 import {
   actualizarProyecto,
@@ -6,6 +7,7 @@ import {
   eliminarProyecto,
   listarProyectos,
   listarTecnologias,
+  type Tecnologia,
 } from "../Services/proyectos";
 
 type ProyectoLocal = {
@@ -17,12 +19,6 @@ type ProyectoLocal = {
   fechaFin: string;
   tecnologias: string[];
   imagen: string;
-};
-
-type Tecnologia = {
-  id_tecnologia: string;
-  nombre: string;
-  categoria?: string | null;
 };
 
 type Proyecto = {
@@ -55,6 +51,8 @@ function MisProyectos() {
   );
   const [eliminando, setEliminando] = useState(false);
 
+  const [buscar, setBuscar] = useState("");
+
   const idPortafolio = localStorage.getItem("id_portafolio") ?? "";
 
   const formatFecha = (fecha?: string | null) => {
@@ -69,18 +67,22 @@ function MisProyectos() {
   };
 
   useEffect(() => {
-    const cargar = async () => {
-      try {
-        if (!idPortafolio) return;
-        const data = await listarProyectos(idPortafolio);
-        setProyectos(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error("Error cargando proyectos:", error);
-      }
-    };
+    const timeout = setTimeout(() => {
+      const cargar = async () => {
+        try {
+          if (!idPortafolio) return;
+          const data = await listarProyectos(idPortafolio, buscar);
+          setProyectos(Array.isArray(data) ? data : []);
+        } catch (error) {
+          console.error("Error cargando proyectos:", error);
+        }
+      };
 
-    cargar();
-  }, [idPortafolio]);
+      cargar();
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [idPortafolio, buscar]);
 
   useEffect(() => {
     const cargarTecnologias = async () => {
@@ -223,6 +225,19 @@ function MisProyectos() {
         >
           + Nuevo Proyecto
         </button>
+      </div>
+
+      <div className="mt-6 flex justify-center">
+        <div className="flex w-full max-w-3xl items-center gap-3 rounded-full border border-app-border bg-white px-5 py-3 shadow-sm">
+          <input
+            type="text"
+            value={buscar}
+            onChange={(e) => setBuscar(e.target.value)}
+            placeholder="Buscar ..."
+            className="w-full bg-transparent text-sm outline-none placeholder:text-app-muted"
+          />
+          <Search size={22} className="text-app-text" />
+        </div>
       </div>
 
       {successMessage && (

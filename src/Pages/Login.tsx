@@ -66,10 +66,7 @@ export const Login: React.FC<LoginProps> = ({
         if (data.token) {
           localStorage.setItem('token', data.token);
           localStorage.setItem('usuario', JSON.stringify(data.usuario));
-<<<<<<< HEAD
           localStorage.setItem('portafolio', data.id_portafolio);
-=======
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
           
           if (onLoginSuccess) {
             onLoginSuccess();

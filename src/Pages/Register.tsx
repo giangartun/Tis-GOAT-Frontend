@@ -26,7 +26,6 @@ export const Register: React.FC<RegisterProps> = ({
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   
-<<<<<<< HEAD
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -58,19 +57,6 @@ export const Register: React.FC<RegisterProps> = ({
     
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
-=======
-  // 👇 NUEVOS: estados para mostrar/ocultar contraseñas
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: '' });
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
     }
     if (error) setError('');
     if (message) setMessage('');
@@ -83,7 +69,6 @@ export const Register: React.FC<RegisterProps> = ({
       return false;
     }
     
-<<<<<<< HEAD
     // Validación: solo letras para nombre
     if (!soloLetras(formData.nombre)) {
       setError('El nombre solo debe contener letras');
@@ -102,8 +87,6 @@ export const Register: React.FC<RegisterProps> = ({
       return false;
     }
     
-=======
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
     if (formData.contrasena !== formData.contrasena_confirmation) {
       setError('Las contraseñas no coinciden');
       return false;
@@ -167,11 +150,7 @@ export const Register: React.FC<RegisterProps> = ({
               }
             });
           }
-<<<<<<< HEAD
         }, 7000);
-=======
-        }, 7000); // AUMENTADO de SEGUNDOS
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
       } else {
         if (data.errors) {
           setErrors(data.errors);
@@ -201,10 +180,7 @@ export const Register: React.FC<RegisterProps> = ({
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="w-full h-screen flex">
-<<<<<<< HEAD
         {/* Columna Izquierda */}
-=======
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
         <div className="w-1/2 bg-[#2E3A4D] p-8 flex flex-col justify-center items-center text-center text-white">
           <div className="max-w-sm">
             <h1 className="text-4xl font-bold mb-4">GOAT</h1>
@@ -217,26 +193,16 @@ export const Register: React.FC<RegisterProps> = ({
           </div>
         </div>
 
-<<<<<<< HEAD
         {/* Columna Derecha - Ajustada para evitar desbordamiento */}
         <div className="w-1/2 flex flex-col justify-center overflow-y-auto py-6">
           <div className="max-w-md mx-auto w-full px-6">
             <div className="text-center mb-4">
-=======
-        <div className="w-1/2 p-8 flex flex-col justify-center">
-          <div className="max-w-md mx-auto w-full">
-            <div className="text-center mb-6">
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
               <h2 className="text-2xl font-bold text-gray-800">Crea tu cuenta</h2>
               <p className="text-gray-500 text-sm mt-1">Regístrate para empezar</p>
             </div>
 
             {message && (
-<<<<<<< HEAD
               <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded mb-3 text-sm">
-=======
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-sm">
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
                 {message}
                 <div className="text-xs mt-1 text-green-600">
                   Redirigiendo al login en 7 segundos...
@@ -245,20 +211,12 @@ export const Register: React.FC<RegisterProps> = ({
             )}
 
             {error && (
-<<<<<<< HEAD
               <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-3 text-sm">
-=======
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
                 {error}
               </div>
             )}
 
-<<<<<<< HEAD
             <form onSubmit={handleSubmit} className="space-y-3">
-=======
-            <form onSubmit={handleSubmit} className="space-y-4">
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
               <div className="text-left">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Nombre *
@@ -268,13 +226,8 @@ export const Register: React.FC<RegisterProps> = ({
                   name="nombre"
                   value={formData.nombre}
                   onChange={handleChange}
-<<<<<<< HEAD
                   placeholder="Ingresa tu nombre (solo letras)"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-=======
-                  placeholder="Ingresa tu nombre"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
                   style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                   required
                 />
@@ -292,13 +245,8 @@ export const Register: React.FC<RegisterProps> = ({
                   name="apellido_paterno"
                   value={formData.apellido_paterno}
                   onChange={handleChange}
-<<<<<<< HEAD
                   placeholder="Ingresa tu apellido paterno (solo letras)"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-=======
-                  placeholder="Ingresa tu apellido paterno"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
                   style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                   required
                 />
@@ -316,13 +264,8 @@ export const Register: React.FC<RegisterProps> = ({
                   name="apellido_materno"
                   value={formData.apellido_materno}
                   onChange={handleChange}
-<<<<<<< HEAD
                   placeholder="Ingresa tu apellido materno (solo letras)"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-=======
-                  placeholder="Ingresa tu apellido materno"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
                   style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                   required
                 />
@@ -341,11 +284,7 @@ export const Register: React.FC<RegisterProps> = ({
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Ingresa tu correo electrónico"
-<<<<<<< HEAD
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-=======
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
                   style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                   required
                 />
@@ -365,11 +304,7 @@ export const Register: React.FC<RegisterProps> = ({
                     value={formData.contrasena}
                     onChange={handleChange}
                     placeholder="Elige una contraseña"
-<<<<<<< HEAD
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-=======
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
                     style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                     required
                   />
@@ -406,11 +341,7 @@ export const Register: React.FC<RegisterProps> = ({
                     value={formData.contrasena_confirmation}
                     onChange={handleChange}
                     placeholder="Repite la contraseña"
-<<<<<<< HEAD
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-=======
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
                     style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                     required
                   />
@@ -436,21 +367,13 @@ export const Register: React.FC<RegisterProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-<<<<<<< HEAD
                 className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50 font-medium mt-2"
-=======
-                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50 font-medium"
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
               >
                 {loading ? 'Registrando...' : 'Registrarse'}
               </button>
             </form>
 
-<<<<<<< HEAD
             <div className="relative my-4">
-=======
-            <div className="relative my-6">
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
               </div>
@@ -484,11 +407,7 @@ export const Register: React.FC<RegisterProps> = ({
               <span className="text-sm text-gray-600">Registrarse con Google</span>
             </button>
 
-<<<<<<< HEAD
             <div className="text-center mt-4">
-=======
-            <div className="text-center mt-6">
->>>>>>> 2082272 (Estructura terminada de perfil conectado con home)
               <button
                 onClick={handleSwitchToLogin}
                 className="text-sm text-blue-600 hover:underline"

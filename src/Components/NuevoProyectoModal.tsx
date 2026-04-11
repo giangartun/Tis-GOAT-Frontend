@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { X } from "lucide-react";
 
 type ProyectoLocal = {
   nombre: string;
@@ -37,7 +38,6 @@ function NuevoProyectoModal({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-
     setForm((prev) => ({
       ...prev,
       [name]: value,
@@ -47,7 +47,6 @@ function NuevoProyectoModal({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     await onSave(form);
-
     setForm({
       nombre: "",
       descripcion: "",
@@ -68,12 +67,23 @@ function NuevoProyectoModal({
         onSubmit={handleSubmit}
         className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-sm border border-app-border bg-app-bg shadow-2xl"
       >
-        <div className="shrink-0 border-b border-app-border px-6 py-4">
+        {/* Encabezado con botón X */}
+        <div className="shrink-0 flex items-center justify-between border-b border-app-border px-6 py-4">
           <h2 className="text-3xl font-extrabold text-app-text">
             Nuevo Proyecto
           </h2>
+          
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full p-2 text-app-muted transition hover:bg-white/60 hover:text-app-text"
+            aria-label="Cerrar"
+          >
+            <X size={22} />
+          </button>
         </div>
 
+        {/* Contenido con scroll */}
         <div className="flex-1 overflow-y-auto px-8 py-6">
           <div className="space-y-5">
             <div>
@@ -99,6 +109,7 @@ function NuevoProyectoModal({
                 value={form.descripcion}
                 onChange={handleChange}
                 rows={5}
+                placeholder=""
                 className="w-full rounded-2xl border border-app-border bg-white px-4 py-3 text-sm outline-none"
               />
             </div>
@@ -182,13 +193,14 @@ function NuevoProyectoModal({
                 value={form.imagen}
                 onChange={handleChange}
                 type="text"
-                placeholder="https://..."
+                placeholder="https://tutorial-como-copiar-direccion-url-de-imagen/"
                 className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
               />
             </div>
           </div>
         </div>
 
+        {/* Footer con botones */}
         <div className="shrink-0 border-t border-app-border px-8 py-5">
           <div className="flex items-center justify-between">
             <button

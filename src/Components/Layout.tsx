@@ -21,7 +21,7 @@ function Layout() {
   }, []);
 
   const handleLogout = async () => {
-    setLoadingLogout(true); // 🔴 activa bloqueo
+    setLoadingLogout(true);
 
     try {
       const token = localStorage.getItem('token');
@@ -42,7 +42,6 @@ function Layout() {
       localStorage.removeItem('usuario');
       localStorage.removeItem('portafolio');
       setUsuario(null);
-
       setLoadingLogout(false);
       navigate('/login');
     }
@@ -54,23 +53,21 @@ function Layout() {
 
   return (
     <div className="min-h-screen bg-app-bg font-inter text-app-text">
-
       {loadingLogout && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[2px] pointer-events-auto">
           <div className="flex flex-col items-center gap-3">
-            
-            {/* 🔄 Spinner moderno */}
+            {/* Spinner moderno */}
             <div className="relative h-10 w-10">
               <div className="absolute inset-0 rounded-full border-2 border-white/30"></div>
               <div className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-white"></div>
             </div>
-
             <p className="text-white text-sm tracking-wide">
               Cerrando sesión...
             </p>
           </div>
         </div>
       )}
+
       <header className="flex items-center justify-between border-b border-app-border bg-app-header px-6 py-4 text-white">
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-md border border-white/20 bg-white/10 text-sm font-bold">
@@ -117,9 +114,9 @@ function Layout() {
 
       <nav className="flex items-center justify-center border-b border-app-border bg-app-topbar px-6 py-3 text-sm text-white">
         <div className="flex gap-8 font-medium">
-          <Link to="/" className="hover:text-white/80">Inicio</Link>
-          <a href="#" className="hover:text-white/80">Mi perfil</a>
-          <Link to="/mis-proyectos" className="font-semibold text-white">Mis proyectos</Link>
+          <Link to="/" className="hover:text-white/80 transition">Inicio</Link>
+          <Link to="/perfil" className="hover:text-white/80 transition">Mi perfil</Link>
+          <Link to="/mis-proyectos" className="hover:text-white/80 transition">Mis proyectos</Link>
         </div>
       </nav>
 

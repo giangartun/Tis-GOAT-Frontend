@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
 
+type Tecnologia = {
+  id_tecnologia: string;
+  nombre: string;
+  categoria?: string | null;
+};
+
 type ProyectoLocal = {
   nombre: string;
   descripcion: string;
@@ -7,7 +13,7 @@ type ProyectoLocal = {
   demo: string;
   fechaInicio: string;
   fechaFin: string;
-  tecnologias: string;
+  tecnologias: string[];
   imagen: string;
 };
 
@@ -16,6 +22,7 @@ type NuevoProyectoModalProps = {
   onClose: () => void;
   onSave: (form: ProyectoLocal) => Promise<void> | void;
   proyectoInicial?: ProyectoLocal | null;
+  tecnologiasDisponibles: Tecnologia[];
 };
 
 function NuevoProyectoModal({
@@ -23,6 +30,7 @@ function NuevoProyectoModal({
   onClose,
   onSave,
   proyectoInicial,
+  tecnologiasDisponibles,
 }: NuevoProyectoModalProps) {
   const [form, setForm] = useState<ProyectoLocal>({
     nombre: "",
@@ -31,7 +39,7 @@ function NuevoProyectoModal({
     demo: "",
     fechaInicio: "",
     fechaFin: "",
-    tecnologias: "",
+    tecnologias: [],
     imagen: "",
   });
 
@@ -46,7 +54,7 @@ function NuevoProyectoModal({
         demo: "",
         fechaInicio: "",
         fechaFin: "",
-        tecnologias: "",
+        tecnologias: [],
         imagen: "",
       });
     }
@@ -63,6 +71,15 @@ function NuevoProyectoModal({
     }));
   };
 
+  const toggleTecnologia = (idTecnologia: string) => {
+    setForm((prev) => ({
+      ...prev,
+      tecnologias: prev.tecnologias.includes(idTecnologia)
+        ? prev.tecnologias.filter((id) => id !== idTecnologia)
+        : [...prev.tecnologias, idTecnologia],
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     await onSave(form);
@@ -74,7 +91,7 @@ function NuevoProyectoModal({
       demo: "",
       fechaInicio: "",
       fechaFin: "",
-      tecnologias: "",
+      tecnologias: [],
       imagen: "",
     });
   };
@@ -190,18 +207,33 @@ function NuevoProyectoModal({
             </div>
 
             <div>
-              <label className="mb-1 block text-base font-medium text-app-text">
+              <label className="mb-2 block text-base font-medium text-app-text">
                 Tecnologías:
               </label>
-              <input
-                name="tecnologias"
-                value={form.tecnologias}
-                onChange={handleChange}
-                type="text"
-                placeholder="React, Node, Mongo DB"
-                required
-                className="w-full rounded-md border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
-              />
+
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {tecnologiasDisponibles.map((tec) => (
+                  <label
+                    key={tec.id_tecnologia}
+                    className="flex cursor-pointer items-start gap-3 rounded-xl border border-app-border bg-white px-3 py-3 text-sm text-app-text"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={form.tecnologias.includes(tec.id_tecnologia)}
+                      onChange={() => toggleTecnologia(tec.id_tecnologia)}
+                      className="mt-1 h-4 w-4"
+                    />
+                    <div className="min-w-0">
+                      <span className="block font-medium">{tec.nombre}</span>
+                      {tec.categoria && (
+                        <span className="block text-xs text-app-muted">
+                          {tec.categoria}
+                        </span>
+                      )}
+                    </div>
+                  </label>
+                ))}
+              </div>
             </div>
 
             <div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type ProyectoLocal = {
   nombre: string;
@@ -15,12 +15,14 @@ type NuevoProyectoModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSave: (form: ProyectoLocal) => Promise<void> | void;
+  proyectoInicial?: ProyectoLocal | null;
 };
 
 function NuevoProyectoModal({
   isOpen,
   onClose,
   onSave,
+  proyectoInicial,
 }: NuevoProyectoModalProps) {
   const [form, setForm] = useState<ProyectoLocal>({
     nombre: "",
@@ -32,6 +34,23 @@ function NuevoProyectoModal({
     tecnologias: "",
     imagen: "",
   });
+
+  useEffect(() => {
+    if (proyectoInicial) {
+      setForm(proyectoInicial);
+    } else {
+      setForm({
+        nombre: "",
+        descripcion: "",
+        github: "",
+        demo: "",
+        fechaInicio: "",
+        fechaFin: "",
+        tecnologias: "",
+        imagen: "",
+      });
+    }
+  }, [proyectoInicial, isOpen]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -70,7 +89,7 @@ function NuevoProyectoModal({
       >
         <div className="shrink-0 border-b border-app-border px-6 py-4">
           <h2 className="text-3xl font-extrabold text-app-text">
-            Nuevo Proyecto
+            {proyectoInicial ? "Editar Proyecto" : "Nuevo Proyecto"}
           </h2>
         </div>
 
@@ -194,7 +213,7 @@ function NuevoProyectoModal({
                 value={form.imagen}
                 onChange={handleChange}
                 type="text"
-                placeholder="Opcional"
+                placeholder="https://..."
                 className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
               />
             </div>
@@ -215,7 +234,7 @@ function NuevoProyectoModal({
               type="submit"
               className="rounded-full bg-app-topbar px-6 py-2 text-sm font-semibold text-white transition hover:opacity-90"
             >
-              Guardar
+              {proyectoInicial ? "Actualizar" : "Guardar"}
             </button>
           </div>
         </div>

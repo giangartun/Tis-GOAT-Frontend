@@ -11,8 +11,9 @@ api.interceptors.request.use(
 
     if (token) {
       config.headers.set("Authorization", `Bearer ${token}`);
-      config.headers.set("Content-Type", "application/json");
     }
+
+    config.headers.set("Accept", "application/json");
 
     return config;
   },

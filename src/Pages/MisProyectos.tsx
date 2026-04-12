@@ -358,6 +358,7 @@ function MisProyectos() {
         )}
       </div>
 
+      {/* Modal con funcionalidad completa */}
       <NuevoProyectoModal
         isOpen={isOpen}
         onClose={cerrarModal}

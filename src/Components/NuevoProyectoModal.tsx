@@ -1,5 +1,10 @@
-import { useState } from "react";
-import { X } from "lucide-react";
+import { useEffect, useState } from "react";
+
+type Tecnologia = {
+  id_tecnologia: string;
+  nombre: string;
+  categoria?: string | null;
+};
 
 type ProyectoLocal = {
   nombre: string;
@@ -8,7 +13,7 @@ type ProyectoLocal = {
   demo: string;
   fechaInicio: string;
   fechaFin: string;
-  tecnologias: string;
+  tecnologias: string[];
   imagen: string;
 };
 
@@ -16,12 +21,16 @@ type NuevoProyectoModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSave: (form: ProyectoLocal) => Promise<void> | void;
+  proyectoInicial?: ProyectoLocal | null;
+  tecnologiasDisponibles: Tecnologia[];
 };
 
 function NuevoProyectoModal({
   isOpen,
   onClose,
   onSave,
+  proyectoInicial,
+  tecnologiasDisponibles,
 }: NuevoProyectoModalProps) {
   const [form, setForm] = useState<ProyectoLocal>({
     nombre: "",
@@ -30,23 +39,52 @@ function NuevoProyectoModal({
     demo: "",
     fechaInicio: "",
     fechaFin: "",
-    tecnologias: "",
+    tecnologias: [],
     imagen: "",
   });
+
+  useEffect(() => {
+    if (proyectoInicial) {
+      setForm(proyectoInicial);
+    } else {
+      setForm({
+        nombre: "",
+        descripcion: "",
+        github: "",
+        demo: "",
+        fechaInicio: "",
+        fechaFin: "",
+        tecnologias: [],
+        imagen: "",
+      });
+    }
+  }, [proyectoInicial, isOpen]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+
     setForm((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
+  const toggleTecnologia = (idTecnologia: string) => {
+    setForm((prev) => ({
+      ...prev,
+      tecnologias: prev.tecnologias.includes(idTecnologia)
+        ? prev.tecnologias.filter((id) => id !== idTecnologia)
+        : [...prev.tecnologias, idTecnologia],
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     await onSave(form);
+    onClose();
+
     setForm({
       nombre: "",
       descripcion: "",
@@ -54,7 +92,7 @@ function NuevoProyectoModal({
       demo: "",
       fechaInicio: "",
       fechaFin: "",
-      tecnologias: "",
+      tecnologias: [],
       imagen: "",
     });
   };
@@ -67,23 +105,12 @@ function NuevoProyectoModal({
         onSubmit={handleSubmit}
         className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-sm border border-app-border bg-app-bg shadow-2xl"
       >
-        {/* Encabezado con botón X */}
-        <div className="shrink-0 flex items-center justify-between border-b border-app-border px-6 py-4">
+        <div className="shrink-0 border-b border-app-border px-6 py-4">
           <h2 className="text-3xl font-extrabold text-app-text">
-            Nuevo Proyecto
+            {proyectoInicial ? "Editar Proyecto" : "Nuevo Proyecto"}
           </h2>
-          
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full p-2 text-app-muted transition hover:bg-white/60 hover:text-app-text"
-            aria-label="Cerrar"
-          >
-            <X size={22} />
-          </button>
         </div>
 
-        {/* Contenido con scroll */}
         <div className="flex-1 overflow-y-auto px-8 py-6">
           <div className="space-y-5">
             <div>
@@ -96,6 +123,7 @@ function NuevoProyectoModal({
                 onChange={handleChange}
                 type="text"
                 placeholder="nombredelproyecto"
+                required
                 className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
               />
             </div>
@@ -109,9 +137,14 @@ function NuevoProyectoModal({
                 value={form.descripcion}
                 onChange={handleChange}
                 rows={5}
-                placeholder=""
+                maxLength={200}
+                required
+                placeholder="Máximo 200 caracteres"
                 className="w-full rounded-2xl border border-app-border bg-white px-4 py-3 text-sm outline-none"
               />
+              <p className="mt-1 text-xs text-app-muted">
+                {form.descripcion.length}/200 caracteres
+              </p>
             </div>
 
             <div>
@@ -122,8 +155,9 @@ function NuevoProyectoModal({
                 name="github"
                 value={form.github}
                 onChange={handleChange}
-                type="text"
+                type="url"
                 placeholder="https://github.com/usuario/proyecto"
+                required
                 className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
               />
             </div>
@@ -136,8 +170,9 @@ function NuevoProyectoModal({
                 name="demo"
                 value={form.demo}
                 onChange={handleChange}
-                type="text"
+                type="url"
                 placeholder="https://demo.com"
+                required
                 className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
               />
             </div>
@@ -147,41 +182,95 @@ function NuevoProyectoModal({
                 <label className="mb-1 block text-base font-medium text-app-text">
                   Fecha inicio:
                 </label>
-                <input
-                  name="fechaInicio"
-                  value={form.fechaInicio}
-                  onChange={handleChange}
-                  type="date"
-                  className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none"
-                />
+                <div className="relative w-full">
+                  <input
+                    name="fechaInicio"
+                    value={form.fechaInicio}
+                    onChange={handleChange}
+                    type="date"
+                    required
+                    style={{ borderRadius: "9999px" }}
+                    className="w-full border border-app-border bg-white px-4 py-2 pr-10 text-sm outline-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-3 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:hover:opacity-100"
+                  />
+                </div>
               </div>
 
               <div>
                 <label className="mb-1 block text-base font-medium text-app-text">
                   Fecha fin:
                 </label>
-                <input
-                  name="fechaFin"
-                  value={form.fechaFin}
-                  onChange={handleChange}
-                  type="date"
-                  className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none"
-                />
+                <div className="relative w-full">
+                  <input
+                    name="fechaFin"
+                    value={form.fechaFin}
+                    onChange={handleChange}
+                    type="date"
+                    required
+                    style={{ borderRadius: "9999px" }}
+                    className="w-full border border-app-border bg-white px-4 py-2 pr-10 text-sm outline-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-3 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:hover:opacity-100"
+                  />
+                </div>
               </div>
             </div>
 
             <div>
-              <label className="mb-1 block text-base font-medium text-app-text">
+              <label className="mb-2 block text-base font-medium text-app-text">
                 Tecnologías:
               </label>
-              <input
-                name="tecnologias"
-                value={form.tecnologias}
-                onChange={handleChange}
-                type="text"
-                placeholder="React, Node, Mongo DB"
-                className="w-full rounded-md border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
-              />
+
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {tecnologiasDisponibles.map((tec) => {
+                  const isChecked = form.tecnologias.includes(tec.id_tecnologia);
+                  return (
+                    <label
+                      key={tec.id_tecnologia}
+                      className="flex cursor-pointer items-start gap-3 rounded-xl border border-app-border bg-white px-3 py-3 text-sm text-app-text"
+                    >
+                      {/* Checkbox visual custom */}
+                      <div
+                        onClick={() => toggleTecnologia(tec.id_tecnologia)}
+                        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${
+                          isChecked
+                            ? "border-blue-500 bg-blue-500"
+                            : "border-gray-400 bg-white"
+                        }`}
+                      >
+                        {isChecked && (
+                          <svg
+                            className="h-3 w-3 text-white"
+                            viewBox="0 0 12 12"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M2 6l3 3 5-5"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                      {/* Oculto para accesibilidad */}
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleTecnologia(tec.id_tecnologia)}
+                        className="sr-only"
+                      />
+                      <div className="min-w-0">
+                        <span className="block font-medium">{tec.nombre}</span>
+                        {tec.categoria && (
+                          <span className="block text-xs text-app-muted">
+                            {tec.categoria}
+                          </span>
+                        )}
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
 
             <div>
@@ -193,14 +282,13 @@ function NuevoProyectoModal({
                 value={form.imagen}
                 onChange={handleChange}
                 type="text"
-                placeholder="https://tutorial-como-copiar-direccion-url-de-imagen/"
+                placeholder="https://..."
                 className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm outline-none placeholder:text-app-muted"
               />
             </div>
           </div>
         </div>
 
-        {/* Footer con botones */}
         <div className="shrink-0 border-t border-app-border px-8 py-5">
           <div className="flex items-center justify-between">
             <button
@@ -215,7 +303,7 @@ function NuevoProyectoModal({
               type="submit"
               className="rounded-full bg-app-topbar px-6 py-2 text-sm font-semibold text-white transition hover:opacity-90"
             >
-              Guardar
+              {proyectoInicial ? "Actualizar" : "Guardar"}
             </button>
           </div>
         </div>

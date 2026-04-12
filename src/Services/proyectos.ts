@@ -17,6 +17,8 @@ export type ProyectoApiPayload = {
   tecnologias: string[];
 };
 
+type ProyectosResponse = unknown;
+
 export async function listarTecnologias(): Promise<Tecnologia[]> {
   const response = await api.get<Tecnologia[]>(
     "/proyecto/gestion-proyectos/tecnologias/lista"
@@ -24,10 +26,16 @@ export async function listarTecnologias(): Promise<Tecnologia[]> {
   return response.data;
 }
 
-export async function listarProyectos(idPortafolio: string, buscar: string = "") {
-  const response = await api.get(`/proyecto/gestion-proyectos/${idPortafolio}`, {
-    params: buscar ? { buscar } : {},
-  });
+export async function listarProyectos(
+  idPortafolio: string,
+  buscar: string = ""
+): Promise<ProyectosResponse> {
+  const response = await api.get(
+    `/proyecto/gestion-proyectos/${idPortafolio}`,
+    {
+      params: buscar ? { buscar } : {},
+    }
+  );
   return response.data;
 }
 
@@ -36,8 +44,14 @@ export async function crearProyecto(payload: ProyectoApiPayload) {
   return response.data;
 }
 
-export async function actualizarProyecto(idProyecto: string, payload: ProyectoApiPayload) {
-  const response = await api.put(`/proyecto/gestion-proyectos/${idProyecto}`, payload);
+export async function actualizarProyecto(
+  idProyecto: string,
+  payload: ProyectoApiPayload
+) {
+  const response = await api.put(
+    `/proyecto/gestion-proyectos/${idProyecto}`,
+    payload
+  );
   return response.data;
 }
 

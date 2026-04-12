@@ -36,24 +36,20 @@ type Proyecto = {
 function MisProyectos() {
   const [isOpen, setIsOpen] = useState(false);
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
-  const [proyectoEditando, setProyectoEditando] = useState<Proyecto | null>(
-    null
-  );
-  const [tecnologiasDisponibles, setTecnologiasDisponibles] = useState<
-    Tecnologia[]
-  >([]);
+  const [proyectoEditando, setProyectoEditando] = useState<Proyecto | null>(null);
+  const [tecnologiasDisponibles, setTecnologiasDisponibles] = useState<Tecnologia[]>([]);
 
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const [proyectoAEliminar, setProyectoAEliminar] = useState<Proyecto | null>(
-    null
-  );
+  const [proyectoAEliminar, setProyectoAEliminar] = useState<Proyecto | null>(null);
   const [eliminando, setEliminando] = useState(false);
 
   const [buscar, setBuscar] = useState("");
 
-  const idPortafolio = localStorage.getItem("id_portafolio") ?? "";
+  const [idPortafolioSesion, setIdPortafolioSesion] = useState(() => {
+    return localStorage.getItem("id_portafolio") ?? "";
+  });
 
   const formatFecha = (fecha?: string | null) => {
     if (!fecha) return "-";
@@ -66,15 +62,60 @@ function MisProyectos() {
     }).format(d);
   };
 
+  const sincronizarIdPortafolio = () => {
+    const idActual = localStorage.getItem("id_portafolio") ?? "";
+    setIdPortafolioSesion(idActual);
+    return idActual;
+  };
+
+  const recargarProyectos = async (idPortafolio: string, termino: string = "") => {
+    if (!idPortafolio) {
+      setProyectos([]);
+      return;
+    }
+
+    const data = await listarProyectos(idPortafolio, termino);
+    setProyectos(Array.isArray(data) ? data : []);
+  };
+
   useEffect(() => {
+    sincronizarIdPortafolio();
+
+    const onFocus = () => {
+      sincronizarIdPortafolio();
+    };
+
+    const onStorage = () => {
+      sincronizarIdPortafolio();
+    };
+
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("storage", onStorage);
+
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, []);
+
+  useEffect(() => {
+    setProyectos([]);
+    setProyectoEditando(null);
+    setProyectoAEliminar(null);
+
     const timeout = setTimeout(() => {
       const cargar = async () => {
         try {
-          if (!idPortafolio) return;
-          const data = await listarProyectos(idPortafolio, buscar);
-          setProyectos(Array.isArray(data) ? data : []);
+          const idActual = sincronizarIdPortafolio();
+          if (!idActual) {
+            setProyectos([]);
+            return;
+          }
+
+          await recargarProyectos(idActual, buscar);
         } catch (error) {
           console.error("Error cargando proyectos:", error);
+          setProyectos([]);
         }
       };
 
@@ -82,7 +123,7 @@ function MisProyectos() {
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [idPortafolio, buscar]);
+  }, [idPortafolioSesion, buscar]);
 
   useEffect(() => {
     const cargarTecnologias = async () => {
@@ -126,9 +167,8 @@ function MisProyectos() {
 
       await eliminarProyecto(proyectoAEliminar.id_proyecto);
 
-      setProyectos((prev) =>
-        prev.filter((p) => p.id_proyecto !== proyectoAEliminar.id_proyecto)
-      );
+      const idActual = sincronizarIdPortafolio();
+      await recargarProyectos(idActual, buscar);
 
       setProyectoAEliminar(null);
       setSuccessMessage("Proyecto eliminado correctamente.");
@@ -151,8 +191,15 @@ function MisProyectos() {
       setSuccessMessage("");
       setErrorMessage("");
 
+      const idPortafolioActual = sincronizarIdPortafolio();
+
+      if (!idPortafolioActual) {
+        setErrorMessage("No se encontró el portafolio de la sesión actual.");
+        return;
+      }
+
       const payload = {
-        id_portafolio: idPortafolio,
+        id_portafolio: idPortafolioActual,
         nombre: form.nombre,
         descripcion: form.descripcion || null,
         url_proyecto: form.github || null,
@@ -162,6 +209,7 @@ function MisProyectos() {
         tecnologias: form.tecnologias,
       };
 
+      console.log("ID PORTAFOLIO ACTUAL:", idPortafolioActual);
       console.log("PAYLOAD:", payload);
 
       if (proyectoEditando) {
@@ -191,6 +239,7 @@ function MisProyectos() {
       }
 
       cerrarModal();
+      await recargarProyectos(idPortafolioActual, buscar);
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error: any) {
       console.error("Error guardando proyecto:", error?.response?.data || error);
@@ -259,9 +308,7 @@ function MisProyectos() {
           proyectos.map((proyecto) => {
             const tecnologiasParaMostrar =
               proyecto.tecnologias?.length
-                ? proyecto.tecnologias.map(
-                    (tec) => tec.nombre || "Tecnología"
-                  )
+                ? proyecto.tecnologias.map((tec) => tec.nombre || "Tecnología")
                 : [];
 
             return (
@@ -358,7 +405,6 @@ function MisProyectos() {
         )}
       </div>
 
-      {/* Modal con funcionalidad completa */}
       <NuevoProyectoModal
         isOpen={isOpen}
         onClose={cerrarModal}
@@ -378,8 +424,7 @@ function MisProyectos() {
                   ? proyectoEditando.fecha_fin.slice(0, 10)
                   : "",
                 tecnologias:
-                  proyectoEditando.tecnologias?.map((tec) => tec.id_tecnologia) ??
-                  [],
+                  proyectoEditando.tecnologias?.map((tec) => tec.id_tecnologia) ?? [],
                 imagen: proyectoEditando.imagen_url ?? "",
               }
             : null

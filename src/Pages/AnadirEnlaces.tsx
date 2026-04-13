@@ -25,12 +25,16 @@ interface Usuario {
   id_usuario?: number | string;
   nombre?: string;
   apellido_paterno?: string;
+  apellido_materno?: string;
   profesion?: string;
   email?: string;
   ciudad?: string;
   institucion?: string;
   biografia?: string;
 }
+
+const getFullName = (u: Usuario) => 
+  [u.nombre, u.apellido_paterno, u.apellido_materno].filter(Boolean).join(' ');
 
 const API_BASE =
   (import.meta as any)?.env?.VITE_API_URL?.replace(/\/$/, '') ||
@@ -41,6 +45,8 @@ const NETWORK_OPTIONS = [
   { value: 'github', label: 'GitHub' },
   { value: 'twitter', label: 'Twitter / X' },
   { value: 'behance', label: 'Behance' },
+  { value: 'facebook', label: 'Facebook' },
+  { value: 'instagram', label: 'Instagram' },
   { value: 'otro', label: 'Otro' }
 ] as const;
 
@@ -69,8 +75,14 @@ export default function AnadirEnlaces() {
   const token = localStorage.getItem('token');
   const idUsuario = String(usuario?.id_usuario || usuario?.id || '');
 
-  const [links, setLinks] = useState<LinkItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [links, setLinks] = useState<LinkItem[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('cachedLinks') || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [loading, setLoading] = useState(links.length === 0);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -80,6 +92,7 @@ export default function AnadirEnlaces() {
   const [sortBy, setSortBy] = useState('más recientes');
 
   const [nombreRed, setNombreRed] = useState<LinkItem['nombre_red']>('linkedin');
+  const [nombreRedOtro, setNombreRedOtro] = useState('');
   const [nuevaUrl, setNuevaUrl] = useState('');
 
   const authHeaders = useMemo(
@@ -120,7 +133,7 @@ export default function AnadirEnlaces() {
       return;
     }
 
-    setLoading(true);
+    if (links.length === 0) setLoading(true);
     setError('');
 
     try {
@@ -144,7 +157,9 @@ export default function AnadirEnlaces() {
         ? data.data
         : [];
 
-      setLinks(rawLinks.map(normalizeLink));
+      const normalized = rawLinks.map(normalizeLink);
+      setLinks(normalized);
+      localStorage.setItem('cachedLinks', JSON.stringify(normalized));
     } catch (err: any) {
       console.error('Error fetching links:', err);
       setError(err?.message || 'Ocurrió un error al cargar los enlaces.');
@@ -179,6 +194,7 @@ export default function AnadirEnlaces() {
 
   const resetForm = () => {
     setNombreRed('linkedin');
+    setNombreRedOtro('');
     setNuevaUrl('');
   };
 
@@ -195,7 +211,9 @@ export default function AnadirEnlaces() {
       return;
     }
 
-    if (!nombreRed || !nuevaUrl.trim()) {
+    const finalNombreRed = nombreRed === 'otro' ? nombreRedOtro.trim() : nombreRed;
+
+    if (!finalNombreRed || !nuevaUrl.trim()) {
       alert('Completa todos los campos.');
       return;
     }
@@ -207,7 +225,7 @@ export default function AnadirEnlaces() {
 
     const payload = {
       id_usuario: idUsuario,
-      nombre_red: nombreRed,
+      nombre_red: finalNombreRed,
       url_red: normalizeUrlBeforeSend(nuevaUrl)
     };
 
@@ -229,7 +247,11 @@ export default function AnadirEnlaces() {
 
       const savedLink = normalizeLink(data?.red ?? data);
 
-      setLinks((prev) => [savedLink, ...prev]);
+      setLinks((prev) => {
+        const newLinks = [savedLink, ...prev];
+        localStorage.setItem('cachedLinks', JSON.stringify(newLinks));
+        return newLinks;
+      });
       setIsModalOpen(false);
       setIsSuccessModalOpen(true);
       resetForm();
@@ -268,7 +290,11 @@ export default function AnadirEnlaces() {
         throw new Error(data?.message || 'No se pudo eliminar el enlace.');
       }
 
-      setLinks((prev) => prev.filter((l) => l.id_redes_prof !== id_redes_prof));
+      setLinks((prev) => {
+        const newLinks = prev.filter((l) => l.id_redes_prof !== id_redes_prof);
+        localStorage.setItem('cachedLinks', JSON.stringify(newLinks));
+        return newLinks;
+      });
     } catch (err: any) {
       console.error('Error deleting link:', err);
       setError(err?.message || 'Ocurrió un error al eliminar el enlace.');
@@ -329,8 +355,8 @@ export default function AnadirEnlaces() {
             <div className="w-28 h-28 rounded-full bg-white/10" />
           </div>
 
-          <h2 className="text-[20px] font-bold">
-            {usuario.nombre} {usuario.apellido_paterno}
+          <h2 className="text-[20px] font-bold text-center px-4">
+            {getFullName(usuario)}
           </h2>
           <p className="text-[15px] text-blue-100 font-medium mb-12 opacity-80">
             {usuario.profesion}
@@ -350,10 +376,10 @@ export default function AnadirEnlaces() {
           <div className="flex justify-between items-start mb-6 text-black">
             <div>
               <h2 className="text-[26px] font-bold text-gray-900 mb-2">
-                {usuario.nombre} {usuario.apellido_paterno}
+                {getFullName(usuario)}
               </h2>
               <p className="text-gray-500 text-[15px] max-w-3xl font-medium">
-                {usuario.biografia || 'Apasionada por las creaciones de aplicaciones web...'}
+                {usuario.biografia || 'Apasionada por las creaciones de aplicaciones web y la elaboración de experiencias de usuario excepcionales, con experiencia en trabajo equipo.'}
               </p>
             </div>
 
@@ -479,6 +505,21 @@ export default function AnadirEnlaces() {
                   <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none w-4 h-4" />
                 </div>
               </div>
+
+              {nombreRed === 'otro' && (
+                <div>
+                  <label className="block text-[14px] font-bold text-gray-700 mb-2">
+                    Nombre de la Plataforma
+                  </label>
+                  <input
+                    required
+                    value={nombreRedOtro}
+                    onChange={(e) => setNombreRedOtro(e.target.value)}
+                    placeholder="Ej. Mi Blog, Portfolio..."
+                    className="w-full px-4 py-3 bg-white text-black border rounded-[14px] focus:ring-2 focus:ring-[#1F4E79] outline-none"
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="block text-[14px] font-bold text-gray-700 mb-2">

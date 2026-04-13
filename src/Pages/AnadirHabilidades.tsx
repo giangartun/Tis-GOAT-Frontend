@@ -24,12 +24,16 @@ interface Skill {
 interface Usuario {
   nombre?: string;
   apellido_paterno?: string;
+  apellido_materno?: string;
   profesion?: string;
   email?: string;
   ciudad?: string;
   institucion?: string;
   biografia?: string;
 }
+
+const getFullName = (u: Usuario) => 
+  [u.nombre, u.apellido_paterno, u.apellido_materno].filter(Boolean).join(' ');
 
 const API_BASE =
   (import.meta as any)?.env?.VITE_API_URL?.replace(/\/$/, '') ||
@@ -48,8 +52,14 @@ export default function AnadirHabilidades() {
 
   const token = localStorage.getItem('token');
 
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [skills, setSkills] = useState<Skill[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('cachedSkills') || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [loading, setLoading] = useState(skills.length === 0);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -61,8 +71,10 @@ export default function AnadirHabilidades() {
   const [tipoHabilidad, setTipoHabilidad] = useState<'Dura' | 'Blanda'>('Dura');
   const [nombreDura, setNombreDura] = useState('');
   const [categoria, setCategoria] = useState('');
+  const [categoriaOtro, setCategoriaOtro] = useState('');
   const [nivel, setNivel] = useState(80);
   const [nombreBlanda, setNombreBlanda] = useState('');
+  const [nombreBlandaOtro, setNombreBlandaOtro] = useState('');
   const [visible, setVisible] = useState(true);
 
   const authHeaders = useMemo(
@@ -74,17 +86,24 @@ export default function AnadirHabilidades() {
     [token]
   );
 
-  const normalizeSkill = (item: any): Skill => ({
-    id_habilidad: String(item?.id_habilidad ?? ''),
-    nombre: String(item?.nombre ?? ''),
-    tipo: item?.tipo === 'blanda' ? 'blanda' : 'tecnica',
-    nivel: Number(item?.nivel ?? 0),
-    visible:
-      item?.visible === true ||
-      item?.visible === 1 ||
-      item?.visible === '1',
-    categoria: item?.categoria ?? null
-  });
+  const normalizeSkill = (item: any): Skill => {
+    const id = String(item?.id_habilidad ?? '');
+    const nombre = String(item?.nombre ?? '');
+    const catCache = JSON.parse(localStorage.getItem('skillCategories') || '{}');
+    const locallySaved = catCache[id] || catCache[nombre.toLowerCase()];
+
+    return {
+      id_habilidad: id,
+      nombre,
+      tipo: item?.tipo === 'blanda' ? 'blanda' : 'tecnica',
+      nivel: Number(item?.nivel ?? 0),
+      visible:
+        item?.visible === true ||
+        item?.visible === 1 ||
+        item?.visible === '1',
+      categoria: item?.categoria ?? locallySaved ?? null
+    };
+  };
 
   const flattenGroupedSkills = (data: any): Skill[] => {
     if (Array.isArray(data)) {
@@ -106,7 +125,7 @@ export default function AnadirHabilidades() {
       return;
     }
 
-    setLoading(true);
+    if (skills.length === 0) setLoading(true);
     setError('');
 
     try {
@@ -124,7 +143,9 @@ export default function AnadirHabilidades() {
         throw new Error(data?.message || 'No se pudieron cargar las habilidades.');
       }
 
-      setSkills(flattenGroupedSkills(data));
+      const finalSkills = flattenGroupedSkills(data);
+      setSkills(finalSkills);
+      localStorage.setItem('cachedSkills', JSON.stringify(finalSkills));
     } catch (err: any) {
       console.error('Error fetching skills:', err);
       setError(err?.message || 'Ocurrió un error al cargar las habilidades.');
@@ -141,8 +162,10 @@ export default function AnadirHabilidades() {
     setTipoHabilidad('Dura');
     setNombreDura('');
     setCategoria('');
+    setCategoriaOtro('');
     setNivel(80);
     setNombreBlanda('');
+    setNombreBlandaOtro('');
     setVisible(true);
   };
 
@@ -154,15 +177,18 @@ export default function AnadirHabilidades() {
       return;
     }
 
+    const finalNombreBlanda = nombreBlanda === 'Otro' ? nombreBlandaOtro.trim() : nombreBlanda;
+    const finalCategoria = categoria === 'Otro' ? categoriaOtro.trim() : categoria;
+
     const nombre =
-      tipoHabilidad === 'Dura' ? nombreDura.trim() : nombreBlanda.trim();
+      tipoHabilidad === 'Dura' ? nombreDura.trim() : finalNombreBlanda.trim();
 
     if (!nombre) {
       alert('Completa el nombre de la habilidad.');
       return;
     }
 
-    if (tipoHabilidad === 'Dura' && !categoria.trim()) {
+    if (tipoHabilidad === 'Dura' && !finalCategoria.trim()) {
       alert('Selecciona una categoría.');
       return;
     }
@@ -171,7 +197,8 @@ export default function AnadirHabilidades() {
       nombre,
       tipo: tipoHabilidad === 'Dura' ? 'tecnica' : 'blanda',
       nivel: tipoHabilidad === 'Dura' ? nivel : 100,
-      visible
+      visible,
+      categoria: tipoHabilidad === 'Dura' ? finalCategoria : null
     };
 
     setSaving(true);
@@ -192,11 +219,15 @@ export default function AnadirHabilidades() {
 
       const savedSkill = normalizeSkill(data?.habilidad ?? data);
 
-      // categoria no se guarda en tu backend actual, así que la mantenemos solo para mostrar en esta vista
+      // categoria no se guarda en tu backend actual, así que la mantenemos en localStorage
       if (tipoHabilidad === 'Dura') {
-        savedSkill.categoria = categoria;
+        savedSkill.categoria = finalCategoria;
+        const catCache = JSON.parse(localStorage.getItem('skillCategories') || '{}');
+        catCache[savedSkill.id_habilidad] = finalCategoria;
+        catCache[savedSkill.nombre.toLowerCase()] = finalCategoria;
+        localStorage.setItem('skillCategories', JSON.stringify(catCache));
       } else {
-        savedSkill.categoria = 'Habilidad Blanda';
+        savedSkill.categoria = 'Habilidades Blandas';
       }
 
       setSkills((prev) => [savedSkill, ...prev]);
@@ -238,7 +269,11 @@ export default function AnadirHabilidades() {
         throw new Error(data?.message || 'No se pudo eliminar la habilidad.');
       }
 
-      setSkills((prev) => prev.filter((s) => s.id_habilidad !== id_habilidad));
+      setSkills((prev) => {
+        const newSkills = prev.filter((s) => s.id_habilidad !== id_habilidad);
+        localStorage.setItem('cachedSkills', JSON.stringify(newSkills));
+        return newSkills;
+      });
     } catch (err: any) {
       console.error('Error deleting skill:', err);
       setError(err?.message || 'Ocurrió un error al eliminar la habilidad.');
@@ -305,8 +340,8 @@ export default function AnadirHabilidades() {
             <div className="w-28 h-28 rounded-full bg-white/10" />
           </div>
 
-          <h2 className="text-[20px] font-bold">
-            {usuario.nombre} {usuario.apellido_paterno}
+          <h2 className="text-[20px] font-bold text-center px-4">
+            {getFullName(usuario)}
           </h2>
           <p className="text-[15px] text-blue-100 font-medium mb-12 opacity-80">
             {usuario.profesion || 'Ingeniera de Software'}
@@ -329,10 +364,10 @@ export default function AnadirHabilidades() {
           <div className="flex justify-between items-start mb-6 text-black">
             <div>
               <h2 className="text-[26px] font-bold text-gray-900 mb-2">
-                {usuario.nombre} {usuario.apellido_paterno}
+                {getFullName(usuario)}
               </h2>
               <p className="text-gray-500 text-[15px] max-w-3xl font-medium">
-                {usuario.biografia || 'Apasionada por las creaciones de aplicaciones web...'}
+                {usuario.biografia || 'Apasionada por las creaciones de aplicaciones web y la elaboración de experiencias de usuario excepcionales, con experiencia en trabajo equipo.'}
               </p>
             </div>
 
@@ -503,21 +538,38 @@ export default function AnadirHabilidades() {
                     className="w-full px-4 py-3 bg-white text-black border rounded-[14px] outline-none transition-all"
                   />
                 ) : (
-                  <div className="relative">
-                    <select
-                      value={nombreBlanda}
-                      onChange={(e) => setNombreBlanda(e.target.value)}
-                      className="w-full px-4 py-3 bg-white text-black border rounded-[14px] outline-none appearance-none cursor-pointer"
-                    >
-                      <option value="">Selecciona una opción</option>
-                      <option>Trabajo en equipo</option>
-                      <option>Liderazgo</option>
-                      <option>Comunicación</option>
-                      <option>Resolución de problemas</option>
-                      <option>Adaptabilidad</option>
-                    </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                  </div>
+                  <>
+                    <div className="relative">
+                      <select
+                        value={nombreBlanda}
+                        onChange={(e) => setNombreBlanda(e.target.value)}
+                        className="w-full px-4 py-3 bg-white text-black border rounded-[14px] outline-none appearance-none cursor-pointer"
+                      >
+                        <option value="">Selecciona una opción</option>
+                        <option>Trabajo en equipo</option>
+                        <option>Liderazgo</option>
+                        <option>Comunicación</option>
+                        <option>Resolución de problemas</option>
+                        <option>Adaptabilidad</option>
+                        <option value="Otro">Otro</option>
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+                    {nombreBlanda === 'Otro' && (
+                      <div className="mt-4">
+                        <label className="block text-[14px] font-bold text-gray-700 mb-2">
+                          Escribe la habilidad blanda
+                        </label>
+                        <input
+                          required
+                          value={nombreBlandaOtro}
+                          onChange={(e) => setNombreBlandaOtro(e.target.value)}
+                          placeholder="Ej. Creatividad..."
+                          className="w-full px-4 py-3 bg-white text-black border rounded-[14px] outline-none transition-all"
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -540,9 +592,24 @@ export default function AnadirHabilidades() {
                         <option>DevOps</option>
                         <option>Testing</option>
                         <option>Diseño</option>
+                        <option value="Otro">Otro</option>
                       </select>
                       <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                     </div>
+                    {categoria === 'Otro' && (
+                      <div className="mt-4">
+                        <label className="block text-[14px] font-bold text-gray-700 mb-2">
+                          Escribe la nueva categoría
+                        </label>
+                        <input
+                          required
+                          value={categoriaOtro}
+                          onChange={(e) => setCategoriaOtro(e.target.value)}
+                          placeholder="Ej. Metodologías Ágiles..."
+                          className="w-full px-4 py-3 bg-white text-black border rounded-[14px] outline-none transition-all"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div>

@@ -23,6 +23,7 @@ interface Usuario {
   id_usuario?: number | string;
   nombre?: string;
   apellido_paterno?: string;
+  apellido_materno?: string;
   profesion?: string;
   email?: string;
   ciudad?: string;
@@ -35,6 +36,9 @@ interface Usuario {
   portafolio_id?: number;
   id_portafolio?: number;
 }
+
+const getFullName = (u: Usuario) => 
+  [u.nombre, u.apellido_paterno, u.apellido_materno].filter(Boolean).join(' ');
 
 interface RedProfesional {
   id_redes_prof: string;
@@ -86,11 +90,23 @@ const PerfilUsuario = () => {
   const token = localStorage.getItem('token');
   const userId = usuario?.id_usuario || usuario?.id;
 
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [skillsLoading, setSkillsLoading] = useState(true);
+  const [skills, setSkills] = useState<Skill[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('cachedSkills') || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [skillsLoading, setSkillsLoading] = useState(skills.length === 0);
   const [skillsError, setSkillsError] = useState('');
 
-  const [links, setLinks] = useState<RedProfesional[]>([]);
+  const [links, setLinks] = useState<RedProfesional[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('cachedLinks') || '[]');
+    } catch {
+      return [];
+    }
+  });
   const [linksError, setLinksError] = useState('');
 
   const experiences = [
@@ -125,17 +141,24 @@ const PerfilUsuario = () => {
     }
   ];
 
-  const normalizeSkill = (item: any): Skill => ({
-    id_habilidad: String(item?.id_habilidad ?? ''),
-    nombre: String(item?.nombre ?? ''),
-    tipo: item?.tipo === 'blanda' ? 'blanda' : 'tecnica',
-    nivel: Number(item?.nivel ?? 0),
-    visible:
-      item?.visible === true ||
-      item?.visible === 1 ||
-      item?.visible === '1',
-    categoria: item?.categoria ?? null
-  });
+  const normalizeSkill = (item: any): Skill => {
+    const id = String(item?.id_habilidad ?? '');
+    const nombre = String(item?.nombre ?? '');
+    const catCache = JSON.parse(localStorage.getItem('skillCategories') || '{}');
+    const locallySaved = catCache[id] || catCache[nombre.toLowerCase()];
+
+    return {
+      id_habilidad: id,
+      nombre,
+      tipo: item?.tipo === 'blanda' ? 'blanda' : 'tecnica',
+      nivel: Number(item?.nivel ?? 0),
+      visible:
+        item?.visible === true ||
+        item?.visible === 1 ||
+        item?.visible === '1',
+      categoria: item?.categoria ?? locallySaved ?? null
+    };
+  };
 
   const flattenGroupedSkills = (data: any): Skill[] => {
     if (Array.isArray(data)) {
@@ -175,7 +198,7 @@ const PerfilUsuario = () => {
       return;
     }
 
-    setSkillsLoading(true);
+    if (skills.length === 0) setSkillsLoading(true);
     setSkillsError('');
 
     try {
@@ -193,7 +216,9 @@ const PerfilUsuario = () => {
         throw new Error(data?.message || 'No se pudieron cargar las habilidades.');
       }
 
-      setSkills(flattenGroupedSkills(data));
+      const finalSkills = flattenGroupedSkills(data);
+      setSkills(finalSkills);
+      localStorage.setItem('cachedSkills', JSON.stringify(finalSkills));
     } catch (err: any) {
       console.error('Error fetching skills:', err);
       setSkillsError(err?.message || 'Error al cargar habilidades.');
@@ -228,7 +253,9 @@ const PerfilUsuario = () => {
         ? data.data
         : [];
 
-      setLinks(rawLinks);
+      const normalized = rawLinks;
+      setLinks(normalized);
+      localStorage.setItem('cachedLinks', JSON.stringify(normalized));
     } catch (err: any) {
       console.error('Error fetching links:', err);
       setLinksError(err?.message || 'Error al cargar enlaces.');
@@ -301,7 +328,7 @@ const PerfilUsuario = () => {
                 </div>
                 <div className="flex flex-col">
                   <h2 className="text-[42px] font-bold mb-1 tracking-tight">
-                    {usuario.nombre} {usuario.apellido_paterno}
+                    {getFullName(usuario)}
                   </h2>
                   <p className="text-blue-200 text-[20px] font-medium opacity-90 mb-6 italic">
                     {usuario.profesion || 'Ingeniera de Software'}

@@ -26,7 +26,7 @@ function Layout() {
     try {
       const token = localStorage.getItem('token');
       if (token) {
-        await fetch('http://127.0.0.1:8000/api/usuario/logout', {
+        await fetch(import.meta.env.VITE_API_URL+'/api/usuario/logout', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -40,7 +40,7 @@ function Layout() {
     } finally {
       localStorage.removeItem('token');
       localStorage.removeItem('usuario');
-      localStorage.removeItem('id_portafolio');
+      localStorage.removeItem('portafolio');
       setUsuario(null);
       setLoadingLogout(false);
       navigate('/login');

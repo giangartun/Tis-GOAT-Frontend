@@ -117,7 +117,7 @@ export const Register: React.FC<RegisterProps> = ({
     setLoading(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/usuario/pre-registro', {
+      const response = await fetch(import.meta.env.VITE_API_URL+'/api/usuario/pre-registro', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -180,7 +180,7 @@ export const Register: React.FC<RegisterProps> = ({
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="w-full h-screen flex">
-        {/* Columna Izquierda - VISUAL DE AMBAS RAMAS (es igual) */}
+        {/* Columna Izquierda */}
         <div className="w-1/2 bg-[#2E3A4D] p-8 flex flex-col justify-center items-center text-center text-white">
           <div className="max-w-sm">
             <h1 className="text-4xl font-bold mb-4">GOAT</h1>
@@ -193,7 +193,7 @@ export const Register: React.FC<RegisterProps> = ({
           </div>
         </div>
 
-        {/* Columna Derecha - VISUAL COMBINADO */}
+        {/* Columna Derecha - Ajustada para evitar desbordamiento */}
         <div className="w-1/2 flex flex-col justify-center overflow-y-auto py-6">
           <div className="max-w-md mx-auto w-full px-6">
             <div className="text-center mb-4">
@@ -227,7 +227,7 @@ export const Register: React.FC<RegisterProps> = ({
                   value={formData.nombre}
                   onChange={handleChange}
                   placeholder="Ingresa tu nombre (solo letras)"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                   required
                 />
@@ -246,7 +246,7 @@ export const Register: React.FC<RegisterProps> = ({
                   value={formData.apellido_paterno}
                   onChange={handleChange}
                   placeholder="Ingresa tu apellido paterno (solo letras)"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                   required
                 />
@@ -265,7 +265,7 @@ export const Register: React.FC<RegisterProps> = ({
                   value={formData.apellido_materno}
                   onChange={handleChange}
                   placeholder="Ingresa tu apellido materno (solo letras)"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                   required
                 />
@@ -284,7 +284,7 @@ export const Register: React.FC<RegisterProps> = ({
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Ingresa tu correo electrónico"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                   required
                 />
@@ -304,7 +304,7 @@ export const Register: React.FC<RegisterProps> = ({
                     value={formData.contrasena}
                     onChange={handleChange}
                     placeholder="Elige una contraseña"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                     required
                   />
@@ -341,7 +341,7 @@ export const Register: React.FC<RegisterProps> = ({
                     value={formData.contrasena_confirmation}
                     onChange={handleChange}
                     placeholder="Repite la contraseña"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                     required
                   />

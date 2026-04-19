@@ -254,13 +254,13 @@ function MisProyectos() {
   };
 
   return (
-    <section className="min-h-screen bg-white px-6 py-8">
-      <div className="flex items-start justify-between gap-4">
+    <section className="min-h-screen bg-white px-4 py-6 sm:px-6 sm:py-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-4xl font-extrabold text-app-text">
+          <h1 className="text-3xl font-extrabold text-app-text sm:text-4xl">
             Mis Proyectos
           </h1>
-          <p className="mt-1 text-base text-app-muted">
+          <p className="mt-1 text-sm text-app-muted sm:text-base">
             Gestiona y organiza tus proyectos de software
           </p>
         </div>
@@ -277,7 +277,7 @@ function MisProyectos() {
       </div>
 
       <div className="mt-6 flex justify-center">
-        <div className="flex w-full max-w-3xl items-center gap-3 rounded-full border border-app-border bg-white px-5 py-3 shadow-sm">
+        <div className="flex w-full max-w-3xl items-center gap-3 rounded-full border border-app-border bg-white px-4 py-3 shadow-sm sm:px-5">
           <input
             type="text"
             value={buscar}
@@ -316,8 +316,8 @@ function MisProyectos() {
                 key={proyecto.id_proyecto}
                 className="overflow-hidden rounded-2xl border border-[#1f7fd1] bg-app-surface shadow-sm transition hover:shadow-md"
               >
-                <div className="flex flex-col gap-5 p-5 lg:flex-row">
-                  <div className="flex h-36 w-full flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border border-dashed border-gray-300 bg-gray-100 text-center text-sm text-gray-400 lg:w-36">
+                <div className="flex flex-col gap-5 p-4 sm:p-5 lg:flex-row">
+                  <div className="flex h-40 w-full flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border border-dashed border-gray-300 bg-gray-100 text-center text-sm text-gray-400 lg:w-36">
                     {proyecto.imagen_url ? (
                       <img
                         src={proyecto.imagen_url}
@@ -383,7 +383,7 @@ function MisProyectos() {
                     )}
                   </div>
 
-                  <div className="flex items-end justify-end gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-end">
                     <button
                       onClick={() => handleEditar(proyecto)}
                       className="rounded-full bg-blue-400 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500"

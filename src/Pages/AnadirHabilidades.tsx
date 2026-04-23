@@ -7,7 +7,8 @@ import {
   MapPin,
   GraduationCap,
   ChevronDown,
-  Trash2
+  Trash2,
+  LogOut
 } from 'lucide-react';
 
 type SkillTypeApi = 'tecnica' | 'blanda';
@@ -32,12 +33,184 @@ interface Usuario {
   biografia?: string;
 }
 
-const getFullName = (u: Usuario) => 
+const getFullName = (u: Usuario) =>
   [u.nombre, u.apellido_paterno, u.apellido_materno].filter(Boolean).join(' ');
+
+const getShortName = (u: Usuario) =>
+  [u.nombre, u.apellido_paterno].filter(Boolean).join(' ');
 
 const API_BASE =
   (import.meta as any)?.env?.VITE_API_URL?.replace(/\/$/, '') ||
   'http://127.0.0.1:8000';
+
+const habilidadesPorCategoria: Record<string, string[]> = {
+  'Lenguajes de Programación': [
+    'Java',
+    'Python',
+    'JavaScript',
+    'TypeScript',
+    'C',
+    'C++',
+    'C#',
+    'PHP',
+    'Go',
+    'Ruby',
+    'Swift',
+    'Kotlin',
+    'SQL',
+    'R',
+    'Rust'
+  ],
+  'Desarrollo Web Frontend': [
+    'HTML5',
+    'CSS3',
+    'JavaScript',
+    'TypeScript',
+    'React',
+    'Vue.js',
+    'Angular',
+    'Next.js',
+    'Bootstrap',
+    'Tailwind CSS',
+    'SASS',
+    'jQuery'
+  ],
+  'Desarrollo Web Backend': [
+    'Node.js',
+    'Express.js',
+    'Laravel',
+    'PHP',
+    'Django',
+    'Flask',
+    'Spring Boot',
+    'Java EE',
+    'ASP.NET Core',
+    'NestJS',
+    'Ruby on Rails',
+    'FastAPI'
+  ],
+  'Desarrollo Móvil': [
+    'Android Studio',
+    'Java Android',
+    'Kotlin',
+    'Swift',
+    'Flutter',
+    'React Native',
+    'Ionic',
+    'Xamarin'
+  ],
+  'Bases de Datos': [
+    'MySQL',
+    'PostgreSQL',
+    'SQL Server',
+    'Oracle Database',
+    'MongoDB',
+    'Firebase Firestore',
+    'MariaDB',
+    'SQLite',
+    'Redis',
+    'Cassandra'
+  ],
+  'Frameworks y Librerías': [
+    'React',
+    'Vue.js',
+    'Angular',
+    'Laravel',
+    'Django',
+    'Spring Boot',
+    'Express.js',
+    'Bootstrap',
+    'Tailwind CSS',
+    'TensorFlow',
+    'PyTorch',
+    'jQuery'
+  ],
+  'DevOps / Infraestructura': [
+    'Docker',
+    'Kubernetes',
+    'Jenkins',
+    'GitHub Actions',
+    'GitLab CI/CD',
+    'Ansible',
+    'Terraform',
+    'Nginx',
+    'Apache',
+    'Linux Server'
+  ],
+  'Cloud Computing': [
+    'AWS',
+    'Microsoft Azure',
+    'Google Cloud Platform',
+    'Firebase',
+    'DigitalOcean',
+    'Heroku',
+    'Vercel',
+    'Netlify'
+  ],
+  'Seguridad Informática': [
+    'OWASP',
+    'Pentesting',
+    'Ethical Hacking',
+    'Burp Suite',
+    'Wireshark',
+    'Kali Linux',
+    'Firewall',
+    'Criptografía',
+    'Autenticación JWT',
+    'Ciberseguridad Web'
+  ],
+  'Inteligencia Artificial / Data Science': [
+    'Python',
+    'Pandas',
+    'NumPy',
+    'Scikit-learn',
+    'TensorFlow',
+    'PyTorch',
+    'Power BI',
+    'Tableau',
+    'Machine Learning',
+    'Deep Learning',
+    'Data Mining',
+    'Análisis de Datos'
+  ],
+  'Testing / QA': [
+    'Postman',
+    'Selenium',
+    'Cypress',
+    'JUnit',
+    'PyTest',
+    'Testing Manual',
+    'Testing Automatizado',
+    'Pruebas Unitarias',
+    'Pruebas Funcionales',
+    'QA Analyst'
+  ],
+  'Herramientas de Diseño': [
+    'Figma',
+    'Adobe XD',
+    'Photoshop',
+    'Illustrator',
+    'Canva',
+    'UI Design',
+    'UX Design',
+    'Wireframing',
+    'Prototyping',
+    'Diseño Responsive'
+  ]
+};
+
+const habilidadesBlandas = [
+  'Trabajo en equipo',
+  'Liderazgo',
+  'Comunicación',
+  'Resolución de problemas',
+  'Adaptabilidad',
+  'Pensamiento crítico',
+  'Gestión del tiempo',
+  'Creatividad',
+  'Inteligencia emocional',
+  'Proactividad'
+];
 
 export default function AnadirHabilidades() {
   const navigate = useNavigate();
@@ -59,6 +232,7 @@ export default function AnadirHabilidades() {
       return [];
     }
   });
+
   const [loading, setLoading] = useState(skills.length === 0);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -66,16 +240,20 @@ export default function AnadirHabilidades() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [sortBy, setSortBy] = useState('más recientes');
 
   const [tipoHabilidad, setTipoHabilidad] = useState<'Dura' | 'Blanda'>('Dura');
-  const [nombreDura, setNombreDura] = useState('');
   const [categoria, setCategoria] = useState('');
-  const [categoriaOtro, setCategoriaOtro] = useState('');
-  const [nivel, setNivel] = useState(80);
+  const [nombreDura, setNombreDura] = useState('');
   const [nombreBlanda, setNombreBlanda] = useState('');
-  const [nombreBlandaOtro, setNombreBlandaOtro] = useState('');
+  const [nivel, setNivel] = useState(80);
   const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    setNombreDura('');
+  }, [categoria]);
 
   const authHeaders = useMemo(
     () => ({
@@ -89,7 +267,14 @@ export default function AnadirHabilidades() {
   const normalizeSkill = (item: any): Skill => {
     const id = String(item?.id_habilidad ?? '');
     const nombre = String(item?.nombre ?? '');
-    const catCache = JSON.parse(localStorage.getItem('skillCategories') || '{}');
+
+    let catCache: Record<string, string> = {};
+    try {
+      catCache = JSON.parse(localStorage.getItem('skillCategories') || '{}');
+    } catch {
+      catCache = {};
+    }
+
     const locallySaved = catCache[id] || catCache[nombre.toLowerCase()];
 
     return {
@@ -111,12 +296,44 @@ export default function AnadirHabilidades() {
     }
 
     if (data && typeof data === 'object') {
-      const tecnica = Array.isArray(data.tecnica) ? data.tecnica : [];
-      const blanda = Array.isArray(data.blanda) ? data.blanda : [];
-      return [...tecnica, ...blanda].map(normalizeSkill);
+      const result: Skill[] = [];
+
+      Object.entries(data).forEach(([tipo, categorias]) => {
+        if (categorias && typeof categorias === 'object') {
+          Object.entries(categorias as Record<string, any[]>).forEach(
+            ([categoria, habilidades]) => {
+              if (Array.isArray(habilidades)) {
+                habilidades.forEach((habilidad) => {
+                  result.push(
+                    normalizeSkill({
+                      ...habilidad,
+                      tipo,
+                      categoria
+                    })
+                  );
+                });
+              }
+            }
+          );
+        }
+      });
+
+      return result;
     }
 
     return [];
+  };
+
+  const saveSkillCategoriesInCache = (skillsToSave: Skill[]) => {
+    const catCache = skillsToSave.reduce((acc: Record<string, string>, skill) => {
+      if (skill.categoria) {
+        acc[skill.id_habilidad] = skill.categoria;
+        acc[skill.nombre.toLowerCase()] = skill.categoria;
+      }
+      return acc;
+    }, {});
+
+    localStorage.setItem('skillCategories', JSON.stringify(catCache));
   };
 
   const fetchSkills = async () => {
@@ -146,6 +363,7 @@ export default function AnadirHabilidades() {
       const finalSkills = flattenGroupedSkills(data);
       setSkills(finalSkills);
       localStorage.setItem('cachedSkills', JSON.stringify(finalSkills));
+      saveSkillCategoriesInCache(finalSkills);
     } catch (err: any) {
       console.error('Error fetching skills:', err);
       setError(err?.message || 'Ocurrió un error al cargar las habilidades.');
@@ -160,12 +378,10 @@ export default function AnadirHabilidades() {
 
   const resetForm = () => {
     setTipoHabilidad('Dura');
-    setNombreDura('');
     setCategoria('');
-    setCategoriaOtro('');
+    setNombreDura('');
     setNivel(80);
     setNombreBlanda('');
-    setNombreBlandaOtro('');
     setVisible(true);
   };
 
@@ -177,18 +393,15 @@ export default function AnadirHabilidades() {
       return;
     }
 
-    const finalNombreBlanda = nombreBlanda === 'Otro' ? nombreBlandaOtro.trim() : nombreBlanda;
-    const finalCategoria = categoria === 'Otro' ? categoriaOtro.trim() : categoria;
-
     const nombre =
-      tipoHabilidad === 'Dura' ? nombreDura.trim() : finalNombreBlanda.trim();
+      tipoHabilidad === 'Dura' ? nombreDura.trim() : nombreBlanda.trim();
 
     if (!nombre) {
       alert('Completa el nombre de la habilidad.');
       return;
     }
 
-    if (tipoHabilidad === 'Dura' && !finalCategoria.trim()) {
+    if (tipoHabilidad === 'Dura' && !categoria.trim()) {
       alert('Selecciona una categoría.');
       return;
     }
@@ -198,7 +411,7 @@ export default function AnadirHabilidades() {
       tipo: tipoHabilidad === 'Dura' ? 'tecnica' : 'blanda',
       nivel: tipoHabilidad === 'Dura' ? nivel : 100,
       visible,
-      categoria: tipoHabilidad === 'Dura' ? finalCategoria : null
+      categoria: tipoHabilidad === 'Dura' ? categoria : 'Habilidades Blandas'
     };
 
     setSaving(true);
@@ -219,18 +432,17 @@ export default function AnadirHabilidades() {
 
       const savedSkill = normalizeSkill(data?.habilidad ?? data);
 
-      // categoria no se guarda en tu backend actual, así que la mantenemos en localStorage
       if (tipoHabilidad === 'Dura') {
-        savedSkill.categoria = finalCategoria;
-        const catCache = JSON.parse(localStorage.getItem('skillCategories') || '{}');
-        catCache[savedSkill.id_habilidad] = finalCategoria;
-        catCache[savedSkill.nombre.toLowerCase()] = finalCategoria;
-        localStorage.setItem('skillCategories', JSON.stringify(catCache));
+        savedSkill.categoria = categoria;
       } else {
         savedSkill.categoria = 'Habilidades Blandas';
       }
 
-      setSkills((prev) => [savedSkill, ...prev]);
+      const updatedSkills = [savedSkill, ...skills];
+      setSkills(updatedSkills);
+      localStorage.setItem('cachedSkills', JSON.stringify(updatedSkills));
+      saveSkillCategoriesInCache(updatedSkills);
+
       setIsModalOpen(false);
       setIsSuccessModalOpen(true);
       resetForm();
@@ -243,19 +455,21 @@ export default function AnadirHabilidades() {
     }
   };
 
-  const handleDelete = async (id_habilidad: string) => {
-    if (!token) {
-      navigate('/signin');
+  const confirmDelete = (id_habilidad: string) => {
+    setShowDeleteConfirm(id_habilidad);
+  };
+
+  const executeDelete = async () => {
+    if (!showDeleteConfirm || !token) {
+      if (!token) navigate('/signin');
       return;
     }
 
-    if (!window.confirm('¿Eliminar habilidad?')) return;
-
-    setDeletingId(id_habilidad);
+    setDeletingId(showDeleteConfirm);
     setError('');
 
     try {
-      const response = await fetch(`${API_BASE}/api/habilidad/${id_habilidad}`, {
+      const response = await fetch(`${API_BASE}/api/habilidad/${showDeleteConfirm}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -270,10 +484,14 @@ export default function AnadirHabilidades() {
       }
 
       setSkills((prev) => {
-        const newSkills = prev.filter((s) => s.id_habilidad !== id_habilidad);
+        const newSkills = prev.filter((s) => s.id_habilidad !== showDeleteConfirm);
         localStorage.setItem('cachedSkills', JSON.stringify(newSkills));
+        saveSkillCategoriesInCache(newSkills);
         return newSkills;
       });
+
+      setShowDeleteConfirm(null);
+      setShowDeleteSuccess(true);
     } catch (err: any) {
       console.error('Error deleting skill:', err);
       setError(err?.message || 'Ocurrió un error al eliminar la habilidad.');
@@ -304,84 +522,104 @@ export default function AnadirHabilidades() {
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] flex flex-col font-inter text-black">
-      <header className="bg-[#2E3A4D] text-white py-[6px] px-8 flex justify-between items-center shadow-sm z-10 shrink-0">
-        <div className="flex items-center gap-6">
-          <div className="w-[34px] h-[42px]" />
-          <h1 className="text-[32px] font-bold">Sistema de Portafolios Digitales</h1>
+      <header className="flex flex-col md:flex-row items-center justify-between border-b border-app-border bg-app-header px-4 md:px-6 py-4 text-white shrink-0 gap-4 md:gap-0">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-md border border-white/20 bg-white/10 text-sm font-bold shrink-0">
+            TG
+          </div>
+          <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-center sm:text-left">
+            Sistema de Portafolios Digitales
+          </h1>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+          <div className="text-center sm:text-right hidden sm:block">
+            <p className="text-sm font-medium">{getShortName(usuario)}</p>
+            <p className="text-xs text-white/70">{usuario.email}</p>
+          </div>
+          <button
+            onClick={() => {
+              localStorage.removeItem('token');
+              localStorage.removeItem('usuario');
+              localStorage.removeItem('portafolio');
+              navigate('/login');
+            }}
+            className="flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium hover:bg-white/20 w-full sm:w-auto"
+          >
+            <LogOut size={18} />
+            Cerrar Sesión
+          </button>
         </div>
       </header>
 
-      <nav className="bg-[#1D4A76] text-white py-[14px] px-8 flex items-center border-t border-white/5 shrink-0">
-        <div className="w-64" />
-        <div className="flex-1 flex justify-center gap-20 text-[18px] font-semibold">
-          <span onClick={() => navigate('/')} className="cursor-pointer opacity-80 hover:opacity-100 transition">
-            Inicio
-          </span>
-          <span onClick={() => navigate('/perfil')} className="cursor-pointer opacity-80 hover:opacity-100 transition">
-            Mi perfil
-          </span>
-          <span onClick={() => navigate('/mis-proyectos')} className="cursor-pointer hover:opacity-100 transition">
-            Mis proyectos
-          </span>
+      <nav className="flex items-center justify-center border-b border-app-border bg-app-topbar px-4 md:px-6 py-3 text-sm text-white shrink-0 overflow-x-auto">
+        <div className="flex gap-6 md:gap-8 font-medium min-w-max">
+          <span onClick={() => navigate('/')} className="cursor-pointer hover:text-white/80 transition">Inicio</span>
+          <span onClick={() => navigate('/perfil')} className="cursor-pointer hover:text-white/80 transition">Mi perfil</span>
+          <span onClick={() => navigate('/mis-proyectos')} className="cursor-pointer hover:text-white/80 transition">Mis proyectos</span>
         </div>
       </nav>
 
-      <div className="bg-[#2E3A4D] text-gray-200 py-2.5 px-8 text-[14px] flex gap-3 shadow-md border-b border-black/10 shrink-0">
-        <span className="hover:underline cursor-pointer">Navegación</span> &gt;
-        <span className="hover:underline cursor-pointer" onClick={() => navigate('/perfil')}>
-          Mi perfil
-        </span> &gt;
-        <span className="font-semibold text-white uppercase">Habilidades</span>
-      </div>
+      <nav className="border-b border-app-border bg-app-surface px-4 md:px-6 py-3 shrink-0 overflow-x-auto">
+        <div className="flex items-center gap-2 text-xs md:text-sm text-app-muted min-w-max">
+          <span onClick={() => navigate('/')} className="cursor-pointer hover:text-app-text">Inicio</span>
+          <span>&gt;</span>
+          <span className="text-app-text">Navegación</span>
+          <span>&gt;</span>
+          <span onClick={() => navigate('/perfil')} className="cursor-pointer hover:text-app-text">Mi perfil</span>
+          <span>&gt;</span>
+          <span className="text-app-text font-semibold">Habilidades</span>
+        </div>
+      </nav>
 
-      <div className="flex flex-1 overflow-hidden">
-        <aside className="w-[280px] bg-[#1D4A76] text-white flex flex-col items-center py-12 shadow-inner shrink-0">
-          <div className="w-32 h-32 rounded-full border-2 border-white/20 bg-white/5 mb-6 flex items-center justify-center">
-            <div className="w-28 h-28 rounded-full bg-white/10" />
+      <div className="flex flex-col md:flex-row flex-1">
+        <aside className="w-full md:w-[280px] bg-[#1D4A76] text-white flex flex-col items-center py-8 md:py-12 shadow-inner shrink-0">
+          <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-white/20 bg-white/5 mb-4 md:mb-6 flex items-center justify-center shrink-0">
+            <div className="w-20 h-20 md:w-28 md:h-28 rounded-full bg-white/10" />
           </div>
 
-          <h2 className="text-[20px] font-bold text-center px-4">
+          <h2 className="text-[18px] md:text-[20px] font-bold text-center px-4">
             {getFullName(usuario)}
           </h2>
-          <p className="text-[15px] text-blue-100 font-medium mb-12 opacity-80">
+          <p className="text-[14px] md:text-[15px] text-blue-100 font-medium mb-6 md:mb-12 opacity-80 text-center px-2">
             {usuario.profesion || 'Ingeniera de Software'}
           </p>
 
           <div className="w-full">
             <button
               onClick={() => navigate('/')}
-              className="flex items-center w-full pl-[50px] py-3 hover:bg-white/10 transition"
+              className="flex items-center w-full pl-8 md:pl-[50px] py-3 hover:bg-white/10 transition"
             >
-              <Home className="w-7 h-7 mr-4" /> Inicio
+              <Home className="w-6 h-6 md:w-7 md:h-7 mr-4" /> Inicio
             </button>
-            <button className="flex items-center w-full pl-[50px] py-3 hover:bg-white/10 transition">
-              <Settings className="w-7 h-7 mr-4" /> Ajustes
+            <button className="flex items-center w-full pl-8 md:pl-[50px] py-3 hover:bg-white/10 transition">
+              <Settings className="w-6 h-6 md:w-7 md:h-7 mr-4" /> Ajustes
             </button>
           </div>
         </aside>
 
-        <main className="flex-1 p-8 px-12 overflow-y-auto">
-          <div className="flex justify-between items-start mb-6 text-black">
-            <div>
-              <h2 className="text-[26px] font-bold text-gray-900 mb-2">
+        <main className="flex-1 p-4 md:p-8 md:px-12 w-full">
+          <div className="flex flex-col md:flex-row justify-between items-center md:items-start mb-6 text-black gap-4 md:gap-0">
+            <div className="text-center md:text-left">
+              <h2 className="text-[22px] md:text-[26px] font-bold text-gray-900 mb-2">
                 {getFullName(usuario)}
               </h2>
-              <p className="text-gray-500 text-[15px] max-w-3xl font-medium">
+              <p className="text-gray-500 text-[14px] md:text-[15px] max-w-3xl font-medium">
                 {usuario.biografia || 'Apasionada por las creaciones de aplicaciones web y la elaboración de experiencias de usuario excepcionales, con experiencia en trabajo equipo.'}
               </p>
             </div>
 
             <button
               onClick={() => navigate('/perfil')}
-              className="bg-[#1F4E79] text-white px-6 py-2 rounded-full text-[14px] font-bold shadow-md hover:bg-opacity-90 active:scale-95 transition"
+              className="bg-[#1F4E79] text-white px-6 py-2 rounded-full text-[14px] font-bold shadow-md hover:bg-opacity-90 active:scale-95 transition whitespace-nowrap w-full md:w-auto"
             >
               Editar Perfil
             </button>
           </div>
 
-          <div className="flex gap-8 mb-6 text-[14px] text-gray-500 font-medium flex-wrap">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 mb-6 text-[13px] md:text-[14px] text-gray-500 font-medium justify-center md:justify-start">
             <span className="flex items-center gap-2">
-              <Mail size={18} /> {usuario.email}
+              <Mail size={18} /> <span className="break-all">{usuario.email}</span>
             </span>
             <span className="flex items-center gap-2">
               <MapPin size={18} /> {usuario.ciudad || 'Cochabamba'}
@@ -391,37 +629,37 @@ export default function AnadirHabilidades() {
             </span>
           </div>
 
-          <div className="bg-white rounded-full px-10 py-[10px] flex gap-24 items-center text-[15px] shadow-sm mb-6 border border-gray-100">
+          <div className="bg-white rounded-[20px] md:rounded-full px-4 sm:px-10 py-3 sm:py-[10px] flex flex-col sm:flex-row justify-between sm:justify-start sm:gap-24 items-center text-[14px] md:text-[15px] shadow-sm mb-6 md:mb-8 border border-gray-100 gap-4">
             <button
               onClick={() => navigate('/mis-proyectos')}
-              className="text-gray-500 font-semibold hover:text-gray-800 transition"
+              className="text-gray-500 font-semibold hover:text-gray-800 transition w-full sm:w-auto"
             >
               Proyectos
             </button>
-            <button className="text-blue-900 font-bold border-b-2 border-blue-900">
+            <button className="text-blue-900 font-bold border-b-2 border-blue-900 w-full sm:w-auto">
               Habilidades
             </button>
             <button
               onClick={() => navigate('/enlaces')}
-              className="text-gray-500 font-semibold hover:text-gray-800 transition"
+              className="text-gray-500 font-semibold hover:text-gray-800 transition w-full sm:w-auto"
             >
               Enlaces
             </button>
           </div>
 
-          <div className="flex justify-end gap-5 mb-5 items-center">
+          <div className="flex flex-col sm:flex-row justify-between md:justify-end gap-4 md:gap-5 mb-5 items-stretch sm:items-center">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="bg-[#1F4E79] text-white px-5 py-2 rounded-[14px] font-bold shadow-md transition hover:bg-opacity-90 active:scale-95"
+              className="bg-[#1F4E79] text-white px-6 py-2 rounded-full text-[14px] font-bold shadow-md hover:bg-opacity-90 active:scale-95 transition w-full sm:w-auto"
             >
               + Añadir Habilidad
             </button>
 
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-white border rounded-full pl-4 pr-9 py-2 text-[14px] text-gray-500 font-semibold cursor-pointer appearance-none outline-none"
+                className="bg-white border rounded-full pl-4 pr-9 py-2 text-[14px] text-gray-500 font-semibold cursor-pointer appearance-none outline-none w-full sm:w-auto"
               >
                 <option>más recientes</option>
                 <option>más antiguas</option>
@@ -463,7 +701,7 @@ export default function AnadirHabilidades() {
                         )}
 
                         <button
-                          onClick={() => handleDelete(skill.id_habilidad)}
+                          onClick={() => confirmDelete(skill.id_habilidad)}
                           disabled={deletingId === skill.id_habilidad}
                           className="absolute right-0 top-0 text-red-200 hover:text-red-500 opacity-0 group-hover:opacity-100 transition disabled:opacity-100"
                           title="Eliminar habilidad"
@@ -500,11 +738,19 @@ export default function AnadirHabilidades() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
-          <div className="bg-white rounded-[24px] shadow-2xl w-full max-w-[500px] p-10 m-4 relative animate-in fade-in zoom-in duration-200 overflow-y-auto max-h-[95vh]">
-            <h2 className="text-[22px] font-bold text-gray-900 mb-8 font-inter uppercase tracking-tight">
-              Añadir Habilidad
-            </h2>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 overflow-y-auto">
+          <div className="bg-white rounded-[24px] shadow-2xl w-full max-w-[500px] p-6 md:p-10 pb-20 md:pb-24 relative animate-in fade-in zoom-in duration-200 mt-10 mb-auto md:my-auto">
+            <div className="flex justify-between items-center mb-6 md:mb-8 font-inter uppercase tracking-tight">
+              <h2 className="text-[20px] md:text-[22px] font-bold text-gray-900">
+                Añadir Habilidad
+              </h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-400 hover:text-gray-700 transition"
+              >
+                ✕
+              </button>
+            </div>
 
             <form onSubmit={handleSave} className="flex flex-col gap-6">
               <div>
@@ -514,7 +760,12 @@ export default function AnadirHabilidades() {
                 <div className="relative">
                   <select
                     value={tipoHabilidad}
-                    onChange={(e) => setTipoHabilidad(e.target.value as 'Dura' | 'Blanda')}
+                    onChange={(e) => {
+                      setTipoHabilidad(e.target.value as 'Dura' | 'Blanda');
+                      setCategoria('');
+                      setNombreDura('');
+                      setNombreBlanda('');
+                    }}
                     className="w-full px-4 py-3 bg-white text-black border rounded-[14px] outline-none cursor-pointer appearance-none transition-colors"
                   >
                     <option value="Dura">Habilidad dura</option>
@@ -524,109 +775,89 @@ export default function AnadirHabilidades() {
                 </div>
               </div>
 
+              {tipoHabilidad === 'Dura' && (
+                <div>
+                  <label className="block text-[14px] font-bold text-gray-700 mb-2">
+                    Categoría
+                  </label>
+                  <div className="relative">
+                    <select
+                      required
+                      value={categoria}
+                      onChange={(e) => setCategoria(e.target.value)}
+                      className="w-full px-4 py-3 bg-white text-black border rounded-[14px] outline-none appearance-none cursor-pointer"
+                    >
+                      <option value="">Selecciona categoría</option>
+                      {Object.keys(habilidadesPorCategoria).map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-[14px] font-bold text-gray-700 mb-2">
-                  Nombre de la habilidad {tipoHabilidad === 'Dura' ? 'dura' : ''}
+                  Nombre de la habilidad {tipoHabilidad === 'Dura' ? 'dura' : 'blanda'}
                 </label>
 
                 {tipoHabilidad === 'Dura' ? (
-                  <input
-                    required
-                    value={nombreDura}
-                    onChange={(e) => setNombreDura(e.target.value)}
-                    placeholder="Ej: React, Python"
-                    className="w-full px-4 py-3 bg-white text-black border rounded-[14px] outline-none transition-all"
-                  />
+                  <div className="relative">
+                    <select
+                      required
+                      value={nombreDura}
+                      onChange={(e) => setNombreDura(e.target.value)}
+                      disabled={!categoria}
+                      className="w-full px-4 py-3 bg-white text-black border rounded-[14px] outline-none appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <option value="">Selecciona una habilidad</option>
+                      {categoria &&
+                        habilidadesPorCategoria[categoria]?.map((hab) => (
+                          <option key={hab} value={hab}>
+                            {hab}
+                          </option>
+                        ))}
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  </div>
                 ) : (
-                  <>
-                    <div className="relative">
-                      <select
-                        value={nombreBlanda}
-                        onChange={(e) => setNombreBlanda(e.target.value)}
-                        className="w-full px-4 py-3 bg-white text-black border rounded-[14px] outline-none appearance-none cursor-pointer"
-                      >
-                        <option value="">Selecciona una opción</option>
-                        <option>Trabajo en equipo</option>
-                        <option>Liderazgo</option>
-                        <option>Comunicación</option>
-                        <option>Resolución de problemas</option>
-                        <option>Adaptabilidad</option>
-                        <option value="Otro">Otro</option>
-                      </select>
-                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                    </div>
-                    {nombreBlanda === 'Otro' && (
-                      <div className="mt-4">
-                        <label className="block text-[14px] font-bold text-gray-700 mb-2">
-                          Escribe la habilidad blanda
-                        </label>
-                        <input
-                          required
-                          value={nombreBlandaOtro}
-                          onChange={(e) => setNombreBlandaOtro(e.target.value)}
-                          placeholder="Ej. Creatividad..."
-                          className="w-full px-4 py-3 bg-white text-black border rounded-[14px] outline-none transition-all"
-                        />
-                      </div>
-                    )}
-                  </>
+                  <div className="relative">
+                    <select
+                      required
+                      value={nombreBlanda}
+                      onChange={(e) => setNombreBlanda(e.target.value)}
+                      className="w-full px-4 py-3 bg-white text-black border rounded-[14px] outline-none appearance-none cursor-pointer"
+                    >
+                      <option value="">Selecciona una opción</option>
+                      {habilidadesBlandas.map((habilidad) => (
+                        <option key={habilidad} value={habilidad}>
+                          {habilidad}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  </div>
                 )}
               </div>
 
               {tipoHabilidad === 'Dura' && (
-                <>
-                  <div>
-                    <label className="block text-[14px] font-bold text-gray-700 mb-2">
-                      Categoría
-                    </label>
-                    <div className="relative">
-                      <select
-                        value={categoria}
-                        onChange={(e) => setCategoria(e.target.value)}
-                        className="w-full px-4 py-3 bg-white text-black border rounded-[14px] outline-none appearance-none cursor-pointer"
-                      >
-                        <option value="">Selecciona categoría</option>
-                        <option>Lenguajes de programación</option>
-                        <option>Base de Datos</option>
-                        <option>Frameworks y Librerías</option>
-                        <option>DevOps</option>
-                        <option>Testing</option>
-                        <option>Diseño</option>
-                        <option value="Otro">Otro</option>
-                      </select>
-                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                    </div>
-                    {categoria === 'Otro' && (
-                      <div className="mt-4">
-                        <label className="block text-[14px] font-bold text-gray-700 mb-2">
-                          Escribe la nueva categoría
-                        </label>
-                        <input
-                          required
-                          value={categoriaOtro}
-                          onChange={(e) => setCategoriaOtro(e.target.value)}
-                          placeholder="Ej. Metodologías Ágiles..."
-                          className="w-full px-4 py-3 bg-white text-black border rounded-[14px] outline-none transition-all"
-                        />
-                      </div>
-                    )}
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <label className="text-[14px] font-bold text-gray-700">Nivel</label>
+                    <span className="text-[14px] font-bold text-gray-700">{nivel}%</span>
                   </div>
-
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <label className="text-[14px] font-bold text-gray-700">Nivel</label>
-                      <span className="text-[14px] font-bold text-gray-700">{nivel}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      value={nivel}
-                      onChange={(e) => setNivel(parseInt(e.target.value))}
-                      className="w-full h-2 bg-blue-50 rounded-full cursor-pointer accent-[#1F4E79]"
-                    />
-                  </div>
-                </>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={nivel}
+                    onChange={(e) => setNivel(parseInt(e.target.value))}
+                    className="w-full h-2 bg-blue-50 rounded-full cursor-pointer accent-[#1F4E79]"
+                  />
+                </div>
               )}
 
               <div className="flex items-center justify-between mt-2">
@@ -651,19 +882,19 @@ export default function AnadirHabilidades() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-4 mt-2">
+              <div className="flex flex-col sm:flex-row justify-end gap-3 mt-4">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   disabled={saving}
-                  className="px-6 py-2 bg-[#E5E7EB] text-gray-600 font-bold rounded-[14px] hover:bg-gray-300 transition"
+                  className="px-4 md:px-6 py-2 bg-[#E5E7EB] text-gray-600 font-bold rounded-[14px] hover:bg-gray-300 transition w-full sm:w-auto"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2 bg-[#1F4E79] text-white font-bold rounded-[14px] shadow-lg active:scale-95 transition hover:opacity-90 disabled:opacity-60"
+                  className="px-4 md:px-6 py-2 bg-[#1F4E79] text-white font-bold rounded-[14px] shadow-lg active:scale-95 transition hover:opacity-90 disabled:opacity-60 w-full sm:w-auto"
                 >
                   {saving ? 'Guardando...' : 'Guardar Habilidad'}
                 </button>
@@ -674,10 +905,10 @@ export default function AnadirHabilidades() {
       )}
 
       {isSuccessModalOpen && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
-          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-[420px] p-12 text-center animate-in fade-in zoom-in duration-300">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8">
-              <div className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center text-white">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 overflow-y-auto">
+          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-[420px] p-8 md:p-12 text-center animate-in fade-in zoom-in duration-300 my-auto">
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8">
+              <div className="w-10 h-10 md:w-14 md:h-14 bg-green-500 rounded-full flex items-center justify-center text-white">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"></path>
                 </svg>
@@ -696,6 +927,41 @@ export default function AnadirHabilidades() {
             >
               Aceptar
             </button>
+          </div>
+        </div>
+      )}
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 overflow-y-auto">
+          <div className="bg-white rounded-[24px] shadow-2xl p-8 max-w-sm w-full text-center my-auto animate-in fade-in zoom-in duration-200">
+            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-red-600 mb-6 border-[8px] border-red-100">
+              <svg className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+            <h3 className="text-[20px] font-bold text-gray-900 mb-2 font-inter uppercase tracking-tight">Eliminar Habilidad</h3>
+            <p className="text-gray-500 mb-8 text-[15px] font-medium">¿Estás seguro que quieres eliminar la habilidad?</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button disabled={deletingId !== null} onClick={executeDelete} className="w-full sm:w-auto px-6 py-2.5 bg-[#1F4E79] text-white font-bold rounded-xl shadow-md hover:bg-opacity-90 active:scale-95 transition disabled:opacity-60">Aceptar</button>
+              <button disabled={deletingId !== null} onClick={() => setShowDeleteConfirm(null)} className="w-full sm:w-auto px-6 py-2.5 bg-[#E5E7EB] hover:bg-gray-300 text-gray-700 font-bold rounded-xl transition disabled:opacity-60">Denegar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteSuccess && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 overflow-y-auto">
+          <div className="bg-white rounded-[24px] shadow-2xl p-8 max-w-sm w-full text-center my-auto animate-in fade-in zoom-in duration-200">
+            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-red-600 mb-6 border-[8px] border-red-100">
+              <svg className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+            <h3 className="text-[20px] font-bold text-gray-900 mb-2 font-inter uppercase tracking-tight">Habilidad Eliminada</h3>
+            <p className="text-gray-500 mb-8 text-[15px] font-medium">Tu habilidad se eliminó con éxito</p>
+            <div className="flex justify-center">
+              <button onClick={() => setShowDeleteSuccess(false)} className="px-10 py-2.5 bg-[#1748DF] hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition">Aceptar</button>
+            </div>
           </div>
         </div>
       )}

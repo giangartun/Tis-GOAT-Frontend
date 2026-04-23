@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Outlet, useNavigate, Link } from "react-router-dom";
+import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { Home, Settings, UserRound, LogOut } from "lucide-react";
 
 interface Usuario {
@@ -10,8 +10,13 @@ interface Usuario {
 
 function Layout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loadingLogout, setLoadingLogout] = useState(false);
+
+  let breadcrumbText = "";
+  if (location.pathname.startsWith('/perfil')) breadcrumbText = "Mi perfil";
+  else if (location.pathname.startsWith('/mis-proyectos')) breadcrumbText = "Mis proyectos";
 
   useEffect(() => {
     const storedUser = localStorage.getItem('usuario');
@@ -125,6 +130,12 @@ function Layout() {
           <Link to="/" className="hover:text-app-text">Inicio</Link>
           <span>&gt;</span>
           <span className="text-app-text">Navegación</span>
+          {breadcrumbText && (
+            <>
+              <span>&gt;</span>
+              <span className="text-app-text font-semibold">{breadcrumbText}</span>
+            </>
+          )}
         </div>
       </nav>
 

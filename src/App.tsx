@@ -24,7 +24,7 @@ function App() {
           <Route path="/mis-proyectos" element={<MisProyectosPage />} />
           <Route path="/perfil" element={<PerfilUsuario />} />
         </Route>
-
+        
         {/* Rutas extra sin layout */}
         <Route path="/habilidades" element={<AnadirHabilidades />} />
         <Route path="/enlaces" element={<AnadirEnlaces />} />

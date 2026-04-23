@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Mail,
   MapPin,
@@ -37,7 +37,7 @@ interface Usuario {
   id_portafolio?: number;
 }
 
-const getFullName = (u: Usuario) => 
+const getFullName = (u: Usuario) =>
   [u.nombre, u.apellido_paterno, u.apellido_materno].filter(Boolean).join(' ');
 
 interface RedProfesional {
@@ -144,7 +144,14 @@ const PerfilUsuario = () => {
   const normalizeSkill = (item: any): Skill => {
     const id = String(item?.id_habilidad ?? '');
     const nombre = String(item?.nombre ?? '');
-    const catCache = JSON.parse(localStorage.getItem('skillCategories') || '{}');
+
+    let catCache: Record<string, string> = {};
+    try {
+      catCache = JSON.parse(localStorage.getItem('skillCategories') || '{}');
+    } catch {
+      catCache = {};
+    }
+
     const locallySaved = catCache[id] || catCache[nombre.toLowerCase()];
 
     return {
@@ -166,12 +173,44 @@ const PerfilUsuario = () => {
     }
 
     if (data && typeof data === 'object') {
-      const tecnica = Array.isArray(data.tecnica) ? data.tecnica : [];
-      const blanda = Array.isArray(data.blanda) ? data.blanda : [];
-      return [...tecnica, ...blanda].map(normalizeSkill);
+      const result: Skill[] = [];
+
+      Object.entries(data).forEach(([tipo, categorias]) => {
+        if (categorias && typeof categorias === 'object') {
+          Object.entries(categorias as Record<string, any[]>).forEach(
+            ([categoria, habilidades]) => {
+              if (Array.isArray(habilidades)) {
+                habilidades.forEach((habilidad) => {
+                  result.push(
+                    normalizeSkill({
+                      ...habilidad,
+                      tipo,
+                      categoria
+                    })
+                  );
+                });
+              }
+            }
+          );
+        }
+      });
+
+      return result;
     }
 
     return [];
+  };
+
+  const saveSkillCategoriesInCache = (skillsToSave: Skill[]) => {
+    const catCache = skillsToSave.reduce((acc: Record<string, string>, skill) => {
+      if (skill.categoria) {
+        acc[skill.id_habilidad] = skill.categoria;
+        acc[skill.nombre.toLowerCase()] = skill.categoria;
+      }
+      return acc;
+    }, {});
+
+    localStorage.setItem('skillCategories', JSON.stringify(catCache));
   };
 
   const getNetworkLabel = (nombreRed: string) => {
@@ -219,6 +258,7 @@ const PerfilUsuario = () => {
       const finalSkills = flattenGroupedSkills(data);
       setSkills(finalSkills);
       localStorage.setItem('cachedSkills', JSON.stringify(finalSkills));
+      saveSkillCategoriesInCache(finalSkills);
     } catch (err: any) {
       console.error('Error fetching skills:', err);
       setSkillsError(err?.message || 'Error al cargar habilidades.');
@@ -300,43 +340,25 @@ const PerfilUsuario = () => {
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] flex flex-col font-inter">
-      <header className="bg-[#2E3A4D] text-white py-[10px] px-12 flex justify-between items-center shadow-sm z-30 shrink-0">
-        <div className="flex items-center gap-6">
-          <div className="w-[34px] h-[44px] bg-transparent" />
-          <h1 className="text-[28px] font-bold tracking-tight">Sistema de Portafolios Digitales</h1>
-        </div>
-        <div className="flex items-center gap-12 font-semibold text-[16px]">
-          <Link to="/" className="hover:text-blue-300 transition">Inicio</Link>
-          <Link to="/perfil" className="hover:text-blue-300 transition underline underline-offset-4 font-bold">Mi perfil</Link>
-          <Link to="/mis-proyectos" className="hover:text-blue-300 transition">Mis proyectos</Link>
-        </div>
-      </header>
-
-      <div className="bg-[#2E3A4D] text-white/80 py-3 px-12 text-[13px] font-medium flex gap-3 z-30 border-t border-white/5 shadow-md">
-        <span>Navegación</span> <span>&gt;</span>
-        <span>Mi perfil</span> <span>&gt;</span>
-        <span className="font-bold text-white uppercase tracking-wider">Perfil</span>
-      </div>
-
-      <main className="flex-1 overflow-y-auto pt-12 pb-20">
+      <main className="flex-1 overflow-y-auto pt-6 md:pt-12 pb-20 px-4 md:px-0">
         <div className="max-w-[1240px] mx-auto flex flex-col shadow-2xl rounded-[16px] overflow-hidden">
-          <div className="bg-[#1F4E79] text-white p-12 relative overflow-hidden shrink-0">
-            <div className="flex justify-between items-start relative z-10">
-              <div className="flex items-center gap-10">
-                <div className="w-32 h-32 rounded-full border-2 border-white/20 bg-white/5 flex items-center justify-center shadow-inner">
+          <div className="bg-[#1F4E79] text-white p-6 md:p-12 relative overflow-hidden shrink-0">
+            <div className="flex flex-col md:flex-row justify-between items-center md:items-start relative z-10 gap-6 md:gap-0">
+              <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 md:gap-10">
+                <div className="w-32 h-32 rounded-full mx-auto md:mx-0 border-2 border-white/20 bg-white/5 flex items-center justify-center shadow-inner shrink-0">
                   <div className="w-28 h-28 rounded-full bg-white/10" />
                 </div>
                 <div className="flex flex-col">
-                  <h2 className="text-[42px] font-bold mb-1 tracking-tight">
+                  <h2 className="text-[32px] md:text-[42px] font-bold mb-1 tracking-tight">
                     {getFullName(usuario)}
                   </h2>
-                  <p className="text-blue-200 text-[20px] font-medium opacity-90 mb-6 italic">
+                  <p className="text-blue-200 text-[18px] md:text-[20px] font-medium opacity-90 mb-6 italic">
                     {usuario.profesion || 'Ingeniera de Software'}
                   </p>
 
-                  <div className="flex flex-wrap gap-x-12 gap-y-4 text-[13px] font-medium">
+                  <div className="flex flex-wrap justify-center md:justify-start gap-x-6 md:gap-x-12 gap-y-4 text-[13px] font-medium">
                     <span className="flex items-center gap-2.5 opacity-80">
-                      <Mail size={16} /> {usuario.email}
+                      <Mail size={16} /> <span className="break-all">{usuario.email}</span>
                     </span>
                     <span className="flex items-center gap-2.5 opacity-80">
                       <MapPin size={16} /> {usuario.ciudad || 'Cochabamba'}, {usuario.pais || 'BO'}
@@ -350,18 +372,18 @@ const PerfilUsuario = () => {
 
               <button
                 onClick={() => navigate('/perfil')}
-                className="bg-white/10 hover:bg-white/25 text-white px-10 py-2.5 rounded-[14px] text-[14px] font-bold border border-white/20 transition-all shadow-lg active:scale-95"
+                className="bg-white/10 hover:bg-white/25 text-white px-10 py-2.5 rounded-[14px] text-[14px] font-bold border border-white/20 transition-all shadow-lg active:scale-95 whitespace-nowrap w-full md:w-auto mt-4 md:mt-0"
               >
                 Editar
               </button>
             </div>
           </div>
 
-          <div className="bg-white p-16 flex flex-col gap-16 border-t border-white/10">
+          <div className="bg-white p-6 md:p-16 flex flex-col gap-12 md:gap-16 border-t border-white/10">
             <section className="scroll-mt-24" id="sobre-mi">
-              <div className="flex justify-between items-start mb-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4 sm:gap-0">
                 <h3 className="text-[22px] font-extrabold text-gray-800">Sobre mi</h3>
-                <button className="bg-[#1F4E79] text-white px-6 py-1.5 rounded-lg text-[12px] font-bold shadow-md hover:opacity-90 transition-all">
+                <button className="bg-[#1F4E79] text-white px-6 py-1.5 rounded-lg text-[12px] font-bold shadow-md hover:opacity-90 transition-all w-full sm:w-auto">
                   Editar
                 </button>
               </div>
@@ -371,9 +393,9 @@ const PerfilUsuario = () => {
             </section>
 
             <section className="scroll-mt-24" id="experiencia">
-              <div className="flex justify-between items-center mb-8">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 sm:gap-0">
                 <h3 className="text-[22px] font-extrabold text-gray-800 uppercase tracking-tight">Experiencia</h3>
-                <button className="bg-[#1F4E79] text-white px-6 py-1.5 rounded-lg text-[12px] font-bold shadow-md hover:opacity-90 transition-all">
+                <button className="bg-[#1F4E79] text-white px-6 py-1.5 rounded-lg text-[12px] font-bold shadow-md hover:opacity-90 transition-all w-full sm:w-auto">
                   Editar
                 </button>
               </div>
@@ -381,7 +403,7 @@ const PerfilUsuario = () => {
                 {experiences.map((exp, idx) => (
                   <div
                     key={idx}
-                    className="w-[340px] rounded-[14px] border border-gray-100 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
+                    className="w-full sm:w-[340px] rounded-[14px] border border-gray-100 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
                   >
                     <h4 className="font-extrabold text-gray-800 text-[17px]">{exp.role}</h4>
                     <p className="text-[13px] font-bold text-gray-400 mt-1">{exp.period}</p>
@@ -392,11 +414,11 @@ const PerfilUsuario = () => {
             </section>
 
             <section className="scroll-mt-24" id="habilidades">
-              <div className="flex justify-between items-center mb-10">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4 sm:gap-0">
                 <h3 className="text-[22px] font-extrabold text-gray-800 uppercase tracking-tight">Habilidades</h3>
                 <button
                   onClick={() => navigate('/habilidades')}
-                  className="bg-[#1F4E79] text-white px-6 py-1.5 rounded-[14px] text-[12px] font-bold shadow-md hover:opacity-90 transition-all"
+                  className="bg-[#1F4E79] text-white px-6 py-1.5 rounded-[14px] text-[12px] font-bold shadow-md hover:opacity-90 transition-all w-full sm:w-auto"
                 >
                   Editar
                 </button>
@@ -417,7 +439,7 @@ const PerfilUsuario = () => {
                   No hay habilidades técnicas añadidas.
                 </div>
               ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
                   {Object.entries(groupedSkills).map(([category, catSkills]) => (
                     <div
                       key={category}
@@ -475,11 +497,11 @@ const PerfilUsuario = () => {
             </section>
 
             <section className="scroll-mt-24" id="enlaces">
-              <div className="flex justify-between items-center mb-8">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 sm:gap-0">
                 <h3 className="text-[22px] font-extrabold text-gray-800 uppercase tracking-tight">Enlaces</h3>
                 <button
                   onClick={() => navigate('/enlaces')}
-                  className="bg-[#1F4E79] text-white px-6 py-1.5 rounded-[14px] text-[12px] font-bold shadow-md hover:opacity-90 transition-all"
+                  className="bg-[#1F4E79] text-white px-6 py-1.5 rounded-[14px] text-[12px] font-bold shadow-md hover:opacity-90 transition-all w-full sm:w-auto"
                 >
                   Editar
                 </button>
@@ -521,16 +543,16 @@ const PerfilUsuario = () => {
             </section>
 
             <section className="scroll-mt-24" id="proyectos">
-              <div className="flex justify-between items-center mb-10">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4 sm:gap-0">
                 <h3 className="text-[22px] font-extrabold text-gray-800 uppercase tracking-tight">Proyectos</h3>
                 <button
                   onClick={() => navigate('/mis-proyectos')}
-                  className="bg-[#1F4E79] text-white px-6 py-1.5 rounded-[14px] text-[12px] font-bold shadow-md hover:opacity-90 transition-all"
+                  className="bg-[#1F4E79] text-white px-6 py-1.5 rounded-[14px] text-[12px] font-bold shadow-md hover:opacity-90 transition-all w-full sm:w-auto"
                 >
                   Editar
                 </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 {projects.map((proj, idx) => (
                   <article
                     key={idx}

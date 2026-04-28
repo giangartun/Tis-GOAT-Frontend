@@ -168,9 +168,14 @@ function Layout() {
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
             <Home size={22} />
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
+          {/* ── Engranaje: navega a configuración de privacidad ── */}
+          <Link
+            to="/privacidad"
+            className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 hover:bg-white/25 transition"
+            title="Configuración de privacidad"
+          >
             <Settings size={22} />
-          </div>
+          </Link>
         </aside>
 
         <section className="overflow-auto">

@@ -8,6 +8,7 @@ import { VerificarEmail } from "./Pages/VerificarEmail";
 import AnadirHabilidades from "./Pages/AnadirHabilidades";
 import AnadirEnlaces from "./Pages/AnadirEnlaces";
 import PerfilUsuario from "./Pages/perfilusuario";
+import PrivacidadPortafolio from "./Pages/PrivacidadPortafolio";
 
 function App() {
   return (
@@ -21,8 +22,9 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/mis-proyectos" element={<MisProyectosPage />} />
           <Route path="/perfil" element={<PerfilUsuario />} />
+          <Route path="/privacidad" element={<PrivacidadPortafolio />} />
         </Route>
-        
+
         {/* Rutas extra sin layout */}
         <Route path="/habilidades" element={<AnadirHabilidades />} />
         <Route path="/enlaces" element={<AnadirEnlaces />} />

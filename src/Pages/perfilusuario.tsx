@@ -1,615 +1,542 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useState, useEffect } from 'react';
+import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Mail,
-  MapPin,
-  GraduationCap,
-  Globe
-} from 'lucide-react';
+import { Mail, MapPin, GraduationCap, Globe, Trash2, ChevronDown, Plus, X, Home, Settings } from 'lucide-react';
 
-type SkillTypeApi = 'tecnica' | 'blanda';
+// ── Constants ────────────────────────────────────────────────────────────────
+const API = (import.meta as any)?.env?.VITE_API_URL?.replace(/\/$/, '') || 'http://127.0.0.1:8000';
 
-interface Skill {
-  id_habilidad: string;
-  nombre: string;
-  tipo: SkillTypeApi;
-  nivel: number;
-  visible: boolean;
-  categoria?: string | null;
-}
-
-interface Usuario {
-  id?: number | string;
-  id_usuario?: number | string;
-  nombre?: string;
-  apellido_paterno?: string;
-  apellido_materno?: string;
-  profesion?: string;
-  email?: string;
-  ciudad?: string;
-  pais?: string;
-  institucion?: string;
-  biografia?: string;
-  portafolio?: {
-    id?: number;
-  };
-  portafolio_id?: number;
-  id_portafolio?: number;
-}
-
-const getFullName = (u: Usuario) =>
-  [u.nombre, u.apellido_paterno, u.apellido_materno].filter(Boolean).join(' ');
-
-interface RedProfesional {
-  id_redes_prof: string;
-  id_usuario: string;
-  nombre_red: 'linkedin' | 'github' | 'twitter' | 'behance' | 'otro';
-  url_red: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-const API_BASE =
-  (import.meta as any)?.env?.VITE_API_URL?.replace(/\/$/, '') ||
-  'http://127.0.0.1:8000';
-
-const PerfilUsuario = () => {
-  const navigate = useNavigate();
-
-  const [usuario] = useState<Usuario>(() => {
-    try {
-      const saved = localStorage.getItem('usuario');
-      const data = saved ? JSON.parse(saved) : {};
-      return {
-        nombre: 'Eliana',
-        apellido_paterno: 'Martinez',
-        profesion: 'Ingeniera de Software',
-        email: 'eliana.martinez@gmail.com',
-        ciudad: 'Cochabamba',
-        pais: 'BO',
-        institucion: 'Universidad Mayor de San Simon',
-        biografia:
-          'Apasionada por las creaciones de aplicaciones web y la elaboración de experiencias de usuario excepcionales, con experiencia en trabajo equipo.',
-        ...data
-      };
-    } catch {
-      return {
-        nombre: 'Eliana',
-        apellido_paterno: 'Martinez',
-        profesion: 'Ingeniera de Software',
-        email: 'eliana.martinez@gmail.com',
-        ciudad: 'Cochabamba',
-        pais: 'BO',
-        institucion: 'Universidad Mayor de San Simon',
-        biografia:
-          'Apasionada por las creaciones de aplicaciones web y la elaboración de experiencias de usuario excepcionales, con experiencia en trabajo equipo.'
-      };
-    }
-  });
-
-  const token = localStorage.getItem('token');
-  const userId = usuario?.id_usuario || usuario?.id;
-
-  const [skills, setSkills] = useState<Skill[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem('cachedSkills') || '[]');
-    } catch {
-      return [];
-    }
-  });
-  const [skillsLoading, setSkillsLoading] = useState(skills.length === 0);
-  const [skillsError, setSkillsError] = useState('');
-
-  const [links, setLinks] = useState<RedProfesional[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem('cachedLinks') || '[]');
-    } catch {
-      return [];
-    }
-  });
-  const [linksError, setLinksError] = useState('');
-
-  const experiences = [
-    {
-      role: 'Software Developer - Empresa X',
-      period: '2023 - Actual',
-      desc: 'APIs REST, Docker, microservicios'
-    },
-    {
-      role: 'Backend Developer - Empresa Y',
-      period: '2022 - 2023',
-      desc: 'Optimización de base de datos'
-    }
-  ];
-
-  const projects = [
-    {
-      title: 'Sistema de Gestión',
-      desc: 'Plataforma de administración de tareas',
-      repo: 'https://github.com/tuusuario/tustareas',
-      demo: 'https://demo-gestionsistemas.com',
-      tags: ['React', 'Node.js', 'MongoDB'],
-      period: '2021 - 2022'
-    },
-    {
-      title: 'E- Commerce App',
-      desc: 'App de ventas online',
-      repo: 'https://github.com/tuusuario/tuventas',
-      demo: 'https://demo-usuarioventas.com',
-      tags: ['Vue.js', 'Firebase', 'Stripe'],
-      period: '2020 - 2021'
-    }
-  ];
-
-  const normalizeSkill = (item: any): Skill => {
-    const id = String(item?.id_habilidad ?? '');
-    const nombre = String(item?.nombre ?? '');
-
-    let catCache: Record<string, string> = {};
-    try {
-      catCache = JSON.parse(localStorage.getItem('skillCategories') || '{}');
-    } catch {
-      catCache = {};
-    }
-
-    const locallySaved = catCache[id] || catCache[nombre.toLowerCase()];
-
-    return {
-      id_habilidad: id,
-      nombre,
-      tipo: item?.tipo === 'blanda' ? 'blanda' : 'tecnica',
-      nivel: Number(item?.nivel ?? 0),
-      visible:
-        item?.visible === true ||
-        item?.visible === 1 ||
-        item?.visible === '1',
-      categoria: item?.categoria ?? locallySaved ?? null
-    };
-  };
-
-  const flattenGroupedSkills = (data: any): Skill[] => {
-    if (Array.isArray(data)) {
-      return data.map(normalizeSkill);
-    }
-
-    if (data && typeof data === 'object') {
-      const result: Skill[] = [];
-
-      Object.entries(data).forEach(([tipo, categorias]) => {
-        if (categorias && typeof categorias === 'object') {
-          Object.entries(categorias as Record<string, any[]>).forEach(
-            ([categoria, habilidades]) => {
-              if (Array.isArray(habilidades)) {
-                habilidades.forEach((habilidad) => {
-                  result.push(
-                    normalizeSkill({
-                      ...habilidad,
-                      tipo,
-                      categoria
-                    })
-                  );
-                });
-              }
-            }
-          );
-        }
-      });
-
-      return result;
-    }
-
-    return [];
-  };
-
-  const saveSkillCategoriesInCache = (skillsToSave: Skill[]) => {
-    const catCache = skillsToSave.reduce((acc: Record<string, string>, skill) => {
-      if (skill.categoria) {
-        acc[skill.id_habilidad] = skill.categoria;
-        acc[skill.nombre.toLowerCase()] = skill.categoria;
-      }
-      return acc;
-    }, {});
-
-    localStorage.setItem('skillCategories', JSON.stringify(catCache));
-  };
-
-  const getNetworkLabel = (nombreRed: string) => {
-    switch (nombreRed) {
-      case 'linkedin':
-        return 'LinkedIn';
-      case 'github':
-        return 'GitHub';
-      case 'twitter':
-        return 'Twitter / X';
-      case 'behance':
-        return 'Behance';
-      case 'otro':
-        return 'Otro';
-      default:
-        return nombreRed;
-    }
-  };
-
-  const fetchSkills = async () => {
-    if (!token) {
-      setSkills([]);
-      setSkillsLoading(false);
-      return;
-    }
-
-    if (skills.length === 0) setSkillsLoading(true);
-    setSkillsError('');
-
-    try {
-      const response = await fetch(`${API_BASE}/api/habilidad`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json'
-        }
-      });
-
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(data?.message || 'No se pudieron cargar las habilidades.');
-      }
-
-      const finalSkills = flattenGroupedSkills(data);
-      setSkills(finalSkills);
-      localStorage.setItem('cachedSkills', JSON.stringify(finalSkills));
-      saveSkillCategoriesInCache(finalSkills);
-    } catch (err: any) {
-      console.error('Error fetching skills:', err);
-      setSkillsError(err?.message || 'Error al cargar habilidades.');
-      setSkills([]);
-    } finally {
-      setSkillsLoading(false);
-    }
-  };
-
-  const fetchLinks = async () => {
-    if (!token || !userId) return;
-
-    try {
-      setLinksError('');
-
-      const response = await fetch(`${API_BASE}/api/redes-profesionales/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json'
-        }
-      });
-
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(data?.message || 'No se pudieron cargar los enlaces.');
-      }
-
-      const rawLinks = Array.isArray(data)
-        ? data
-        : Array.isArray(data?.data)
-        ? data.data
-        : [];
-
-      const normalized = rawLinks;
-      setLinks(normalized);
-      localStorage.setItem('cachedLinks', JSON.stringify(normalized));
-    } catch (err: any) {
-      console.error('Error fetching links:', err);
-      setLinksError(err?.message || 'Error al cargar enlaces.');
-    }
-  };
-
-  useEffect(() => {
-    fetchSkills();
-  }, []);
-
-  useEffect(() => {
-    if (userId) {
-      fetchLinks();
-    }
-  }, [userId]);
-
-  const visibleSkills = useMemo(
-    () => skills.filter((skill) => skill.visible),
-    [skills]
-  );
-
-  const sortedSkills = useMemo(
-    () => [...visibleSkills].sort((a, b) => b.id_habilidad.localeCompare(a.id_habilidad)),
-    [visibleSkills]
-  );
-
-  const hardSkills = sortedSkills.filter((s) => s.tipo === 'tecnica');
-  const softSkillsArray = sortedSkills.filter((s) => s.tipo === 'blanda');
-
-  const groupedSkills = hardSkills.reduce((acc: Record<string, Skill[]>, skill: Skill) => {
-    const key = skill.categoria || 'Habilidades Técnicas';
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(skill);
-    return acc;
-  }, {} as Record<string, Skill[]>);
-
-  const displayLinks = links.map((l) => ({
-    label: getNetworkLabel(l.nombre_red),
-    icon: <Globe size={18} />,
-    url: l.url_red
-  }));
-
-  return (
-    <div className="min-h-screen bg-[#F5F5F5] flex flex-col font-inter">
-      <main className="flex-1 overflow-y-auto pt-6 md:pt-12 pb-20 px-4 md:px-0">
-        <div className="max-w-[1240px] mx-auto flex flex-col shadow-2xl rounded-[16px] overflow-hidden">
-          <div className="bg-[#1F4E79] text-white p-6 md:p-12 relative overflow-hidden shrink-0">
-            <div className="flex flex-col md:flex-row justify-between items-center md:items-start relative z-10 gap-6 md:gap-0">
-              <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 md:gap-10">
-                <div className="w-32 h-32 rounded-full mx-auto md:mx-0 border-2 border-white/20 bg-white/5 flex items-center justify-center shadow-inner shrink-0">
-                  <div className="w-28 h-28 rounded-full bg-white/10" />
-                </div>
-                <div className="flex flex-col">
-                  <h2 className="text-[32px] md:text-[42px] font-bold mb-1 tracking-tight">
-                    {getFullName(usuario)}
-                  </h2>
-                  <p className="text-blue-200 text-[18px] md:text-[20px] font-medium opacity-90 mb-6 italic">
-                    {usuario.profesion || 'Ingeniera de Software'}
-                  </p>
-
-                  <div className="flex flex-wrap justify-center md:justify-start gap-x-6 md:gap-x-12 gap-y-4 text-[13px] font-medium">
-                    <span className="flex items-center gap-2.5 opacity-80">
-                      <Mail size={16} /> <span className="break-all">{usuario.email}</span>
-                    </span>
-                    <span className="flex items-center gap-2.5 opacity-80">
-                      <MapPin size={16} /> {usuario.ciudad || 'Cochabamba'}, {usuario.pais || 'BO'}
-                    </span>
-                    <span className="flex items-center gap-2.5 opacity-80">
-                      <GraduationCap size={18} /> {usuario.institucion || 'Universidad Mayor de San Simon'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={() => navigate('/perfil')}
-                className="bg-white/10 hover:bg-white/25 text-white px-10 py-2.5 rounded-[14px] text-[14px] font-bold border border-white/20 transition-all shadow-lg active:scale-95 whitespace-nowrap w-full md:w-auto mt-4 md:mt-0"
-              >
-                Editar
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 md:p-16 flex flex-col gap-12 md:gap-16 border-t border-white/10">
-            <section className="scroll-mt-24" id="sobre-mi">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4 sm:gap-0">
-                <h3 className="text-[22px] font-extrabold text-gray-800">Sobre mi</h3>
-                <button className="bg-[#1F4E79] text-white px-6 py-1.5 rounded-lg text-[12px] font-bold shadow-md hover:opacity-90 transition-all w-full sm:w-auto">
-                  Editar
-                </button>
-              </div>
-              <p className="text-gray-500 text-[18px] leading-relaxed max-w-5xl font-medium">
-                {usuario.biografia || 'Apasionada por las creaciones de aplicaciones web y la elaboración de experiencias de usuario excepcionales, con experiencia en trabajo equipo.'}
-              </p>
-            </section>
-
-            <section className="scroll-mt-24" id="experiencia">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 sm:gap-0">
-                <h3 className="text-[22px] font-extrabold text-gray-800 uppercase tracking-tight">Experiencia</h3>
-                <button className="bg-[#1F4E79] text-white px-6 py-1.5 rounded-lg text-[12px] font-bold shadow-md hover:opacity-90 transition-all w-full sm:w-auto">
-                  Editar
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-8">
-                {experiences.map((exp, idx) => (
-                  <div
-                    key={idx}
-                    className="w-full sm:w-[340px] rounded-[14px] border border-gray-100 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
-                  >
-                    <h4 className="font-extrabold text-gray-800 text-[17px]">{exp.role}</h4>
-                    <p className="text-[13px] font-bold text-gray-400 mt-1">{exp.period}</p>
-                    <p className="mt-4 text-[14px] text-gray-500 leading-snug font-medium">{exp.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="scroll-mt-24" id="habilidades">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4 sm:gap-0">
-                <h3 className="text-[22px] font-extrabold text-gray-800 uppercase tracking-tight">Habilidades</h3>
-                <button
-                  onClick={() => navigate('/habilidades')}
-                  className="bg-[#1F4E79] text-white px-6 py-1.5 rounded-[14px] text-[12px] font-bold shadow-md hover:opacity-90 transition-all w-full sm:w-auto"
-                >
-                  Editar
-                </button>
-              </div>
-
-              {skillsError && (
-                <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-sm font-medium">
-                  {skillsError}
-                </div>
-              )}
-
-              {skillsLoading ? (
-                <div className="text-gray-400 font-medium py-8">
-                  Cargando habilidades...
-                </div>
-              ) : hardSkills.length === 0 ? (
-                <div className="text-gray-400 font-medium py-8">
-                  No hay habilidades técnicas añadidas.
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
-                  {Object.entries(groupedSkills).map(([category, catSkills]) => (
-                    <div
-                      key={category}
-                      className="rounded-[18px] border border-gray-100 p-8 pt-10 relative mb-8"
-                    >
-                      <h4 className="text-[15px] font-extrabold text-gray-800 mb-8 absolute -top-3 left-6 bg-white px-3">
-                        {category}
-                      </h4>
-                      <div className="space-y-6">
-                        {catSkills.map((skill) => (
-                          <div key={skill.id_habilidad}>
-                            <div className="flex justify-between text-[13px] font-bold text-gray-600 mb-1.5">
-                              <span>{skill.nombre}</span>
-                              <span className="opacity-60">{skill.nivel}%</span>
-                            </div>
-                            <div className="h-2.5 w-full bg-blue-50/50 rounded-full overflow-hidden border border-gray-100">
-                              <div
-                                className="h-full bg-orange-200 rounded-full shadow-inner"
-                                style={{ width: `${skill.nivel}%` }}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-
-            <section className="scroll-mt-24" id="habilidades-blandas">
-              <h3 className="text-[22px] font-extrabold text-gray-800 uppercase tracking-tight mb-8">
-                Habilidades Blandas Desarrolladas
-              </h3>
-              <div className="flex flex-wrap gap-4">
-                {skillsLoading ? (
-                  <div className="w-full text-center py-5 text-gray-400 font-medium">
-                    Cargando habilidades blandas...
-                  </div>
-                ) : softSkillsArray.length > 0 ? (
-                  softSkillsArray.map((skill) => (
-                    <span
-                      key={skill.id_habilidad}
-                      className="px-7 py-3 bg-[#F8FAFC] text-[#1F4E79] rounded-[14px] text-[14px] font-extrabold border border-gray-100 shadow-sm"
-                    >
-                      {skill.nombre}
-                    </span>
-                  ))
-                ) : (
-                  <div className="w-full text-center py-5 text-gray-400 font-medium">
-                    No hay habilidades blandas añadidas.
-                  </div>
-                )}
-              </div>
-            </section>
-
-            <section className="scroll-mt-24" id="enlaces">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 sm:gap-0">
-                <h3 className="text-[22px] font-extrabold text-gray-800 uppercase tracking-tight">Enlaces</h3>
-                <button
-                  onClick={() => navigate('/enlaces')}
-                  className="bg-[#1F4E79] text-white px-6 py-1.5 rounded-[14px] text-[12px] font-bold shadow-md hover:opacity-90 transition-all w-full sm:w-auto"
-                >
-                  Editar
-                </button>
-              </div>
-
-              {linksError && (
-                <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-sm font-medium">
-                  {linksError}
-                </div>
-              )}
-
-              {displayLinks.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {displayLinks.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-white rounded-[14px] border border-gray-200 p-6 shadow-sm flex flex-col gap-3 group hover:border-[#1F4E79]/30 transition-colors"
-                    >
-                      <div className="flex items-center gap-3 font-extrabold text-gray-800 text-[16px]">
-                        {item.icon}
-                        <span>{item.label}</span>
-                      </div>
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[13px] text-blue-600 font-bold hover:underline truncate"
-                      >
-                        {item.url}
-                      </a>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="w-full text-center py-5 text-gray-400 font-medium">
-                  No hay enlaces añadidos.
-                </div>
-              )}
-            </section>
-
-            <section className="scroll-mt-24" id="proyectos">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4 sm:gap-0">
-                <h3 className="text-[22px] font-extrabold text-gray-800 uppercase tracking-tight">Proyectos</h3>
-                <button
-                  onClick={() => navigate('/mis-proyectos')}
-                  className="bg-[#1F4E79] text-white px-6 py-1.5 rounded-[14px] text-[12px] font-bold shadow-md hover:opacity-90 transition-all w-full sm:w-auto"
-                >
-                  Editar
-                </button>
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                {projects.map((proj, idx) => (
-                  <article
-                    key={idx}
-                    className="rounded-[24px] overflow-hidden border border-gray-100 bg-gray-50/30 shadow-sm flex flex-col group hover:shadow-md transition-shadow"
-                  >
-                    <div className="h-64 bg-gray-200 relative overflow-hidden">
-                      <div className="absolute inset-0 bg-black/5" />
-                    </div>
-                    <div className="p-8 pb-12 flex flex-col flex-1 bg-white">
-                      <h4 className="text-[22px] font-extrabold text-gray-800 mb-2">{proj.title}</h4>
-                      <p className="text-gray-400 text-[15px] mb-8 font-semibold">{proj.desc}</p>
-
-                      <div className="space-y-2 mb-10">
-                        <div className="text-[14px] font-bold text-gray-700">
-                          URL Repositorio:{' '}
-                          <a
-                            href={proj.repo}
-                            className="text-blue-500 hover:underline inline-block truncate max-w-[200px] align-bottom ml-1"
-                          >
-                            {proj.repo}
-                          </a>
-                        </div>
-                        <div className="text-[14px] font-bold text-gray-700">
-                          URL Demo:{' '}
-                          <a
-                            href={proj.demo}
-                            className="text-blue-500 hover:underline inline-block truncate max-w-[200px] align-bottom ml-1"
-                          >
-                            {proj.demo}
-                          </a>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2.5 mt-auto">
-                        {proj.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="px-5 py-2 bg-[#1F4E79]/5 text-[#1F4E79] rounded-lg text-[12px] font-extrabold"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="mt-8 text-right">
-                        <span className="text-[14px] font-bold text-gray-400 italic">{proj.period}</span>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
+const CATS: Record<string, string[]> = {
+  'Lenguajes de Programación': ['Java','Python','JavaScript','TypeScript','C','C++','C#','PHP','Go','Ruby','Swift','Kotlin','SQL','R','Rust'],
+  'Desarrollo Web Frontend': ['HTML5','CSS3','JavaScript','TypeScript','React','Vue.js','Angular','Next.js','Bootstrap','Tailwind CSS','SASS','jQuery'],
+  'Desarrollo Web Backend': ['Node.js','Express.js','Laravel','PHP','Django','Flask','Spring Boot','Java EE','ASP.NET Core','NestJS','Ruby on Rails','FastAPI'],
+  'Desarrollo Móvil': ['Android Studio','Java Android','Kotlin','Swift','Flutter','React Native','Ionic','Xamarin'],
+  'Bases de Datos': ['MySQL','PostgreSQL','SQL Server','Oracle Database','MongoDB','Firebase Firestore','MariaDB','SQLite','Redis','Cassandra'],
+  'Frameworks y Librerías': ['React','Vue.js','Angular','Laravel','Django','Spring Boot','Express.js','Bootstrap','Tailwind CSS','TensorFlow','PyTorch','jQuery'],
+  'DevOps / Infraestructura': ['Docker','Kubernetes','Jenkins','GitHub Actions','GitLab CI/CD','Ansible','Terraform','Nginx','Apache','Linux Server'],
+  'Cloud Computing': ['AWS','Microsoft Azure','Google Cloud Platform','Firebase','DigitalOcean','Heroku','Vercel','Netlify'],
+  'Seguridad Informática': ['OWASP','Pentesting','Ethical Hacking','Burp Suite','Wireshark','Kali Linux','Firewall','Criptografía','Autenticación JWT','Ciberseguridad Web'],
+  'Inteligencia Artificial / Data Science': ['Python','Pandas','NumPy','Scikit-learn','TensorFlow','PyTorch','Power BI','Tableau','Machine Learning','Deep Learning','Data Mining','Análisis de Datos'],
+  'Testing / QA': ['Postman','Selenium','Cypress','JUnit','PyTest','Testing Manual','Testing Automatizado','Pruebas Unitarias','Pruebas Funcionales','QA Analyst'],
+  'Herramientas de Diseño': ['Figma','Adobe XD','Photoshop','Illustrator','Canva','UI Design','UX Design','Wireframing','Prototyping','Diseño Responsive'],
 };
 
-export default PerfilUsuario;
+const SOFT = ['Trabajo en equipo','Liderazgo','Comunicación','Resolución de problemas','Adaptabilidad','Pensamiento crítico','Gestión del tiempo','Creatividad','Inteligencia emocional','Proactividad','Empatía','Negociación','Toma de decisiones','Gestión del estrés','Orientación a resultados'];
+
+const PLATFORMS: Record<string, string> = {
+  LinkedIn: 'https://www.linkedin.com/in/', GitHub: 'https://github.com/',
+  GitLab: 'https://gitlab.com/', LeetCode: 'https://leetcode.com/',
+  HackerRank: 'https://www.hackerrank.com/', Kaggle: 'https://www.kaggle.com/',
+  Instagram: 'https://www.instagram.com/', Facebook: 'https://www.facebook.com/',
+  'Twitter / X': 'https://x.com/',
+};
+
+const NET_LABELS: Record<string, string> = {
+  linkedin: 'LinkedIn', github: 'GitHub', gitlab: 'GitLab', leetcode: 'LeetCode',
+  hackerrank: 'HackerRank', kaggle: 'Kaggle', instagram: 'Instagram',
+  facebook: 'Facebook', twitter: 'Twitter / X',
+};
+
+const TABS = [
+  { id: 'datosPersonales', label: 'Datos Personales' },
+  { id: 'habilidades',     label: 'Habilidades' },
+  { id: 'enlaces',         label: 'Enlaces Profesionales' },
+  { id: 'academica',       label: 'Exp. Académica' },
+  { id: 'laboral',         label: 'Exp. Laboral' },
+] as const;
+type Tab = typeof TABS[number]['id'];
+
+// ── Types ────────────────────────────────────────────────────────────────────
+interface Skill { id_habilidad: string; nombre: string; tipo: 'tecnica'|'blanda'; nivel: number; visible: boolean; categoria?: string|null; }
+interface LinkItem { id_redes_prof: string; nombre_red: string; url_red: string; created_at?: string; }
+
+// ── Utils ────────────────────────────────────────────────────────────────────
+const getFullName = (u: any) => [u.nombre, u.apellido_paterno, u.apellido_materno].filter(Boolean).join(' ');
+const getNetLabel = (v: string) => NET_LABELS[v?.toLowerCase()] || v;
+
+const normalizeSkill = (item: any): Skill => {
+  const id = String(item?.id_habilidad ?? '');
+  let cache: Record<string,string> = {};
+  try { cache = JSON.parse(localStorage.getItem('skillCategories') || '{}'); } catch {}
+  return { id_habilidad: id, nombre: String(item?.nombre ?? ''), tipo: item?.tipo === 'blanda' ? 'blanda' : 'tecnica', nivel: Number(item?.nivel ?? 0), visible: item?.visible === true || item?.visible === 1, categoria: item?.categoria ?? cache[id] ?? null };
+};
+
+const saveCatCache = (skills: Skill[]) => {
+  const c = skills.reduce((a: Record<string,string>, s) => { if (s.categoria) { a[s.id_habilidad] = s.categoria; a[s.nombre.toLowerCase()] = s.categoria; } return a; }, {});
+  localStorage.setItem('skillCategories', JSON.stringify(c));
+};
+
+const flattenSkills = (data: any): Skill[] => {
+  if (Array.isArray(data)) return data.map(normalizeSkill);
+  if (data && typeof data === 'object') {
+    const r: Skill[] = [];
+    Object.entries(data).forEach(([tipo, cats]) => {
+      if (cats && typeof cats === 'object') Object.entries(cats as Record<string,any[]>).forEach(([cat, items]) => { if (Array.isArray(items)) items.forEach(i => r.push(normalizeSkill({ ...i, tipo, categoria: cat }))); });
+    });
+    return r;
+  }
+  return [];
+};
+
+// ── Reusable UI ──────────────────────────────────────────────────────────────
+const selCls = 'w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-[14px] focus:ring-2 focus:ring-[#1F4E79] outline-none appearance-none cursor-pointer text-[14px] disabled:opacity-50';
+const lblCls = 'block text-[14px] font-bold text-gray-700 mb-2';
+
+function Sel({ label, value, onChange, opts, placeholder, disabled }: { label: string; value: string; onChange: (v: string) => void; opts: {value:string;label:string}[]; placeholder?: string; disabled?: boolean }) {
+  return (
+    <div>
+      <label className={lblCls}>{label}</label>
+      <div className="relative">
+        <select value={value} onChange={e => onChange(e.target.value)} disabled={disabled} className={selCls}>
+          {placeholder && <option value="">{placeholder}</option>}
+          {opts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none w-4 h-4" />
+      </div>
+    </div>
+  );
+}
+
+function Toggle({ on, toggle }: { on: boolean; toggle: () => void }) {
+  return (
+    <button type="button" onClick={toggle} className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${on ? 'bg-[#1F4E79]' : 'bg-gray-300'}`}>
+      <span className={`inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform ${on ? 'translate-x-6' : 'translate-x-1'}`} />
+    </button>
+  );
+}
+
+function ModalWrap({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/40 backdrop-blur-[2px] p-4 overflow-y-auto">
+      <div className="flex items-center justify-center min-h-full w-full">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function SuccessModal({ title, msg, onClose }: { title: string; msg: string; onClose: () => void }) {
+  return (
+    <ModalWrap>
+      <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-[380px] p-10 text-center my-auto">
+        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-11 h-11 bg-green-500 rounded-full flex items-center justify-center">
+            <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg>
+          </div>
+        </div>
+        <h3 className="text-[20px] font-extrabold text-gray-900 mb-2 uppercase">{title}</h3>
+        <p className="text-gray-500 mb-8">{msg}</p>
+        <button onClick={onClose} className="w-full bg-[#1F4E79] text-white font-bold py-3 rounded-2xl hover:opacity-90 transition">Aceptar</button>
+      </div>
+    </ModalWrap>
+  );
+}
+
+function ConfirmModal({ title, msg, onOk, onCancel, loading }: { title: string; msg: string; onOk: () => void; onCancel: () => void; loading?: boolean }) {
+  return (
+    <ModalWrap>
+      <div className="bg-white rounded-[24px] shadow-2xl p-8 max-w-sm w-full text-center">
+        <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-red-600 mb-6 border-[8px] border-red-100">
+          <svg className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </div>
+        <h3 className="text-[20px] font-bold text-gray-900 mb-2 uppercase">{title}</h3>
+        <p className="text-gray-500 mb-8 text-[14px]">{msg}</p>
+        <div className="flex gap-4 justify-center">
+          <button disabled={loading} onClick={onOk} className="px-6 py-2.5 bg-[#1F4E79] text-white font-bold rounded-xl hover:opacity-90 active:scale-95 disabled:opacity-60 transition">Aceptar</button>
+          <button disabled={loading} onClick={onCancel} className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl transition disabled:opacity-60">Cancelar</button>
+        </div>
+      </div>
+    </ModalWrap>
+  );
+}
+
+function DeleteSuccessModal({ title, msg, onClose }: { title: string; msg: string; onClose: () => void }) {
+  return (
+    <ModalWrap>
+      <div className="bg-white rounded-[24px] shadow-2xl p-8 max-w-sm w-full text-center">
+        <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-red-600 mb-6 border-[8px] border-red-100">
+          <svg className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </div>
+        <h3 className="text-[20px] font-bold text-gray-900 mb-2 uppercase">{title}</h3>
+        <p className="text-gray-500 mb-8 text-[14px]">{msg}</p>
+        <button onClick={onClose} className="px-10 py-2.5 bg-[#1F4E79] hover:opacity-90 text-white font-bold rounded-xl shadow active:scale-95 transition">Aceptar</button>
+      </div>
+    </ModalWrap>
+  );
+}
+
+// ── Skill Modal ──────────────────────────────────────────────────────────────
+function SkillModal({ onClose, onSaved }: { onClose: () => void; onSaved: (s: Skill) => void }) {
+  const token = localStorage.getItem('token') || '';
+  const [tipo, setTipo] = useState<'Dura'|'Blanda'>('Dura');
+  const [cat, setCat] = useState('');
+  const [nombre, setNombre] = useState('');
+  const [nivel, setNivel] = useState(80);
+  const [visible, setVisible] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const opts = tipo === 'Blanda' ? SOFT : (CATS[cat] || []);
+
+  const handleTipo = (v: string) => { setTipo(v as 'Dura'|'Blanda'); setCat(''); setNombre(''); };
+  const handleCat  = (v: string) => { setCat(v); setNombre(''); };
+
+  const handleSave = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!nombre) { alert('Selecciona un nombre.'); return; }
+    if (tipo === 'Dura' && !cat) { alert('Selecciona una categoría.'); return; }
+    setSaving(true);
+    try {
+      const res = await fetch(`${API}/api/habilidad`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ nombre, tipo: tipo === 'Dura' ? 'tecnica' : 'blanda', nivel: tipo === 'Dura' ? nivel : 100, visible, categoria: tipo === 'Dura' ? cat : 'Habilidades Blandas' }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.message || 'Error al guardar.');
+      const saved = normalizeSkill(data?.habilidad ?? data);
+      saved.categoria = tipo === 'Dura' ? cat : 'Habilidades Blandas';
+      onSaved(saved);
+    } catch (err: any) { alert(err.message); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <ModalWrap>
+      <div className="bg-white rounded-[28px] shadow-2xl w-full max-w-[480px] max-h-[90vh] overflow-y-auto p-8">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-[20px] font-bold text-gray-900 uppercase tracking-tight">Añadir Habilidad</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 transition"><X size={20}/></button>
+        </div>
+        <form onSubmit={handleSave} className="flex flex-col gap-5">
+          <Sel label="Tipo de habilidad" value={tipo} onChange={handleTipo} opts={[{value:'Dura',label:'Habilidad dura'},{value:'Blanda',label:'Habilidad blanda'}]} />
+          {tipo === 'Dura' && <Sel label="Categoría" value={cat} onChange={handleCat} placeholder="Selecciona categoría" opts={Object.keys(CATS).map(c=>({value:c,label:c}))} />}
+          <Sel label={`Nombre de la habilidad ${tipo === 'Dura' ? 'dura' : 'blanda'}`} value={nombre} onChange={setNombre} placeholder="Selecciona una opción" opts={opts.map(s=>({value:s,label:s}))} disabled={tipo==='Dura' && !cat} />
+          {tipo === 'Dura' && (
+            <div>
+              <div className="flex justify-between mb-2">
+                <label className={lblCls + ' mb-0'}>Nivel</label>
+                <span className="text-[14px] font-bold text-gray-700">{nivel}%</span>
+              </div>
+              <input type="range" min={0} max={100} value={nivel} onChange={e => setNivel(+e.target.value)} className="w-full cursor-pointer accent-[#1F4E79]"/>
+            </div>
+          )}
+          <div className="flex items-center justify-between">
+            <div><p className={lblCls + ' mb-0'}>Visible</p><p className="text-[12px] text-gray-400">Mostrar en el perfil</p></div>
+            <Toggle on={visible} toggle={() => setVisible(v => !v)} />
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={onClose} className="flex-1 py-3 rounded-[14px] bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 transition">Cancelar</button>
+            <button type="submit" disabled={saving} className="flex-1 py-3 rounded-[14px] bg-[#1F4E79] text-white font-bold hover:opacity-90 active:scale-95 disabled:opacity-60 transition">{saving ? 'Guardando...' : 'Guardar Habilidad'}</button>
+          </div>
+        </form>
+      </div>
+    </ModalWrap>
+  );
+}
+
+// ── Link Modal ───────────────────────────────────────────────────────────────
+function LinkModal({ uid, onClose, onSaved }: { uid: string; onClose: () => void; onSaved: (l: LinkItem) => void }) {
+  const token = localStorage.getItem('token') || '';
+  const [red, setRed] = useState('');
+  const [username, setUsername] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!red) { alert('Selecciona una plataforma.'); return; }
+    if (!username.trim()) { alert('Ingresa tu nombre de usuario.'); return; }
+    setSaving(true);
+    try {
+      const url = `${PLATFORMS[red]}${username.trim()}`;
+      const res = await fetch(`${API}/api/redes-profesionales`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ id_usuario: uid, nombre_red: red.toLowerCase().replace(/[\s/]+/g, ''), url_red: url }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.message || 'Error al guardar.');
+      onSaved(data?.red ?? data);
+    } catch (err: any) { alert(err.message); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <ModalWrap>
+      <div className="bg-white rounded-[28px] shadow-2xl w-full max-w-[480px] p-8 my-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-[20px] font-bold text-gray-900 uppercase tracking-tight">Añadir Enlace</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 transition"><X size={20}/></button>
+        </div>
+        <form onSubmit={handleSave} className="flex flex-col gap-5">
+          <Sel label="Plataforma" value={red} onChange={v => { setRed(v); setUsername(''); }} placeholder="Selecciona una opción" opts={Object.keys(PLATFORMS).map(p=>({value:p,label:p}))} />
+          {red && (
+            <div>
+              <label className={lblCls}>URL</label>
+              <div className="flex items-center border border-gray-300 rounded-[14px] overflow-hidden focus-within:ring-2 focus-within:ring-[#1F4E79]">
+                <span className="bg-gray-100 text-gray-500 text-[13px] px-3 py-3 border-r border-gray-300 whitespace-nowrap select-none shrink-0">{PLATFORMS[red]}</span>
+                <input type="text" value={username} onChange={e => setUsername(e.target.value)} placeholder="tunombredeusuario" className="flex-1 px-3 py-3 text-[14px] text-gray-900 outline-none bg-transparent"/>
+              </div>
+              <p className="text-[12px] text-gray-400 mt-1">Solo escribe tu nombre de usuario.</p>
+            </div>
+          )}
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={onClose} className="flex-1 py-3 rounded-[14px] bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 transition">Cancelar</button>
+            <button type="submit" disabled={saving} className="flex-1 py-3 rounded-[14px] bg-[#1F4E79] text-white font-bold hover:opacity-90 disabled:opacity-60 transition">{saving ? 'Guardando...' : 'Guardar Enlace'}</button>
+          </div>
+        </form>
+      </div>
+    </ModalWrap>
+  );
+}
+
+// ── Custom Hook ──────────────────────────────────────────────────────────────
+function useProfileData(uid: string) {
+  const token = localStorage.getItem('token') || '';
+  const headers = { Authorization: `Bearer ${token}`, Accept: 'application/json', 'Content-Type': 'application/json' };
+
+  const [skills, setSkills] = useState<Skill[]>(() => { try { return JSON.parse(localStorage.getItem('cachedSkills') || '[]'); } catch { return []; } });
+  const [links,  setLinks]  = useState<LinkItem[]>([]);
+  const [loadingSkills, setLoadingSkills] = useState(skills.length === 0);
+  const [loadingLinks,  setLoadingLinks]  = useState(true);
+
+  useEffect(() => {
+    // Fetch skills
+    (async () => {
+      setLoadingSkills(true);
+      try {
+        const res  = await fetch(`${API}/api/habilidad`, { headers });
+        const data = await res.json().catch(() => null);
+        const list = flattenSkills(data);
+        setSkills(list);
+        localStorage.setItem('cachedSkills', JSON.stringify(list));
+        saveCatCache(list);
+      } catch (e) { console.error(e); }
+      finally { setLoadingSkills(false); }
+    })();
+
+    // Fetch links
+    if (!uid) { setLoadingLinks(false); return; }
+    (async () => {
+      try {
+        const res  = await fetch(`${API}/api/redes-profesionales/${uid}`, { headers });
+        const data = await res.json().catch(() => null);
+        setLinks(Array.isArray(data) ? data : data?.data || []);
+      } catch (e) { console.error(e); }
+      finally { setLoadingLinks(false); }
+    })();
+  }, [uid]);
+
+  const addSkill = (s: Skill) => {
+    const updated = [s, ...skills];
+    setSkills(updated);
+    localStorage.setItem('cachedSkills', JSON.stringify(updated));
+    saveCatCache(updated);
+  };
+
+  const removeSkill = async (id: string) => {
+    const res = await fetch(`${API}/api/habilidad/${id}`, { method: 'DELETE', headers });
+    if (res.ok) {
+      const updated = skills.filter(s => s.id_habilidad !== id);
+      setSkills(updated);
+      localStorage.setItem('cachedSkills', JSON.stringify(updated));
+      saveCatCache(updated);
+    }
+    return res.ok;
+  };
+
+  const addLink   = (l: LinkItem) => setLinks(prev => [l, ...prev]);
+  const removeLink = async (id: string) => {
+    const res = await fetch(`${API}/api/redes-profesionales/${id}`, { method: 'DELETE', headers });
+    if (res.ok) setLinks(prev => prev.filter(l => l.id_redes_prof !== id));
+    return res.ok;
+  };
+
+  return { skills, links, loadingSkills, loadingLinks, addSkill, removeSkill, addLink, removeLink };
+}
+
+// ── Helper components ────────────────────────────────────────────────────────
+const Empty    = ({ label }: { label: string }) => <div className="py-20 text-center rounded-3xl border-2 border-dashed border-gray-200 text-gray-400 font-bold uppercase tracking-widest text-sm">No hay {label} añadidos aún.</div>;
+const Loading  = ({ label }: { label: string }) => <div className="text-center py-20 text-gray-400 font-medium">Cargando {label}...</div>;
+const Soon     = ({ label }: { label: string }) => <div className="py-20 text-center rounded-3xl border-2 border-dashed border-gray-200 text-gray-400 font-bold uppercase tracking-widest text-sm">Próximamente — {label}</div>;
+
+// ── Main Component ───────────────────────────────────────────────────────────
+export default function PerfilUsuario() {
+  const navigate = useNavigate();
+  const [user] = useState<any>(() => { try { return JSON.parse(localStorage.getItem('usuario') || '{}'); } catch { return {}; } });
+  const uid = String(user.id_usuario || user.id || '');
+
+  const [tab,    setTab]    = useState<Tab>('habilidades');
+  const [sortBy, setSortBy] = useState('más recientes');
+  const { skills, links, loadingSkills, loadingLinks, addSkill, removeSkill, addLink, removeLink } = useProfileData(uid);
+
+  // Modal state
+  const [showSkill, setShowSkill] = useState(false);
+  const [showLink,  setShowLink]  = useState(false);
+  const [skillOk,   setSkillOk]   = useState(false);
+  const [linkOk,    setLinkOk]    = useState(false);
+  const [delSkill,  setDelSkill]  = useState<string|null>(null);
+  const [delLink,   setDelLink]   = useState<string|null>(null);
+  const [delSkillOk, setDelSkillOk] = useState(false);
+  const [delLinkOk,  setDelLinkOk]  = useState(false);
+  const [deleting,   setDeleting]   = useState(false);
+
+  // Group skills by category
+  const grouped = skills.reduce((acc: Record<string,Skill[]>, s) => {
+    const key = s.tipo === 'blanda' ? 'Habilidades Blandas' : (s.categoria || 'Habilidades Técnicas');
+    return { ...acc, [key]: [...(acc[key] || []), s] };
+  }, {});
+
+  // Sort links
+  const sortedLinks = [...links].sort((a, b) => {
+    const d = new Date(b.created_at||0).getTime() - new Date(a.created_at||0).getTime();
+    return sortBy === 'más recientes' ? d : -d;
+  });
+
+  const handleDelSkill = async () => {
+    if (!delSkill) return;
+    setDeleting(true);
+    const ok = await removeSkill(delSkill);
+    setDeleting(false); setDelSkill(null);
+    if (ok) setDelSkillOk(true); else alert('Error al eliminar.');
+  };
+  const handleDelLink = async () => {
+    if (!delLink) return;
+    setDeleting(true);
+    const ok = await removeLink(delLink);
+    setDeleting(false); setDelLink(null);
+    if (ok) setDelLinkOk(true); else alert('Error al eliminar.');
+  };
+
+  return (
+    <div className="flex flex-col md:flex-row min-h-[calc(100vh-180px)] bg-[#F5F5F5] font-inter">
+
+      {/* ── Sidebar ── */}
+      <aside className="hidden md:flex w-[240px] lg:w-[260px] bg-[#1D4A76] text-white flex-col items-center py-10 shadow-inner shrink-0">
+        <div className="w-24 h-24 rounded-full border-2 border-white/20 bg-white/10 mb-4 flex items-center justify-center">
+          <span className="text-3xl font-bold uppercase">{user.nombre?.charAt(0) || '?'}</span>
+        </div>
+        <h2 className="text-[16px] font-bold text-center px-4 mb-1">{getFullName(user)}</h2>
+        <p className="text-[13px] text-blue-200 font-medium mb-10 text-center px-2 opacity-80">{user.profesion || 'Ingeniera de Software'}</p>
+        <div className="w-full">
+          <button onClick={() => navigate('/')} className="flex items-center w-full pl-10 py-3 hover:bg-white/10 transition text-[14px] font-medium">
+            <Home className="w-5 h-5 mr-3"/> Inicio
+          </button>
+          <button className="flex items-center w-full pl-10 py-3 hover:bg-white/10 transition text-[14px] font-medium">
+            <Settings className="w-5 h-5 mr-3"/> Ajustes
+          </button>
+        </div>
+      </aside>
+
+      {/* ── Content ── */}
+      <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto">
+
+        {/* Profile header */}
+        <div className="mb-3">
+          <h2 className="text-[20px] md:text-[24px] font-bold text-gray-900 mb-1">{getFullName(user)}</h2>
+          <p className="text-gray-500 text-[13px] md:text-[14px] max-w-2xl leading-relaxed">{user.biografia || 'Apasionada por las creaciones de aplicaciones web y la elaboración de experiencias de usuario excepcionales, con experiencia en trabajo equipo.'}</p>
+        </div>
+
+        <div className="flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-gray-500 font-medium mb-5">
+          <span className="flex items-center gap-2"><Mail size={14}/>{user.email}</span>
+          <span className="flex items-center gap-2"><MapPin size={14}/>{user.ciudad || 'Cochabamba'}</span>
+          <span className="flex items-center gap-2"><GraduationCap size={15}/>{user.institucion || 'UMSS'}</span>
+        </div>
+
+        {/* Tabs */}
+        <div className="overflow-x-auto mb-5 -mx-1 px-1">
+          <div className="bg-white rounded-full px-3 py-2 flex gap-1 items-center border border-gray-100 shadow-sm w-max">
+            {TABS.map(t => (
+              <button key={t.id} onClick={() => setTab(t.id)}
+                className={`text-[12px] md:text-[13px] font-bold transition whitespace-nowrap px-3 py-1.5 rounded-full ${tab === t.id ? 'bg-[#1F4E79] text-white' : 'text-gray-400 hover:text-gray-700'}`}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Actions bar */}
+        {(tab === 'habilidades' || tab === 'enlaces') && (
+          <div className="flex justify-end gap-3 mb-5">
+            <button onClick={() => tab === 'habilidades' ? setShowSkill(true) : setShowLink(true)}
+              className="bg-[#1F4E79] text-white px-4 py-2 rounded-full text-[13px] font-bold shadow flex items-center gap-2 hover:opacity-90 transition">
+              <Plus size={14}/> Añadir {tab === 'habilidades' ? 'Habilidad' : 'Enlace'}
+            </button>
+            <div className="relative">
+              <select value={sortBy} onChange={e => setSortBy(e.target.value)}
+                className="bg-white border border-gray-200 rounded-full pl-4 pr-8 py-2 text-[12px] text-gray-500 font-semibold appearance-none outline-none shadow-sm cursor-pointer">
+                <option>más recientes</option>
+                <option>más antiguas</option>
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"/>
+            </div>
+          </div>
+        )}
+
+        {/* Tab content */}
+        {tab === 'datosPersonales' && <Soon label="Datos Personales"/>}
+        {tab === 'academica'       && <Soon label="Experiencia Académica"/>}
+        {tab === 'laboral'         && <Soon label="Experiencia Laboral"/>}
+
+        {tab === 'habilidades' && (
+          loadingSkills ? <Loading label="habilidades"/> :
+          Object.keys(grouped).length === 0 ? <Empty label="habilidades"/> :
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {Object.entries(grouped).map(([cat, list]) => (
+              <div key={cat} className="bg-white border border-gray-100 rounded-[16px] p-6 shadow-sm">
+                <h3 className="text-[16px] font-bold text-gray-900 mb-5">{cat}</h3>
+                {list.map(s => (
+                  <div key={s.id_habilidad} className="mb-5 relative group">
+                    <div className="flex justify-between items-center text-[14px] mb-2 pr-8">
+                      <span className="font-bold text-gray-800">{s.nombre}</span>
+                      {s.tipo === 'tecnica' && <span className="font-medium text-gray-500">{s.nivel}%</span>}
+                      <button onClick={() => setDelSkill(s.id_habilidad)}
+                        className="absolute right-0 top-0 text-red-200 hover:text-red-500 opacity-0 group-hover:opacity-100 transition">
+                        <Trash2 size={16}/>
+                      </button>
+                    </div>
+                    {s.tipo === 'tecnica'
+                      ? <div className="h-[10px] bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-orange-200 rounded-full transition-all duration-500" style={{width:`${s.nivel}%`}}/></div>
+                      : <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-md text-xs font-semibold">Blanda</span>
+                    }
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tab === 'enlaces' && (
+          loadingLinks ? <Loading label="enlaces"/> :
+          sortedLinks.length === 0 ? <Empty label="enlaces"/> :
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {sortedLinks.map(l => (
+              <div key={l.id_redes_prof} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm group hover:border-[#1F4E79]/30 hover:shadow-md transition-all">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center gap-2 text-[#1F4E79] font-bold text-[13px]">
+                    <Globe size={17}/>{getNetLabel(l.nombre_red)}
+                  </div>
+                  <button onClick={() => setDelLink(l.id_redes_prof)} className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition">
+                    <Trash2 size={15}/>
+                  </button>
+                </div>
+                <a href={l.url_red} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-[13px] truncate block">{l.url_red}</a>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+
+      {/* ── Modals ── */}
+      {showSkill && <SkillModal onClose={() => setShowSkill(false)} onSaved={s => { addSkill(s); setShowSkill(false); setSkillOk(true); }}/>}
+      {showLink  && <LinkModal uid={uid} onClose={() => setShowLink(false)} onSaved={l => { addLink(l); setShowLink(false); setLinkOk(true); }}/>}
+
+      {skillOk    && <SuccessModal title="Habilidad añadida" msg="Tu habilidad se guardó con éxito." onClose={() => setSkillOk(false)}/>}
+      {linkOk     && <SuccessModal title="Enlace añadido"    msg="Tu enlace se guardó con éxito."    onClose={() => setLinkOk(false)}/>}
+
+      {delSkill && <ConfirmModal title="Eliminar Habilidad" msg="¿Estás seguro que quieres eliminar esta habilidad?" onOk={handleDelSkill} onCancel={() => setDelSkill(null)} loading={deleting}/>}
+      {delLink  && <ConfirmModal title="Eliminar Enlace"    msg="¿Estás seguro que quieres eliminar este enlace?"    onOk={handleDelLink}  onCancel={() => setDelLink(null)}  loading={deleting}/>}
+
+      {delSkillOk && <DeleteSuccessModal title="Habilidad Eliminada" msg="Tu habilidad se eliminó con éxito." onClose={() => setDelSkillOk(false)}/>}
+      {delLinkOk  && <DeleteSuccessModal title="Enlace Eliminado"    msg="Tu enlace se eliminó con éxito."    onClose={() => setDelLinkOk(false)}/>}
+    </div>
+  );
+}

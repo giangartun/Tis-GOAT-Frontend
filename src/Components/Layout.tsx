@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Outlet, useNavigate, Link } from "react-router-dom";
+import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { Home, Settings, UserRound, LogOut, Menu, X, Palette } from "lucide-react";
 
 interface Usuario {
@@ -10,6 +10,8 @@ interface Usuario {
 
 function Layout() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const esPerfil = location.pathname === "/perfil";
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loadingLogout, setLoadingLogout] = useState(false);
   const [menuAbierto, setMenuAbierto] = useState(false);
@@ -162,67 +164,52 @@ function Layout() {
             Inicio
           </Link>
           <span>&gt;</span>
-          <span className="text-app-text">Navegación</span>
+          {esPerfil ? (
+            <span className="text-app-text font-semibold">Mi perfil</span>
+          ) : (
+            <span className="text-app-text">Navegación</span>
+          )}
         </div>
       </nav>
 
-      <main className="min-h-[calc(100vh-180px)] lg:grid lg:grid-cols-[88px_1fr_360px]">
-        <aside className="hidden border-r border-app-border bg-app-sidebar py-6 text-white lg:flex lg:flex-col lg:items-center lg:gap-6">
-          <button
-            type="button"
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15 transition hover:bg-white/25"
-            title="Perfil"
-          >
-            <UserRound size={22} />
-          </button>
+      <main className={`min-h-[calc(100vh-180px)] ${esPerfil ? "flex flex-col" : "lg:grid lg:grid-cols-[88px_1fr_360px]"}`}>
+        {!esPerfil && (
+          <aside className="hidden border-r border-app-border bg-app-sidebar py-6 text-white lg:flex lg:flex-col lg:items-center lg:gap-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15">
+              <UserRound size={22} />
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
+              <Home size={22} />
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
+              <Settings size={22} />
+            </div>
+          </aside>
+        )}
 
-          <button
-            type="button"
-            className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 transition hover:bg-white/25"
-            title="Inicio"
-          >
-            <Home size={22} />
-          </button>
-
-          <button
-            type="button"
-            className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 transition hover:bg-white/25"
-            title="Configuración"
-          >
-            <Settings size={22} />
-          </button>
-
-          <button
-            type="button"
-            className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 transition hover:bg-white/25"
-            title="Personalización del portafolio"
-            onClick={() => navigate("/personalizacion-portafolio")}
-          >
-            <Palette size={22} />
-          </button>
-        </aside>
-
-        <section className="overflow-auto">
+        <section className="overflow-auto flex-1">
           <Outlet />
         </section>
 
-        <aside className="hidden border-l border-app-border bg-app-surface px-5 py-6 lg:block">
-          <div className="rounded-2xl border border-app-border bg-white p-4">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-semibold">Artículos y notificaciones</h3>
-              <a href="#" className="text-xs text-app-muted hover:text-app-text">
-                Ver todos
-              </a>
+        {!esPerfil && (
+          <aside className="hidden border-l border-app-border bg-app-surface px-5 py-6 lg:block">
+            <div className="rounded-2xl border border-app-border bg-white p-4">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="font-semibold">Artículos y notificaciones</h3>
+                <a href="#" className="text-xs text-app-muted hover:text-app-text">
+                  Ver todos
+                </a>
+              </div>
+              <div className="h-40 rounded-xl bg-app-card" />
+              <h4 className="mt-4 text-base font-semibold">
+                Mejores prácticas de desarrollo web
+              </h4>
+              <p className="mt-2 text-sm text-app-muted">
+                Descubre técnicas y conceptos para mejorar tus habilidades de desarrollo web.
+              </p>
             </div>
-            <div className="h-40 rounded-xl bg-app-card" />
-            <h4 className="mt-4 text-base font-semibold">
-              Mejores prácticas de desarrollo web
-            </h4>
-            <p className="mt-2 text-sm text-app-muted">
-              Descubre técnicas y conceptos para mejorar tus habilidades de desarrollo web.
-            </p>
-          </div>
-        </aside>
+          </aside>
+        )}
       </main>
 
       <footer className="border-t border-app-border bg-app-header px-4 py-4 text-center text-white sm:px-6">

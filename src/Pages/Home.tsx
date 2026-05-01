@@ -1,34 +1,69 @@
-import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
+import { useState, useEffect } from "react";
 
-const profiles = [
-  {
-    name: "Carlos Sanchez",
-    role: "Ingeniero Frontend",
-    location: "Medellín, CO",
-    tags: ["React", "Node.js", "MongoDB"],
-  },
-  {
-    name: "Lucía Torres",
-    role: "Desarrolladora Full Stack",
-    location: "Argentina, AR",
-    tags: ["Vue.js", "Node.js", "JavaScript"],
-  },
-  {
-    name: "Gabriel Rojas",
-    role: "Desarrollador Full Stack",
-    location: "Santiago, CL",
-    tags: ["Vue.js", "Node.js", "JavaScript"],
-  },
-];
+interface Habilidad {
+  nombre: string;
+}
+
+interface Usuario {
+  nombre: string;
+  profesion: string;
+  foto: string | null;
+  ubicacion: string | null;
+}
+
+interface Portafolio {
+  id_portafolio: string;
+  enlace_pagi_web: string;
+  usuario: Usuario;
+  habilidades: Habilidad[];
+}
 
 function Home() {
-  const navigate = useNavigate();
+  const [portafolios, setPortafolios] = useState<Portafolio[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/portafolios/publicos", {
+      headers: {
+        Accept: "application/json",
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Error al cargar los perfiles");
+        return res.json();
+      })
+      .then((data) => {
+        setPortafolios(data);
+        setCargando(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setCargando(false);
+      });
+  }, []);
+
+  if (cargando) {
+    return (
+      <section className="bg-app-bg px-6 py-6">
+        <p className="text-sm text-app-muted">Cargando perfiles...</p>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="bg-app-bg px-6 py-6">
+        <p className="text-sm text-red-500">{error}</p>
+      </section>
+    );
+  }
 
   return (
-    <section className="bg-app-bg px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-      <div className="mb-6 flex items-center gap-3 rounded-2xl border border-app-border bg-app-surface px-4 py-3 shadow-sm">
-        <Search size={18} className="text-app-muted shrink-0" />
+    <section className="bg-app-bg px-6 py-6">
+      <div className="mb-6 flex items-center gap-3 rounded-2xl border border-app-border bg-app-surface px-4 py-3">
+        <Search size={18} className="text-app-muted" />
         <input
           type="text"
           placeholder="Buscar..."
@@ -37,58 +72,74 @@ function Home() {
       </div>
 
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-app-text sm:text-3xl">
+        <h2 className="text-2xl font-bold text-app-text">
           ¡Hola de nuevo! Explora nuevos perfiles y amplía tus conexiones
         </h2>
-        <p className="mt-2 max-w-2xl text-sm text-app-muted sm:text-base">
+        <p className="mt-2 max-w-2xl text-sm text-app-muted">
           Descubre otros perfiles de desarrolladores y conecta con colegas del sector tecnológico.
         </p>
       </div>
 
       <div className="space-y-4">
-        {profiles.map((profile) => (
+        {portafolios.map((portafolio) => (
           <article
-            key={profile.name}
-            className="flex flex-col gap-4 rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm sm:p-5 lg:flex-row lg:items-center lg:justify-between"
+            key={portafolio.id_portafolio}
+            className="flex items-center justify-between rounded-2xl border border-app-border bg-app-surface p-5 shadow-sm"
           >
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-app-card text-lg font-bold text-app-text shrink-0">
-                {profile.name.charAt(0)}
-              </div>
+            <div className="flex items-center gap-4">
 
-              <div className="min-w-0">
+              {/* Foto o inicial */}
+              {portafolio.usuario.foto ? (
+                <img
+                  src={portafolio.usuario.foto}
+                  alt={portafolio.usuario.nombre}
+                  className="h-14 w-14 rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-app-card text-lg font-bold text-app-text">
+                  {portafolio.usuario.nombre.charAt(0)}
+                </div>
+              )}
+
+              <div>
                 <h3 className="text-base font-semibold text-app-text">
-                  {profile.name}
+                  {portafolio.usuario.nombre}
                 </h3>
-                <p className="text-sm text-app-muted">{profile.role}</p>
-                <p className="text-xs text-app-muted">{profile.location}</p>
+                <p className="text-sm text-app-muted">
+                  {portafolio.usuario.profesion ?? "Sin profesión"}
+                </p>
+                <p className="text-xs text-app-muted">
+                  {portafolio.usuario.ubicacion ?? ""}
+                </p>
 
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {profile.tags.map((tag) => (
+                  {portafolio.habilidades.map((habilidad) => (
                     <span
-                      key={tag}
+                      key={habilidad.nombre}
                       className="rounded-full border border-app-border bg-app-card px-3 py-1 text-xs text-app-text"
                     >
-                      {tag}
+                      {habilidad.nombre}
                     </span>
                   ))}
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-start lg:justify-end">
-              <button
-                onClick={() => navigate("/perfil")}
-                className="rounded-full border border-app-border bg-app-card px-4 py-2 text-sm font-medium transition hover:bg-zinc-200"
-              >
-                Ver perfil
-              </button>
-            </div>
+            <button
+              onClick={() => window.location.href = portafolio.enlace_pagi_web}
+              className="rounded-full border border-app-border bg-app-card px-4 py-2 text-sm font-medium transition hover:bg-zinc-200"
+            >
+              Ver perfil
+            </button>
           </article>
         ))}
+
+        {portafolios.length === 0 && (
+          <p className="text-sm text-app-muted">No hay perfiles disponibles.</p>
+        )}
       </div>
 
-      <div className="mt-6 text-left text-sm text-app-muted sm:text-right">
+      <div className="mt-6 text-right text-sm text-app-muted">
         <a href="#" className="hover:text-app-text">
           Ver más perfiles
         </a>

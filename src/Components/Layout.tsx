@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link } from "react-router-dom";
-import { Home, Settings, UserRound, LogOut, Menu, X } from "lucide-react";
+import { Home, Settings, UserRound, LogOut, Menu, X, Palette } from "lucide-react";
 
 interface Usuario {
   nombre?: string;
@@ -115,15 +115,18 @@ function Layout() {
 
       <nav className="border-b border-app-border bg-app-topbar px-4 py-3 text-white sm:px-6">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-6 overflow-x-auto whitespace-nowrap text-sm font-medium">
-            <Link to="/" className="hover:text-white/80 transition">
+          <div className="flex flex-1 items-center justify-center gap-6 overflow-x-auto whitespace-nowrap text-sm font-medium">
+            <Link to="/" className="transition hover:text-white/80">
               Inicio
             </Link>
-            <Link to="/perfil" className="hover:text-white/80 transition">
+            <Link to="/perfil" className="transition hover:text-white/80">
               Mi perfil
             </Link>
-            <Link to="/mis-proyectos" className="hover:text-white/80 transition">
+            <Link to="/mis-proyectos" className="transition hover:text-white/80">
               Mis proyectos
+            </Link>
+            <Link to="/portafolio" className="transition hover:text-white/80">
+              Portafolio
             </Link>
           </div>
 
@@ -146,6 +149,9 @@ function Layout() {
             <Link to="/mis-proyectos" className="hover:text-white/80 transition">
               Mis proyectos
             </Link>
+            <Link to="/portafolio" className="hover:text-white/80 transition">
+              Portafolio
+            </Link>
           </div>
         )}
       </nav>
@@ -162,15 +168,38 @@ function Layout() {
 
       <main className="min-h-[calc(100vh-180px)] lg:grid lg:grid-cols-[88px_1fr_360px]">
         <aside className="hidden border-r border-app-border bg-app-sidebar py-6 text-white lg:flex lg:flex-col lg:items-center lg:gap-6">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15">
+          <button
+            type="button"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15 transition hover:bg-white/25"
+            title="Perfil"
+          >
             <UserRound size={22} />
-          </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
+          </button>
+
+          <button
+            type="button"
+            className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 transition hover:bg-white/25"
+            title="Inicio"
+          >
             <Home size={22} />
-          </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
+          </button>
+
+          <button
+            type="button"
+            className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 transition hover:bg-white/25"
+            title="Configuración"
+          >
             <Settings size={22} />
-          </div>
+          </button>
+
+          <button
+            type="button"
+            className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 transition hover:bg-white/25"
+            title="Personalización del portafolio"
+            onClick={() => navigate("/personalizacion-portafolio")}
+          >
+            <Palette size={22} />
+          </button>
         </aside>
 
         <section className="overflow-auto">

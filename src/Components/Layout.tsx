@@ -184,6 +184,14 @@ function Layout() {
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
               <Settings size={22} />
             </div>
+            <button
+              type="button"
+              onClick={() => navigate("/personalizacion-portafolio")}
+              className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 transition hover:bg-white/25"
+              title="Personalización del portafolio"
+            >
+              <Palette size={22} />
+            </button>
           </aside>
         )}
 

@@ -1,11 +1,19 @@
-import { useEffect, useState } from "react";
-import { Briefcase, GraduationCap, FolderOpen, Code2, ExternalLink } from 'lucide-react';
+import { useEffect, useMemo, useState } from "react";
+import {
+  Briefcase,
+  GraduationCap,
+  FolderOpen,
+  Code2,
+  ExternalLink,
+} from "lucide-react";
 
 interface Habilidad {
   id_habilidad: string;
   nombre: string;
-  categoria: string;
+  tipo?: string | null;
+  categoria?: string | null;
   nivel: number;
+  visible?: boolean;
 }
 
 interface Proyecto {
@@ -15,6 +23,7 @@ interface Proyecto {
   url_proyecto?: string;
   imagen_url?: string;
   tecnologias?: { id_tecnologia: string; nombre: string }[];
+  visible?: boolean;
 }
 
 interface ExperienciaLaboral {
@@ -23,7 +32,8 @@ interface ExperienciaLaboral {
   cargo: string;
   descripcion: string;
   fecha_ini: string;
-  fecha_fin?: string;
+  fecha_fin?: string | null;
+  visible?: boolean;
 }
 
 interface ExperienciaAcademica {
@@ -32,51 +42,70 @@ interface ExperienciaAcademica {
   titulo: string;
   descripcion: string;
   fecha_ini: string;
-  fecha_fin?: string;
+  fecha_fin?: string | null;
+  visible?: boolean;
 }
 
 interface RedProfesional {
   id_redes_prof: string;
   nombre_red: string;
   url_red: string;
+  visible?: boolean;
 }
 
 interface PortafolioData {
   usuario: {
+    id_usuario: string;
     nombre: string;
     apellido_paterno: string;
     apellido_materno?: string;
-    biografia?: string;
-    foto?: string;
+    email: string;
+    biografia?: string | null;
+    foto?: string | null;
+    fecha?: string | null;
   };
+  portafolio: {
+    id_portafolio: string;
+    id_plantilla?: string | null;
+    enlace_pagi_web?: string | null;
+    visible?: boolean;
+    creado_en?: string | null;
+    fecha_act?: string | null;
+  } | null;
+  redes_profesionales: RedProfesional[];
   habilidades: Habilidad[];
-  proyectos: Proyecto[];
   experiencias_laborales: ExperienciaLaboral[];
   experiencias_academicas: ExperienciaAcademica[];
-  redes_profesionales: RedProfesional[];
+  proyectos: Proyecto[];
 }
 
 export default function Portafolio() {
   const [data, setData] = useState<PortafolioData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPortafolio = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('/api/portafolio/completo', {
+        const token = localStorage.getItem("token");
+
+        const response = await fetch("/api/portafolio/completo", {
           headers: {
             Authorization: `Bearer ${token}`,
-            Accept: 'application/json',
+            Accept: "application/json",
           },
         });
 
-        if (!response.ok) throw new Error('Error al cargar el portafolio');
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || `Error ${response.status}`);
+        }
 
-        const result = await response.json();
+        const result = (await response.json()) as PortafolioData;
         setData(result);
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error("Error al cargar el portafolio:", err);
+        setError(err instanceof Error ? err.message : "Error desconocido");
       } finally {
         setLoading(false);
       }
@@ -85,46 +114,72 @@ export default function Portafolio() {
     fetchPortafolio();
   }, []);
 
+  const usuario = data?.usuario;
+  const portafolio = data?.portafolio;
+
+  const redes_profesionales = data?.redes_profesionales ?? [];
+  const habilidades = data?.habilidades ?? [];
+  const experiencias_laborales = data?.experiencias_laborales ?? [];
+  const experiencias_academicas = data?.experiencias_academicas ?? [];
+  const proyectos = data?.proyectos ?? [];
+
+  const nombreCompleto = useMemo(() => {
+    if (!usuario) return "Mi portafolio";
+    return `${usuario.nombre || ""} ${usuario.apellido_paterno || ""}`.trim();
+  }, [usuario]);
+
+  const inicial = useMemo(() => {
+    const nombre = usuario?.nombre?.trim();
+    return nombre ? nombre.charAt(0).toUpperCase() : "P";
+  }, [usuario]);
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#071a2f] flex items-center justify-center text-white">
+      <div className="flex min-h-screen items-center justify-center bg-[#071a2f] text-white">
         Cargando portafolio...
       </div>
     );
   }
 
-  if (!data) {
+  if (error || !data) {
     return (
-      <div className="min-h-screen bg-[#071a2f] flex items-center justify-center text-white">
+      <div className="flex min-h-screen items-center justify-center bg-[#071a2f] text-white">
         No se pudo cargar el portafolio.
       </div>
     );
   }
 
-  const { usuario, habilidades, proyectos, experiencias_laborales, experiencias_academicas, redes_profesionales } = data;
-
   return (
     <div className="min-h-screen bg-[#071a2f] text-white">
       <div className="mx-auto max-w-7xl px-6 py-10">
-        {/* Header */}
         <header className="mb-12 rounded-3xl border border-white/10 bg-[#0b223f] p-8 shadow-2xl">
           <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-6">
-              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-blue-500 text-4xl font-bold">
-                {usuario.nombre?.charAt(0).toUpperCase()}
-              </div>
+              {usuario?.foto ? (
+                <img
+                  src={usuario.foto}
+                  alt={nombreCompleto}
+                  className="h-24 w-24 rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-blue-500 text-4xl font-bold">
+                  {inicial}
+                </div>
+              )}
+
               <div>
                 <h1 className="text-5xl font-bold tracking-tight">
-                  {usuario.nombre} {usuario.apellido_paterno}
+                  {nombreCompleto}
                 </h1>
                 <p className="mt-3 max-w-3xl text-lg text-slate-300">
-                  {usuario.biografia || 'Profesional apasionado por crear soluciones innovadoras y escalables.'}
+                  {usuario?.biografia ||
+                    "Profesional apasionado por crear soluciones innovadoras y escalables."}
                 </p>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-3">
-              {redes_profesionales.length > 0 ? (
+              {(redes_profesionales ?? []).length > 0 ? (
                 redes_profesionales.map((red) => (
                   <a
                     key={red.id_redes_prof}
@@ -143,16 +198,34 @@ export default function Portafolio() {
               )}
             </div>
           </div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-slate-300">
+            {usuario?.email && (
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                {usuario.email}
+              </span>
+            )}
+
+            {portafolio?.enlace_pagi_web && (
+              <a
+                href={portafolio.enlace_pagi_web}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition hover:border-blue-400 hover:text-blue-300"
+              >
+                Ver enlace público
+              </a>
+            )}
+          </div>
         </header>
 
-        {/* Proyectos */}
         <section className="mb-12">
           <div className="mb-6 flex items-center gap-3">
             <FolderOpen className="h-7 w-7 text-blue-400" />
             <h2 className="text-3xl font-bold">Proyectos</h2>
           </div>
 
-          {proyectos.length > 0 ? (
+          {(proyectos ?? []).length > 0 ? (
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {proyectos.map((proyecto) => (
                 <article
@@ -236,7 +309,6 @@ export default function Portafolio() {
         </section>
 
         <div className="grid gap-8 lg:grid-cols-2">
-          {/* Experiencia Laboral */}
           <section>
             <div className="mb-6 flex items-center gap-3">
               <Briefcase className="h-7 w-7 text-blue-400" />
@@ -245,13 +317,13 @@ export default function Portafolio() {
 
             <div className="space-y-5">
               {(experiencias_laborales ?? []).length > 0 ? (
-                 (experiencias_laborales ?? []).map((exp) => (
+                experiencias_laborales.map((exp) => (
                   <article
                     key={exp.id_experiencia}
                     className="rounded-2xl border border-white/10 bg-[#0e2747] p-6 shadow-sm"
                   >
                     <p className="text-sm text-blue-400">
-                      {exp.fecha_ini} - {exp.fecha_fin || 'Actual'}
+                      {exp.fecha_ini} - {exp.fecha_fin || "Actual"}
                     </p>
                     <h3 className="mt-2 text-xl font-bold">{exp.cargo}</h3>
                     <p className="text-slate-300">{exp.empresa}</p>
@@ -262,7 +334,9 @@ export default function Portafolio() {
                 ))
               ) : (
                 <div className="rounded-2xl border border-white/10 bg-[#0e2747] p-5 shadow-sm">
-                  <p className="font-semibold text-white">Sin experiencia laboral registrada</p>
+                  <p className="font-semibold text-white">
+                    Sin experiencia laboral registrada
+                  </p>
                   <p className="mt-2 leading-6 text-slate-300">
                     Cuando agregues experiencia desde el panel de gestión, aparecerá aquí organizada en tarjetas.
                   </p>
@@ -271,7 +345,6 @@ export default function Portafolio() {
             </div>
           </section>
 
-          {/* Habilidades */}
           <section>
             <div className="mb-6 flex items-center gap-3">
               <Code2 className="h-7 w-7 text-blue-400" />
@@ -279,7 +352,7 @@ export default function Portafolio() {
             </div>
 
             <div className="space-y-4">
-              {habilidades.length > 0 ? (
+              {(habilidades ?? []).length > 0 ? (
                 habilidades.map((habilidad) => (
                   <div
                     key={habilidad.id_habilidad}
@@ -287,7 +360,9 @@ export default function Portafolio() {
                   >
                     <div className="mb-3 flex items-center justify-between">
                       <span className="font-medium">{habilidad.nombre}</span>
-                      <span className="text-sm text-slate-400">{habilidad.nivel}%</span>
+                      <span className="text-sm text-slate-400">
+                        {habilidad.nivel}%
+                      </span>
                     </div>
                     <div className="h-3 rounded-full bg-slate-700">
                       <div
@@ -299,7 +374,9 @@ export default function Portafolio() {
                 ))
               ) : (
                 <div className="rounded-2xl border border-white/10 bg-[#0e2747] p-5 shadow-sm">
-                  <p className="font-semibold text-white">Sin habilidades registradas</p>
+                  <p className="font-semibold text-white">
+                    Sin habilidades registradas
+                  </p>
                   <p className="mt-2 leading-6 text-slate-300">
                     Aquí se mostrarán tus habilidades con barras de nivel cuando las vayas agregando.
                   </p>
@@ -309,7 +386,6 @@ export default function Portafolio() {
           </section>
         </div>
 
-        {/* Formación Académica */}
         <section className="mt-12">
           <div className="mb-6 flex items-center gap-3">
             <GraduationCap className="h-7 w-7 text-blue-400" />
@@ -318,13 +394,13 @@ export default function Portafolio() {
 
           <div className="grid gap-6 md:grid-cols-2">
             {(experiencias_academicas ?? []).length > 0 ? (
-               (experiencias_academicas ?? []).map((edu) => (
+              experiencias_academicas.map((edu) => (
                 <article
                   key={edu.id_experiencia_academica}
                   className="rounded-2xl border border-white/10 bg-[#0e2747] p-6 shadow-sm"
                 >
                   <p className="text-sm text-blue-400">
-                    {edu.fecha_ini} - {edu.fecha_fin || 'Actual'}
+                    {edu.fecha_ini} - {edu.fecha_fin || "Actual"}
                   </p>
                   <h3 className="mt-2 text-xl font-bold">{edu.titulo}</h3>
                   <p className="text-slate-300">{edu.institucion}</p>
@@ -335,7 +411,9 @@ export default function Portafolio() {
               ))
             ) : (
               <div className="rounded-2xl border border-white/10 bg-[#0e2747] p-5 shadow-sm md:col-span-2">
-                <p className="font-semibold text-white">Sin experiencia académica registrada</p>
+                <p className="font-semibold text-white">
+                  Sin experiencia académica registrada
+                </p>
                 <p className="mt-2 leading-6 text-slate-300">
                   Aquí aparecerán tus estudios y certificaciones en tarjetas limpias y ordenadas.
                 </p>

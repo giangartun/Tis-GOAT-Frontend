@@ -1,27 +1,142 @@
 import { useEffect, useState } from "react";
 import { Check, Layout, Palette } from "lucide-react";
+import axios from "axios";
+
+interface Plantilla {
+  id_plantilla: string;
+  nombre: string;
+  descripcion: string;
+  url_vista: string;
+}
 
 function PersonalizacionPortafolio() {
   const [tema, setTema] = useState("claro");
-  const [plantilla, setPlantilla] = useState("bento");
+  const [plantillaSeleccionada, setPlantillaSeleccionada] = useState<string>("");
+  const [plantillas, setPlantillas] = useState<Plantilla[]>([]);
   const [mostrarMensaje, setMostrarMensaje] = useState(false);
+  const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
     const temaGuardado = localStorage.getItem("portafolio_tema");
-    const plantillaGuardada = localStorage.getItem("portafolio_plantilla");
-
     if (temaGuardado) setTema(temaGuardado);
-    if (plantillaGuardada) setPlantilla(plantillaGuardada);
+
+    cargarPlantillas();
+    cargarPlantillaActual();
   }, []);
 
-  const aplicarCambios = () => {
-    localStorage.setItem("portafolio_tema", tema);
-    localStorage.setItem("portafolio_plantilla", plantilla);
-    setMostrarMensaje(true);
+  const getAuthHeaders = () => ({
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+  });
+
+  const cargarPlantillas = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/plantillas",
+        getAuthHeaders()
+      );
+      setPlantillas(response.data);
+    } catch (error) {
+      console.error("Error al cargar plantillas:", error);
+    }
+  };
+
+  const cargarPlantillaActual = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/portafolio/completo",
+        getAuthHeaders()
+      );
+
+      const portafolio = response.data.portafolio;
+      if (portafolio?.id_plantilla) {
+        setPlantillaSeleccionada(portafolio.id_plantilla);
+      }
+    } catch (error) {
+      console.error("Error al cargar plantilla actual:", error);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const aplicarCambios = async () => {
+    try {
+      await axios.put(
+        "http://localhost:8000/api/portafolio/plantilla",
+        {
+          id_plantilla: plantillaSeleccionada,
+        },
+        getAuthHeaders()
+      );
+
+      localStorage.setItem("portafolio_tema", tema);
+      setMostrarMensaje(true);
+    } catch (error) {
+      console.error("Error al guardar la plantilla:", error);
+      alert("No se pudo guardar la configuración del portafolio.");
+    }
+  };
+
+  const obtenerVistaPrevia = (urlVista: string) => {
+    switch (urlVista) {
+      case "bento":
+      case "v1_modern":
+        return (
+          <div className="grid h-full grid-cols-3 grid-rows-3 gap-1">
+            <div className="rounded bg-[#4f81bd]" />
+            <div className="col-span-2 rounded bg-[#2a4b73]" />
+            <div className="col-span-2 rounded bg-[#162a44]" />
+            <div className="rounded bg-[#2a4b73]" />
+            <div className="row-span-2 rounded bg-[#162a44]" />
+            <div className="row-span-2 rounded bg-[#2a4b73]" />
+            <div className="rounded bg-[#4f81bd]" />
+          </div>
+        );
+
+      case "sidebar":
+        return (
+          <div className="grid h-full grid-cols-3 gap-1">
+            <div className="rounded bg-[#162a44]" />
+            <div className="col-span-2 rounded bg-[#0f2035]" />
+          </div>
+        );
+
+      case "editorial":
+        return (
+          <div className="grid h-full grid-cols-3 grid-rows-3 gap-1">
+            <div className="col-span-3 rounded bg-[#4f81bd]" />
+            <div className="col-span-3 rounded bg-[#162a44]" />
+            <div className="rounded bg-[#2a4b73]" />
+            <div className="rounded bg-[#2a4b73]" />
+            <div className="rounded bg-[#2a4b73]" />
+          </div>
+        );
+
+      default:
+        return (
+          <div className="grid h-full grid-cols-3 grid-rows-3 gap-1">
+            <div className="rounded bg-[#4f81bd]" />
+            <div className="col-span-2 rounded bg-[#2a4b73]" />
+            <div className="col-span-3 rounded bg-[#162a44]" />
+            <div className="col-span-3 rounded bg-[#2a4b73]" />
+          </div>
+        );
+    }
   };
 
   const tarjetaBase =
     "rounded-2xl border bg-white p-4 shadow-sm transition-all duration-300 hover:shadow-lg";
+
+  if (cargando) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-app-bg">
+        <p className="text-lg text-app-text">Cargando personalización...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-app-bg p-6 md:p-8">
@@ -31,7 +146,7 @@ function PersonalizacionPortafolio() {
             Personalización del Portafolio
           </h1>
           <p className="mt-2 text-lg text-app-muted">
-            Elige el color y la estructura de tu portafolio que vaya más con tu personalidad.
+            Elige el color y la estructura de tu portafolio.
           </p>
         </div>
 
@@ -40,11 +155,11 @@ function PersonalizacionPortafolio() {
             <div className="mb-6 flex items-center gap-3">
               <Palette className="text-blue-600" size={28} />
               <h2 className="text-2xl font-semibold text-app-text">
-                Color y estilo de Tipografía
+                Color y estilo de tipografía
               </h2>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 max-w-2xl">
+            <div className="grid max-w-2xl gap-6 md:grid-cols-2">
               <button
                 type="button"
                 onClick={() => setTema("claro")}
@@ -56,7 +171,7 @@ function PersonalizacionPortafolio() {
               >
                 <div className="overflow-hidden rounded-xl border">
                   <div className="bg-white px-6 py-8 text-left">
-                    <h3 className="text-4xl font-light text-gray-800 leading-tight">
+                    <h3 className="text-4xl font-light leading-tight text-gray-800">
                       Portafolio
                       <br />
                       Estilo
@@ -79,7 +194,7 @@ function PersonalizacionPortafolio() {
               >
                 <div className="overflow-hidden rounded-xl border">
                   <div className="bg-slate-700 px-6 py-8 text-left">
-                    <h3 className="text-4xl font-light text-white leading-tight">
+                    <h3 className="text-4xl font-light leading-tight text-white">
                       Portafolio
                       <br />
                       Estilo
@@ -97,97 +212,48 @@ function PersonalizacionPortafolio() {
             <div className="mb-6 flex items-center gap-3">
               <Layout className="text-blue-600" size={28} />
               <h2 className="text-2xl font-semibold text-app-text">
-                Estructura
+                Plantillas disponibles
               </h2>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              <button
-                type="button"
-                onClick={() => setPlantilla("bento")}
-                className={`text-left transition ${
-                  plantilla === "bento" ? "scale-[1.02]" : ""
-                }`}
-              >
-                <div
-                  className={`mx-auto h-[116px] w-[170px] rounded border-4 p-2 shadow-sm ${
-                    plantilla === "bento"
-                      ? "border-[#1d3557] ring-4 ring-blue-100"
-                      : "border-gray-200"
-                  } bg-[#203a5c]`}
+              {plantillas.map((plantilla) => (
+                <button
+                  key={plantilla.id_plantilla}
+                  type="button"
+                  onClick={() => setPlantillaSeleccionada(plantilla.id_plantilla)}
+                  className={`text-left transition ${
+                    plantillaSeleccionada === plantilla.id_plantilla
+                      ? "scale-[1.02]"
+                      : ""
+                  }`}
                 >
-                  <div className="grid h-full grid-cols-3 grid-rows-3 gap-1">
-                    <div className="col-span-1 row-span-1 rounded bg-[#4f81bd]" />
-                    <div className="col-span-2 row-span-1 rounded bg-[#2a4b73]" />
-                    <div className="col-span-2 row-span-1 rounded bg-[#162a44]" />
-                    <div className="col-span-1 row-span-1 rounded bg-[#2a4b73]" />
-                    <div className="col-span-1 row-span-2 rounded bg-[#162a44]" />
-                    <div className="col-span-1 row-span-2 rounded bg-[#2a4b73]" />
-                    <div className="col-span-1 row-span-1 rounded bg-[#4f81bd]" />
+                  <div
+                    className={`mx-auto h-[116px] w-[170px] rounded border-4 p-2 shadow-sm ${
+                      plantillaSeleccionada === plantilla.id_plantilla
+                        ? "border-[#1d3557] ring-4 ring-blue-100"
+                        : "border-gray-200"
+                    } bg-[#203a5c]`}
+                  >
+                    {obtenerVistaPrevia(plantilla.url_vista)}
                   </div>
-                </div>
-                <p className="mt-3 text-center text-sm text-app-muted">
-                  Plantilla Bento-grid
-                </p>
-              </button>
 
-              <button
-                type="button"
-                onClick={() => setPlantilla("sidebar")}
-                className={`text-left transition ${
-                  plantilla === "sidebar" ? "scale-[1.02]" : ""
-                }`}
-              >
-                <div
-                  className={`mx-auto h-[116px] w-[170px] rounded border-4 p-2 shadow-sm ${
-                    plantilla === "sidebar"
-                      ? "border-[#1d3557] ring-4 ring-blue-100"
-                      : "border-gray-200"
-                  } bg-[#203a5c]`}
-                >
-                  <div className="grid h-full grid-cols-3 gap-1">
-                    <div className="col-span-1 rounded bg-[#162a44]" />
-                    <div className="col-span-2 rounded bg-[#0f2035]" />
-                  </div>
-                </div>
-                <p className="mt-3 text-center text-sm text-app-muted">
-                  Plantilla Sidebar-Fijo
-                </p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setPlantilla("editorial")}
-                className={`text-left transition ${
-                  plantilla === "editorial" ? "scale-[1.02]" : ""
-                }`}
-              >
-                <div
-                  className={`mx-auto h-[116px] w-[170px] rounded border-4 p-2 shadow-sm ${
-                    plantilla === "editorial"
-                      ? "border-[#1d3557] ring-4 ring-blue-100"
-                      : "border-gray-200"
-                  } bg-[#203a5c]`}
-                >
-                  <div className="grid h-full grid-cols-3 grid-rows-3 gap-1">
-                    <div className="col-span-3 row-span-1 rounded bg-[#4f81bd]" />
-                    <div className="col-span-3 row-span-1 rounded bg-[#162a44]" />
-                    <div className="col-span-1 row-span-1 rounded bg-[#2a4b73]" />
-                    <div className="col-span-1 row-span-1 rounded bg-[#2a4b73]" />
-                    <div className="col-span-1 row-span-1 rounded bg-[#2a4b73]" />
-                  </div>
-                </div>
-                <p className="mt-3 text-center text-sm text-app-muted">
-                  Plantilla Editorial/Revista
-                </p>
-              </button>
+                  <p className="mt-3 text-center font-medium text-app-text">
+                    {plantilla.nombre}
+                  </p>
+                  <p className="mt-1 text-center text-sm text-app-muted">
+                    {plantilla.descripcion}
+                  </p>
+                </button>
+              ))}
             </div>
           </section>
 
           <div className="flex justify-end pt-4">
             <button
               onClick={aplicarCambios}
-              className="rounded-full bg-blue-500 px-8 py-3 text-lg font-medium text-white shadow-lg transition hover:bg-blue-600"
+              disabled={!plantillaSeleccionada}
+              className="rounded-full bg-blue-500 px-8 py-3 text-lg font-medium text-white shadow-lg transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Aplicar cambios
             </button>

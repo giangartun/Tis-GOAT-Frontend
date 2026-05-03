@@ -1,116 +1,168 @@
-import React, { useState, useEffect } from 'react';
-import { getPrivacidad, actualizarPrivacidad, restablecerPrivacidad, normalizeEstado } from '../Services/privacy';
-import type { PrivacidadEstado } from '../Services/privacy';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  getPrivacidad,
+  actualizarPrivacidad,
+  restablecerPrivacidad,
+  transformarRespuesta,
+  extraerTodosLosNombres,
+  calcularCambios,
+  calcularTodos,
+  SECCIONES_KEYS,
+} from '../Services/privacy';
+import type { EstadoFrontend, NombresItems, ClaveSeccion } from '../Services/privacy';
+import SeccionPrivacidad from '../Components/SeccionPrivacidad';
 import ConfirmModal from '../Components/ConfirmModal';
 import './PrivacidadPortafolio.css';
 
-// ── Iconos inline ────────────────────────────────────────────────────────────
+// ── Iconos ───────────────────────────────────────────────────────────────────
 const IconGlobe = () => (
-  <svg viewBox="0 0 18 18" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+  <svg viewBox="0 0 18 18" fill="currentColor" width="16" height="16">
     <path d="M9 1a8 8 0 1 0 0 16A8 8 0 0 0 9 1zm5.93 7H12.9a12.7 12.7 0 0 0-1.1-4.45A6.01 6.01 0 0 1 14.93 8zM9 15a11.2 11.2 0 0 1-1.52-4H10.52A11.2 11.2 0 0 1 9 15zm-1.65-6H10.65A11 11 0 0 0 9 3 11 11 0 0 0 7.35 9zM6.2 3.55A12.7 12.7 0 0 0 5.1 8H3.07A6.01 6.01 0 0 1 6.2 3.55zM3.07 10H5.1c.17 1.58.54 3.07 1.1 4.45A6.01 6.01 0 0 1 3.07 10zm8.73 4.45A12.7 12.7 0 0 0 12.9 10h2.03a6.01 6.01 0 0 1-3.13 4.45z" />
   </svg>
 );
 const IconLock = () => (
-  <svg viewBox="0 0 18 18" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+  <svg viewBox="0 0 18 18" fill="currentColor" width="16" height="16">
     <path d="M13 7h-1V5.5a3 3 0 0 0-6 0V7H5a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1zm-5 4.73V13h2v-1.27a1.5 1.5 0 1 0-2 0zM7.5 7V5.5a1.5 1.5 0 0 1 3 0V7h-3z" />
   </svg>
 );
 const IconFolder = () => (
-  <svg viewBox="0 0 18 18" fill="currentColor"><path d="M1 4a1 1 0 0 1 1-1h5l2 2h7a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4z"/></svg>
+  <svg viewBox="0 0 18 18" fill="currentColor" width="16" height="16">
+    <path d="M1 4a1 1 0 0 1 1-1h5l2 2h7a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4z"/>
+  </svg>
 );
 const IconSkill = () => (
-  <svg viewBox="0 0 18 18" fill="currentColor"><path d="M9 1l2.39 4.84L17 6.76l-4 3.9.94 5.5L9 13.77l-4.94 2.6L5 10.66 1 6.76l5.61-.92z"/></svg>
+  <svg viewBox="0 0 18 18" fill="currentColor" width="16" height="16">
+    <path d="M9 1l2.39 4.84L17 6.76l-4 3.9.94 5.5L9 13.77l-4.94 2.6L5 10.66 1 6.76l5.61-.92z"/>
+  </svg>
 );
 const IconAcad = () => (
-  <svg viewBox="0 0 18 18" fill="currentColor"><path d="M9 1L1 5l8 4 8-4-8-4zM1 9l8 4 8-4M1 13l8 4 8-4"/></svg>
+  <svg viewBox="0 0 18 18" fill="currentColor" width="16" height="16">
+    <path d="M9 1L1 5l8 4 8-4-8-4zM1 9l8 4 8-4M1 13l8 4 8-4"/>
+  </svg>
 );
 const IconWork = () => (
-  <svg viewBox="0 0 18 18" fill="currentColor"><path d="M6 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3zm2-1v1h2V3H8zM3 8v5h12V8H3z"/></svg>
+  <svg viewBox="0 0 18 18" fill="currentColor" width="16" height="16">
+    <path d="M6 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3zm2-1v1h2V3H8zM3 8v5h12V8H3z"/>
+  </svg>
 );
 const IconNet = () => (
-  <svg viewBox="0 0 18 18" fill="currentColor"><circle cx="9" cy="4" r="2"/><circle cx="3" cy="14" r="2"/><circle cx="15" cy="14" r="2"/><path d="M9 6v3M9 9l-4 4M9 9l4 4"/></svg>
+  <svg viewBox="0 0 18 18" fill="currentColor" width="16" height="16">
+    <circle cx="9" cy="4" r="2"/>
+    <circle cx="3" cy="14" r="2"/>
+    <circle cx="15" cy="14" r="2"/>
+    <path d="M9 6v3M9 9l-4 4M9 9l4 4"/>
+  </svg>
 );
 
-// ── Tipos ────────────────────────────────────────────────────────────────────
-type ModalType = 'guardar' | 'restablecer' | null;
+// ── Config secciones ─────────────────────────────────────────────────────────
+const SECCIONES_CONFIG: Record<ClaveSeccion, { titulo: string; icon: React.FC }> = {
+  proyectos:             { titulo: 'Proyectos',             icon: IconFolder },
+  habilidades:           { titulo: 'Habilidades',           icon: IconSkill  },
+  experiencia_academica: { titulo: 'Experiencia académica', icon: IconAcad   },
+  experiencia_laboral:   { titulo: 'Experiencia laboral',   icon: IconWork   },
+  redes_profesionales:   { titulo: 'Redes profesionales',   icon: IconNet    },
+};
 
-interface SeccionConfig {
-  key: keyof PrivacidadEstado;
-  label: string;
-  desc: string;
-  icon: React.FC;
-}
-
-const SECCIONES: SeccionConfig[] = [
-  { key: 'proyectos',             label: 'Proyectos',             desc: 'Todos los proyectos publicados',        icon: IconFolder },
-  { key: 'habilidades',           label: 'Habilidades',           desc: 'Técnicas y blandas',                    icon: IconSkill  },
-  { key: 'experiencia_academica', label: 'Experiencia académica', desc: 'Formación universitaria y cursos',      icon: IconAcad   },
-  { key: 'experiencia_laboral',   label: 'Experiencia laboral',   desc: 'Historial de empleo y cargos',          icon: IconWork   },
-  { key: 'redes_profesionales',   label: 'Redes profesionales',   desc: 'LinkedIn, GitHub y otros enlaces',      icon: IconNet    },
-];
-
-const DEFAULT_ESTADO: PrivacidadEstado = {
+const ESTADO_VACIO: EstadoFrontend = {
   portafolio: true,
-  proyectos: true,
-  habilidades: true,
-  experiencia_academica: true,
-  experiencia_laboral: true,
-  redes_profesionales: true,
+  proyectos: {},
+  habilidades: {},
+  experiencia_academica: {},
+  experiencia_laboral: {},
+  redes_profesionales: {},
+};
+
+const NOMBRES_VACIOS: NombresItems = {
+  proyectos: {},
+  habilidades: {},
+  experiencia_academica: {},
+  experiencia_laboral: {},
+  redes_profesionales: {},
 };
 
 // ── Componente principal ─────────────────────────────────────────────────────
 const PrivacidadPortafolio: React.FC = () => {
-  const [estado, setEstado]                 = useState<PrivacidadEstado>(DEFAULT_ESTADO);
-  const [estadoGuardado, setEstadoGuardado] = useState<PrivacidadEstado>(DEFAULT_ESTADO);
-  const [loading, setLoading]               = useState(true);
-  const [saving, setSaving]                 = useState(false);
-  const [modal, setModal]                   = useState<ModalType>(null);
-  const [toast, setToast]                   = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
-  const [hayCambios, setHayCambios]         = useState(false);
+  const [loading, setLoading]                   = useState(true);
+  const [saving, setSaving]                     = useState(false);
+  const [estadoActual, setEstadoActual]         = useState<EstadoFrontend>(ESTADO_VACIO);
+  const [estadoOriginal, setEstadoOriginal]     = useState<EstadoFrontend>(ESTADO_VACIO);
+  const [nombres, setNombres]                   = useState<NombresItems>(NOMBRES_VACIOS);
+  const [modalGuardar, setModalGuardar]         = useState(false);
+  const [modalRestablecer, setModalRestablecer] = useState(false);
+  const [toast, setToast]                       = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const raw  = await getPrivacidad();
-        const norm = normalizeEstado(raw);
-        setEstado(norm);
-        setEstadoGuardado(norm);
-      } catch {
-        showToast('Error al cargar la configuración de privacidad', 'error');
-      } finally {
-        setLoading(false);
-      }
-    })();
+  // ── Carga de datos ─────────────────────────────────────────────────────────
+  const cargarDatos = useCallback(async () => {
+    setLoading(true);
+    try {
+      const raw = await getPrivacidad();
+      console.log('RAW backend:', JSON.stringify(raw, null, 2));
+      const estado = transformarRespuesta(raw);
+      console.log('Estado transformado:', JSON.stringify(estado, null, 2));
+      const noms = extraerTodosLosNombres(raw);
+      console.log('Nombres:', JSON.stringify(noms, null, 2));
+      setEstadoActual(estado);
+      setEstadoOriginal(JSON.parse(JSON.stringify(estado)));
+      setNombres(noms);
+    } catch (err) {
+      console.error('Error al cargar privacidad:', err);
+      showToast('Error al cargar la configuración de privacidad', 'error');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  useEffect(() => {
-    const changed = (Object.keys(estado) as (keyof PrivacidadEstado)[]).some(
-      (k) => estado[k] !== estadoGuardado[k]
-    );
-    setHayCambios(changed);
-  }, [estado, estadoGuardado]);
+  useEffect(() => { cargarDatos(); }, [cargarDatos]);
 
+  // ── Toast ──────────────────────────────────────────────────────────────────
   const showToast = (msg: string, type: 'success' | 'error') => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
   };
 
-  const handleToggle = (key: keyof PrivacidadEstado) => {
-    setEstado((prev) => ({ ...prev, [key]: !prev[key] }));
+  // ── Cambios pendientes ─────────────────────────────────────────────────────
+  const hayCambios = JSON.stringify(estadoActual) !== JSON.stringify(estadoOriginal);
+
+  // ── Handlers ───────────────────────────────────────────────────────────────
+  const handleTogglePortafolio = () => {
+    setEstadoActual((prev) => ({ ...prev, portafolio: !prev.portafolio }));
+  };
+
+  const handleToggleSeccion = (seccion: ClaveSeccion, nuevoValor: boolean) => {
+    setEstadoActual((prev) => {
+      const nuevosItems: Record<string, boolean> = {};
+      for (const id of Object.keys(prev[seccion])) {
+        nuevosItems[id] = nuevoValor;
+      }
+      return { ...prev, [seccion]: nuevosItems };
+    });
+  };
+
+  const handleToggleItem = (seccion: ClaveSeccion, id: string, nuevoValor: boolean) => {
+    setEstadoActual((prev) => ({
+      ...prev,
+      [seccion]: { ...prev[seccion], [id]: nuevoValor },
+    }));
+  };
+
+  const handleRevertir = () => {
+    setEstadoActual(JSON.parse(JSON.stringify(estadoOriginal)));
   };
 
   const handleGuardar = async () => {
     setSaving(true);
     try {
-      await actualizarPrivacidad(estado);
-      setEstadoGuardado({ ...estado });
-      setHayCambios(false);
+      const payload = calcularCambios(estadoOriginal, estadoActual);
+      console.log('Payload a enviar:', JSON.stringify(payload, null, 2));
+      await actualizarPrivacidad(payload);
+      setEstadoOriginal(JSON.parse(JSON.stringify(estadoActual)));
       showToast('Configuración guardada correctamente', 'success');
-    } catch {
+    } catch (err) {
+      console.error('Error al guardar:', err);
       showToast('Error al guardar los cambios. Intenta nuevamente.', 'error');
     } finally {
       setSaving(false);
-      setModal(null);
+      setModalGuardar(false);
     }
   };
 
@@ -118,35 +170,29 @@ const PrivacidadPortafolio: React.FC = () => {
     setSaving(true);
     try {
       await restablecerPrivacidad();
-      setEstado(DEFAULT_ESTADO);
-      setEstadoGuardado(DEFAULT_ESTADO);
-      setHayCambios(false);
+      await cargarDatos();
       showToast('Privacidad restablecida. Todo es visible nuevamente.', 'success');
-    } catch {
+    } catch (err) {
+      console.error('Error al restablecer:', err);
       showToast('Error al restablecer. Intenta nuevamente.', 'error');
     } finally {
       setSaving(false);
-      setModal(null);
+      setModalRestablecer(false);
     }
   };
 
-  const handleDescartar = () => {
-    setEstado({ ...estadoGuardado });
-    setHayCambios(false);
-  };
+  // ── Cálculos panel derecho ─────────────────────────────────────────────────
+  const perfilPublico     = estadoActual.portafolio;
+  const totalItems        = SECCIONES_KEYS.reduce((acc, sec) => acc + Object.keys(estadoActual[sec]).length, 0);
+  const itemsVisibles     = SECCIONES_KEYS.reduce((acc, sec) => acc + Object.values(estadoActual[sec]).filter(Boolean).length, 0);
+  const seccionesVisibles = SECCIONES_KEYS.filter((sec) => calcularTodos(estadoActual[sec]));
 
-  const visiblesCount = Object.values(estado).filter(Boolean).length;
-  const perfilPublico  = estado.portafolio;
-
-  // Secciones visibles para la vista previa
-  const seccionesVisibles = SECCIONES.filter((s) => estado[s.key]);
-  const seccionesOcultas  = SECCIONES.filter((s) => !estado[s.key]);
-
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="pv-page">
       <div className="pv-content-wrap">
 
-        {/* ── COLUMNA IZQUIERDA ────────────────────────────── */}
+        {/* ── COLUMNA IZQUIERDA ──────────────────────────── */}
         <div className="pv-col-left">
 
           {/* Encabezado */}
@@ -163,7 +209,7 @@ const PrivacidadPortafolio: React.FC = () => {
             )}
           </div>
 
-          {/* Banner de estado */}
+          {/* Banner estado */}
           <div className={`pv-status-banner ${perfilPublico ? 'pub' : 'priv'}`}>
             <div className="pv-status-dot"></div>
             <div className="pv-status-text">
@@ -179,20 +225,25 @@ const PrivacidadPortafolio: React.FC = () => {
           {/* Visibilidad general */}
           <div className="pv-card">
             <p className="pv-card-label">Visibilidad general</p>
-            <div className="pv-toggle-row">
+            <div className="pv-toggle-row last">
               <div className="pv-toggle-left">
                 <div className={`pv-sec-icon ${perfilPublico ? 'on' : 'off'}`}>
                   <IconGlobe />
                 </div>
                 <div className="pv-toggle-info">
                   <span className="pv-toggle-label">Perfil público</span>
-                  <span className="pv-toggle-desc">Permite que cualquier persona acceda a tu portafolio mediante URL</span>
+                  <span className="pv-toggle-desc">
+                    Permite que cualquier persona acceda a tu portafolio mediante URL
+                  </span>
                 </div>
               </div>
               <div className="pv-toggle-right">
+                <span className={`pv-vis-badge ${perfilPublico ? 'visible' : 'hidden'}`}>
+                  {perfilPublico ? 'Visible' : 'Oculto'}
+                </span>
                 <button
                   className={`pv-toggle-btn ${perfilPublico ? 'on' : 'off'}`}
-                  onClick={() => handleToggle('portafolio')}
+                  onClick={handleTogglePortafolio}
                   role="switch"
                   aria-checked={perfilPublico}
                   aria-label="Perfil público"
@@ -201,7 +252,7 @@ const PrivacidadPortafolio: React.FC = () => {
             </div>
           </div>
 
-          {/* Visibilidad por sección */}
+          {/* Secciones con items individuales */}
           {loading ? (
             <div className="pv-card">
               <p className="pv-card-label">Visibilidad por sección</p>
@@ -217,35 +268,20 @@ const PrivacidadPortafolio: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="pv-card">
-              <p className="pv-card-label">Visibilidad por sección</p>
-              {SECCIONES.map((sec, i) => {
-                const Icon = sec.icon;
-                const isOn = estado[sec.key];
+            <div className="pv-secciones-lista">
+              {SECCIONES_KEYS.map((seccion) => {
+                const config = SECCIONES_CONFIG[seccion];
                 return (
-                  <div key={sec.key} className={`pv-toggle-row ${i === SECCIONES.length - 1 ? 'last' : ''}`}>
-                    <div className="pv-toggle-left">
-                      <div className={`pv-sec-icon ${isOn ? 'on' : 'off'}`}>
-                        <Icon />
-                      </div>
-                      <div className="pv-toggle-info">
-                        <span className="pv-toggle-label">{sec.label}</span>
-                        <span className="pv-toggle-desc">{sec.desc}</span>
-                      </div>
-                    </div>
-                    <div className="pv-toggle-right">
-                      <span className={`pv-vis-badge ${isOn ? 'visible' : 'hidden'}`}>
-                        {isOn ? 'Visible' : 'Oculto'}
-                      </span>
-                      <button
-                        className={`pv-toggle-btn ${isOn ? 'on' : 'off'}`}
-                        onClick={() => handleToggle(sec.key)}
-                        aria-label={`${isOn ? 'Ocultar' : 'Mostrar'} ${sec.label}`}
-                        role="switch"
-                        aria-checked={isOn}
-                      />
-                    </div>
-                  </div>
+                  <SeccionPrivacidad
+                    key={seccion}
+                    titulo={config.titulo}
+                    descripcion=""
+                    icon={config.icon}
+                    items={estadoActual[seccion]}
+                    nombres={nombres[seccion]}
+                    onToggleSeccion={(val) => handleToggleSeccion(seccion, val)}
+                    onToggleItem={(id, val) => handleToggleItem(seccion, id, val)}
+                  />
                 );
               })}
             </div>
@@ -257,78 +293,70 @@ const PrivacidadPortafolio: React.FC = () => {
               <button
                 className="pv-btn-primary"
                 disabled={!hayCambios || saving}
-                onClick={() => setModal('guardar')}
+                onClick={() => setModalGuardar(true)}
               >
                 Guardar cambios
               </button>
               <button
                 className="pv-btn-ghost"
                 disabled={!hayCambios || saving}
-                onClick={handleDescartar}
+                onClick={handleRevertir}
               >
                 Revertir
               </button>
-              {hayCambios && (
+              {!hayCambios && (
                 <span className="pv-saved-ok">
                   <span className="pv-dot green"></span>
-                  Tienes cambios pendientes
+                  Todo guardado
                 </span>
               )}
             </div>
           )}
         </div>
 
-        {/* ── COLUMNA DERECHA ──────────────────────────────── */}
+        {/* ── COLUMNA DERECHA ────────────────────────────── */}
         <aside className="pv-col-right">
 
-          {/* Vista previa pública */}
+          {/* Vista previa */}
           <div className="pv-card">
             <p className="pv-card-label">Vista previa pública</p>
             <div className="pv-preview-box">
-              {/* Mini topbar */}
               <div className="pv-preview-topbar">
                 <div className="pv-preview-dot"></div>
                 <div className="pv-preview-bar short"></div>
               </div>
-
               {perfilPublico ? (
                 <div className="pv-preview-body">
-                  {/* Líneas de perfil */}
                   <div className="pv-preview-bar w60 mb4"></div>
                   <div className="pv-preview-bar w40 mb8"></div>
-
-                  {/* Secciones visibles */}
                   {seccionesVisibles.slice(0, 3).map((sec) => (
-                    <div key={sec.key} className="pv-preview-section">
-                      <div className="pv-preview-section-title">{sec.label}</div>
+                    <div key={sec} className="pv-preview-section">
+                      <div className="pv-preview-section-title">
+                        {SECCIONES_CONFIG[sec].titulo}
+                      </div>
                       <div className="pv-preview-bar w100 filled mb2"></div>
                       <div className="pv-preview-bar w75 filled"></div>
                     </div>
                   ))}
-
-                  {/* Secciones ocultas */}
-                  {seccionesOcultas.slice(0, 2).map((sec) => (
-                    <div key={sec.key} className="pv-preview-hidden">
-                      <span>{sec.label} oculto</span>
-                    </div>
-                  ))}
+                  {SECCIONES_KEYS
+                    .filter((s) => !calcularTodos(estadoActual[s]))
+                    .slice(0, 2)
+                    .map((sec) => (
+                      <div key={sec} className="pv-preview-hidden">
+                        <span>{SECCIONES_CONFIG[sec].titulo} oculto</span>
+                      </div>
+                    ))}
                 </div>
               ) : (
                 <div className="pv-preview-locked">
-                  <div className="pv-preview-lock-icon">
-                    <IconLock />
-                  </div>
+                  <div className="pv-preview-lock-icon"><IconLock /></div>
                   <p>Este perfil es privado. No visible al público.</p>
                 </div>
               )}
             </div>
-
-            {/* Enlace */}
-            <div className="pv-link-label">
-              {perfilPublico ? 'Enlace del portafolio' : 'Enlace privado activo'}
-            </div>
+            <div className="pv-link-label">Enlace del portafolio</div>
             <div className="pv-link-box">
-              <span className="pv-link-url">portafolio.app/eliana-martinez</span>
+              <span className="pv-link-url">portafolio.app/mi-portafolio</span>
               <button className="pv-link-copy">Copiar</button>
             </div>
           </div>
@@ -344,8 +372,12 @@ const PrivacidadPortafolio: React.FC = () => {
                 </span>
               </div>
               <div className="pv-sum-row">
-                <span>Secciones visibles</span>
-                <span className="pv-sum-val">{visiblesCount} de {SECCIONES.length + 1}</span>
+                <span>Elementos visibles</span>
+                <span className="pv-sum-val">{itemsVisibles} de {totalItems}</span>
+              </div>
+              <div className="pv-sum-row">
+                <span>Secciones activas</span>
+                <span className="pv-sum-val">{seccionesVisibles.length} de {SECCIONES_KEYS.length}</span>
               </div>
               <div className="pv-sum-row">
                 <span>Acceso público</span>
@@ -356,24 +388,26 @@ const PrivacidadPortafolio: React.FC = () => {
             </div>
           </div>
 
-          {/* Advertencia cambios pendientes */}
+          {/* Advertencia */}
           {hayCambios && (
             <div className="pv-card pv-warn-card">
               <div className="pv-warn-icon">
-                <svg viewBox="0 0 18 18" fill="currentColor"><path d="M9 1L1 16h16L9 1zm0 3.5L15.1 15H2.9L9 4.5zM8 8v3h2V8H8zm0 4v2h2v-2H8z"/></svg>
+                <svg viewBox="0 0 18 18" fill="currentColor">
+                  <path d="M9 1L1 16h16L9 1zm0 3.5L15.1 15H2.9L9 4.5zM8 8v3h2V8H8zm0 4v2h2v-2H8z"/>
+                </svg>
               </div>
               <div>
                 <strong>Cambios sin guardar</strong>
-                <p>Presiona "Guardar cambios" para aplicar la nueva configuración.</p>
+                <p>Presiona "Guardar cambios" para aplicar la configuración.</p>
               </div>
             </div>
           )}
 
-          {/* Botón restablecer */}
+          {/* Restablecer */}
           {!loading && (
             <button
               className="pv-btn-restablecer-full"
-              onClick={() => setModal('restablecer')}
+              onClick={() => setModalRestablecer(true)}
               disabled={saving}
             >
               Restablecer todo a público
@@ -382,25 +416,32 @@ const PrivacidadPortafolio: React.FC = () => {
         </aside>
       </div>
 
-      {/* ── MODALS ──────────────────────────────────────────── */}
-      {modal === 'guardar' && (
-        <ConfirmModal
-          type="guardar"
-          loading={saving}
-          onConfirm={handleGuardar}
-          onCancel={() => setModal(null)}
-        />
-      )}
-      {modal === 'restablecer' && (
-        <ConfirmModal
-          type="restablecer"
-          loading={saving}
-          onConfirm={handleRestablecer}
-          onCancel={() => setModal(null)}
-        />
-      )}
+      {/* Modals */}
+      <ConfirmModal
+        isOpen={modalGuardar}
+        tipo="info"
+        titulo="Confirmar cambios"
+        mensaje="Los cambios de visibilidad se aplicarán de inmediato. Los elementos desactivados dejarán de ser visibles en tu portafolio público."
+        textoConfirmar="Guardar cambios"
+        textoCancelar="Cancelar"
+        loading={saving}
+        onConfirm={handleGuardar}
+        onCancel={() => setModalGuardar(false)}
+      />
 
-      {/* ── TOAST ───────────────────────────────────────────── */}
+      <ConfirmModal
+        isOpen={modalRestablecer}
+        tipo="warning"
+        titulo="Restablecer privacidad"
+        mensaje="Se restablecerá la visibilidad de todos los elementos a público. Esta acción afecta a todos los proyectos, habilidades, experiencias y redes."
+        textoConfirmar="Restablecer todo"
+        textoCancelar="Cancelar"
+        loading={saving}
+        onConfirm={handleRestablecer}
+        onCancel={() => setModalRestablecer(false)}
+      />
+
+      {/* Toast */}
       {toast && (
         <div className={`pv-toast ${toast.type}`}>
           <span className={`pv-toast-dot ${toast.type}`}></span>

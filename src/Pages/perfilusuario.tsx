@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, MapPin, GraduationCap, Globe, Trash2, ChevronDown, Plus, X, Home, Settings } from 'lucide-react';
+import { Mail, MapPin, GraduationCap, Globe, Trash2, ChevronDown, Plus, X, Home, Settings, Camera } from 'lucide-react';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const API = (import.meta as any)?.env?.VITE_API_URL?.replace(/\/$/, '') || 'http://127.0.0.1:8000';
@@ -353,6 +353,175 @@ function useProfileData(uid: string) {
   return { skills, links, loadingSkills, loadingLinks, addSkill, removeSkill, addLink, removeLink };
 }
 
+// ── Datos Personales Modal ───────────────────────────────────────────────────
+function DatosPersonalesModal({
+  currentPhoto,
+  currentBio: _currentBio,   // intentionally unused: bio always starts empty on open
+  onClose,
+  onSave,
+}: {
+  currentPhoto: string | null;
+  currentBio: string;
+  onClose: () => void;
+  onSave: (photo: string | null, bio: string) => void;
+}) {
+  // Local draft state — discarded on Cancel, committed on Guardar
+  const [draftPhoto, setDraftPhoto]     = useState<string | null>(currentPhoto);
+  const [draftBio,   setDraftBio]       = useState('');   // always start empty per spec
+  const [imageOk,    setImageOk]        = useState(false); // green banner flag
+  const [saving,     setSaving]         = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Open the OS image picker (navigates to images folder via accept="image/*")
+  const handlePickImage = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Handle file selection: convert to data-URL and show green banner
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      setDraftPhoto(ev.target?.result as string);
+      setImageOk(true);
+    };
+    reader.readAsDataURL(file);
+    // Reset input so same file can be re-selected if needed
+    e.target.value = '';
+  };
+
+  // Limit textarea to 500 characters
+  const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (e.target.value.length <= 500) setDraftBio(e.target.value);
+  };
+
+  // Cancel: discard local state and close
+  const handleCancel = () => {
+    setDraftPhoto(currentPhoto);
+    setDraftBio('');
+    setImageOk(false);
+    onClose();
+  };
+
+  // Save: pass the new values to the parent
+  const handleSave = async () => {
+    setSaving(true);
+    // Simulate async (e.g. API call) — replace with real fetch if needed
+    await new Promise(r => setTimeout(r, 300));
+    setSaving(false);
+    onSave(draftPhoto, draftBio);
+  };
+
+  return (
+    <ModalWrap>
+      <div className="bg-white rounded-[24px] shadow-2xl w-full max-w-[620px] p-8 my-auto">
+
+        {/* ── Modal header ── */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-[20px] font-bold text-gray-900">Datos Personales</h2>
+          <button onClick={handleCancel} className="text-gray-400 hover:text-gray-700 transition">
+            <X size={20}/>
+          </button>
+        </div>
+
+        {/* ── Body: two columns ── */}
+        <div className="flex gap-8">
+
+          {/* Left column — Photo */}
+          <div className="flex flex-col items-start gap-3 min-w-[160px]">
+            <p className="text-[13px] font-bold text-gray-700">Foto de perfil</p>
+
+            {/* Circular photo preview */}
+            <div className="w-[130px] h-[130px] rounded-full border-2 border-gray-200 bg-gray-50 flex flex-col items-center justify-center overflow-hidden">
+              {draftPhoto
+                ? <img src={draftPhoto} alt="Vista previa" className="w-full h-full object-cover"/>
+                : (
+                  <div className="flex flex-col items-center gap-1 text-gray-400">
+                    <Camera size={28}/>
+                    <span className="text-[11px]">Foto</span>
+                  </div>
+                )
+              }
+            </div>
+
+            {/* Hidden file input — accept only images */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+
+            {/* Button that triggers the file picker */}
+            <button
+              type="button"
+              onClick={handlePickImage}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-full text-[13px] font-semibold text-gray-700 bg-white hover:bg-gray-50 transition"
+            >
+              <Camera size={14}/> Cambiar Foto
+            </button>
+          </div>
+
+          {/* Right column — Sobre mí */}
+          <div className="flex-1 flex flex-col gap-2">
+            <p className="text-[13px] font-bold text-gray-700">Sobre mi</p>
+
+            {/* Textarea — white background, max 500 chars */}
+            <textarea
+              value={draftBio}
+              onChange={handleBioChange}
+              placeholder="Cuéntanos un poco sobre ti…"
+              maxLength={500}
+              rows={7}
+              className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-[14px] resize-none focus:ring-2 focus:ring-[#1F4E79] outline-none text-[14px] placeholder:text-gray-400"
+            />
+
+            {/* Character counter */}
+            <p className="text-right text-[12px] text-gray-400">{draftBio.length}/500 caracteres</p>
+          </div>
+        </div>
+
+        {/* ── Green success banner (shown after image is selected) ── */}
+        {imageOk && (
+          <div className="mt-5 flex items-center justify-between bg-green-50 border border-green-200 rounded-[12px] px-4 py-3">
+            <div className="flex items-center gap-2 text-green-700 text-[13px] font-semibold">
+              <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Imagen seleccionada correctamente
+            </div>
+            <button onClick={() => setImageOk(false)} className="text-green-400 hover:text-green-600 transition">
+              <X size={16}/>
+            </button>
+          </div>
+        )}
+
+        {/* ── Action buttons — same style as other modals ── */}
+        <div className="flex gap-3 mt-7 justify-end">
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="px-6 py-2.5 rounded-[14px] bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 transition"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="px-6 py-2.5 rounded-[14px] bg-[#1F4E79] text-white font-bold hover:opacity-90 active:scale-95 disabled:opacity-60 transition"
+          >
+            {saving ? 'Guardando...' : 'Guardar Cambios'}
+          </button>
+        </div>
+      </div>
+    </ModalWrap>
+  );
+}
+
 // ── Helper components ────────────────────────────────────────────────────────
 const Empty    = ({ label }: { label: string }) => <div className="py-20 text-center rounded-3xl border-2 border-dashed border-gray-200 text-gray-400 font-bold uppercase tracking-widest text-sm">No hay {label} añadidos aún.</div>;
 const Loading  = ({ label }: { label: string }) => <div className="text-center py-20 text-gray-400 font-medium">Cargando {label}...</div>;
@@ -361,14 +530,24 @@ const Soon     = ({ label }: { label: string }) => <div className="py-20 text-ce
 // ── Main Component ───────────────────────────────────────────────────────────
 export default function PerfilUsuario() {
   const navigate = useNavigate();
-  const [user] = useState<any>(() => { try { return JSON.parse(localStorage.getItem('usuario') || '{}'); } catch { return {}; } });
+
+  // ── User state (mutable for profile updates) ──────────────────────────────
+  const [user, setUser] = useState<any>(() => { try { return JSON.parse(localStorage.getItem('usuario') || '{}'); } catch { return {}; } });
   const uid = String(user.id_usuario || user.id || '');
+
+  // ── Bio / avatar state (derived from user, updated on save) ───────────────
+  const [profilePhoto, setProfilePhoto]   = useState<string | null>(user.foto || null);
+  const [biography,    setBiography]      = useState<string>(user.biografia || '');
 
   const [tab,    setTab]    = useState<Tab>('habilidades');
   const [sortBy, setSortBy] = useState('más recientes');
   const { skills, links, loadingSkills, loadingLinks, addSkill, removeSkill, addLink, removeLink } = useProfileData(uid);
 
-  // Modal state
+  // ── Datos Personales modal state ──────────────────────────────────────────
+  const [showDatosModal,      setShowDatosModal]      = useState(false);
+  const [showDatosSavedModal, setShowDatosSavedModal] = useState(false);
+
+  // ── Skills / Links modal state ───────────────────────────────────────────
   const [showSkill, setShowSkill] = useState(false);
   const [showLink,  setShowLink]  = useState(false);
   const [skillOk,   setSkillOk]   = useState(false);
@@ -378,6 +557,21 @@ export default function PerfilUsuario() {
   const [delSkillOk, setDelSkillOk] = useState(false);
   const [delLinkOk,  setDelLinkOk]  = useState(false);
   const [deleting,   setDeleting]   = useState(false);
+
+  // ── Handler: save datos personales ───────────────────────────────────────
+  /**
+   * Called by DatosPersonalesModal when the user confirms.
+   * Updates the local user state and persists it in localStorage.
+   */
+  const handleSaveDatos = (newPhoto: string | null, newBio: string) => {
+    const updatedUser = { ...user, foto: newPhoto ?? user.foto, biografia: newBio };
+    setUser(updatedUser);
+    setProfilePhoto(newPhoto ?? profilePhoto);
+    setBiography(newBio);
+    localStorage.setItem('usuario', JSON.stringify(updatedUser));
+    setShowDatosModal(false);
+    setShowDatosSavedModal(true);
+  };
 
   // Group skills by category
   const grouped = skills.reduce((acc: Record<string,Skill[]>, s) => {
@@ -411,8 +605,12 @@ export default function PerfilUsuario() {
 
       {/* ── Sidebar ── */}
       <aside className="hidden md:flex w-[240px] lg:w-[260px] bg-[#1D4A76] text-white flex-col items-center py-10 shadow-inner shrink-0">
-        <div className="w-24 h-24 rounded-full border-2 border-white/20 bg-white/10 mb-4 flex items-center justify-center">
-          <span className="text-3xl font-bold uppercase">{user.nombre?.charAt(0) || '?'}</span>
+        {/* Avatar: shows uploaded photo or initial */}
+        <div className="w-24 h-24 rounded-full border-2 border-white/20 bg-white/10 mb-4 flex items-center justify-center overflow-hidden">
+          {profilePhoto
+            ? <img src={profilePhoto} alt="Foto de perfil" className="w-full h-full object-cover" />
+            : <span className="text-3xl font-bold uppercase">{user.nombre?.charAt(0) || '?'}</span>
+          }
         </div>
         <h2 className="text-[16px] font-bold text-center px-4 mb-1">{getFullName(user)}</h2>
         <p className="text-[13px] text-blue-200 font-medium mb-10 text-center px-2 opacity-80">{user.profesion || 'Ingeniera de Software'}</p>
@@ -429,10 +627,12 @@ export default function PerfilUsuario() {
       {/* ── Content ── */}
       <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto">
 
-        {/* Profile header */}
+        {/* Profile header — biography updates reactively after saving datos personales */}
         <div className="mb-3">
           <h2 className="text-[20px] md:text-[24px] font-bold text-gray-900 mb-1">{getFullName(user)}</h2>
-          <p className="text-gray-500 text-[13px] md:text-[14px] max-w-2xl leading-relaxed">{user.biografia || 'Apasionada por las creaciones de aplicaciones web y la elaboración de experiencias de usuario excepcionales, con experiencia en trabajo equipo.'}</p>
+          <p className="text-gray-500 text-[13px] md:text-[14px] max-w-2xl leading-relaxed">
+            {biography || 'Apasionada por las creaciones de aplicaciones web y la elaboración de experiencias de usuario excepcionales, con experiencia en trabajo equipo.'}
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-gray-500 font-medium mb-5">
@@ -472,7 +672,18 @@ export default function PerfilUsuario() {
         )}
 
         {/* Tab content */}
-        {tab === 'datosPersonales' && <Soon label="Datos Personales"/>}
+        {/* Datos Personales tab — opens modal on button click */}
+        {tab === 'datosPersonales' && (
+          <div className="flex flex-col items-center justify-center py-16 gap-4">
+            <p className="text-gray-500 text-[14px]">Edita tu foto de perfil y la descripción personal.</p>
+            <button
+              onClick={() => setShowDatosModal(true)}
+              className="flex items-center gap-2 bg-[#1F4E79] text-white px-6 py-2.5 rounded-full text-[13px] font-bold shadow hover:opacity-90 transition"
+            >
+              <Camera size={15}/> Datos personales
+            </button>
+          </div>
+        )}
         {tab === 'academica'       && <Soon label="Experiencia Académica"/>}
         {tab === 'laboral'         && <Soon label="Experiencia Laboral"/>}
 
@@ -526,6 +737,26 @@ export default function PerfilUsuario() {
       </main>
 
       {/* ── Modals ── */}
+
+      {/* Datos Personales modal */}
+      {showDatosModal && (
+        <DatosPersonalesModal
+          currentPhoto={profilePhoto}
+          currentBio={biography}
+          onClose={() => setShowDatosModal(false)}
+          onSave={handleSaveDatos}
+        />
+      )}
+
+      {/* Datos Personales saved confirmation */}
+      {showDatosSavedModal && (
+        <SuccessModal
+          title="Cambios guardados"
+          msg="Tu información personal ha sido actualizada correctamente"
+          onClose={() => setShowDatosSavedModal(false)}
+        />
+      )}
+
       {showSkill && <SkillModal onClose={() => setShowSkill(false)} onSaved={s => { addSkill(s); setShowSkill(false); setSkillOk(true); }}/>}
       {showLink  && <LinkModal uid={uid} onClose={() => setShowLink(false)} onSaved={l => { addLink(l); setShowLink(false); setLinkOk(true); }}/>}
 

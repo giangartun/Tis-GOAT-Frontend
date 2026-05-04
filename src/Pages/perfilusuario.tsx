@@ -408,11 +408,36 @@ function DatosPersonalesModal({
   // Save: pass the new values to the parent
   const handleSave = async () => {
     setSaving(true);
-    // Simulate async (e.g. API call) — replace with real fetch if needed
-    await new Promise(r => setTimeout(r, 300));
+    const token = localStorage.getItem('token') || '';
+
+    // Si hay una foto nueva (es base64 o File)
+    if (draftPhoto && draftPhoto.startsWith('data:')) {
+        // Convertir base64 a File
+        const blob = await fetch(draftPhoto).then(r => r.blob());
+        const formData = new FormData();
+        formData.append('foto', blob, 'foto.jpg');
+
+        const res = await fetch(`${API}/api/usuario/foto`, {
+            method: 'POST',
+            headers: { 
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/json'
+            },
+            body: formData  // sin Content-Type, lo pone el browser solo
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+            onSave(data.foto_url, draftBio);
+        } else {
+            alert(data.message || 'Error al subir la foto');
+        }
+    } else {
+        onSave(draftPhoto, draftBio);
+    }
+
     setSaving(false);
-    onSave(draftPhoto, draftBio);
-  };
+};
 
   return (
     <ModalWrap>

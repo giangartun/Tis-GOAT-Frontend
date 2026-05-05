@@ -121,12 +121,16 @@ function Layout() {
             <Link to="/" className="hover:text-white/80 transition">
               Inicio
             </Link>
-            <Link to="/perfil" className="hover:text-white/80 transition">
-              Mi perfil
-            </Link>
-            <Link to="/mis-proyectos" className="hover:text-white/80 transition">
-              Mis proyectos
-            </Link>
+            {usuario && localStorage.getItem("token") && (
+              <>
+                <Link to="/perfil" className="hover:text-white/80 transition">
+                  Mi perfil
+                </Link>
+                <Link to="/mis-proyectos" className="hover:text-white/80 transition">
+                  Mis proyectos
+                </Link>
+              </>
+            )}
           </div>
 
           <button
@@ -142,12 +146,16 @@ function Layout() {
             <Link to="/" className="hover:text-white/80 transition">
               Inicio
             </Link>
-            <Link to="/perfil" className="hover:text-white/80 transition">
-              Mi perfil
-            </Link>
-            <Link to="/mis-proyectos" className="hover:text-white/80 transition">
-              Mis proyectos
-            </Link>
+            {usuario && localStorage.getItem("token") && (
+              <>
+                <Link to="/perfil" className="hover:text-white/80 transition">
+                  Mi perfil
+                </Link>
+                <Link to="/mis-proyectos" className="hover:text-white/80 transition">
+                  Mis proyectos
+                </Link>
+              </>
+            )}
           </div>
         )}
       </nav>

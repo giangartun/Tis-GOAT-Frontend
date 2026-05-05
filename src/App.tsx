@@ -11,18 +11,23 @@ import AnadirHabilidades from "./Pages/AnadirHabilidades";
 import AnadirEnlaces from "./Pages/AnadirEnlaces";
 import PerfilUsuario from "./Pages/perfilusuario";
 
+import PerfilPublico from "./Pages/PerfilPublico";
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Rutas sin layout */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verificar-email/:token" element={<VerificarEmail />} />
 
+        {/* Rutas con layout */}
         <Route element={<Layout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/mis-proyectos" element={<MisProyectosPage />} />
           <Route path="/perfil" element={<PerfilUsuario />} />
+          <Route path="/perfil-publico/:id" element={<PerfilPublico />} />
           <Route path="/portafolio" element={<Portafolio />} />
           <Route
             path="/personalizacion-portafolio"

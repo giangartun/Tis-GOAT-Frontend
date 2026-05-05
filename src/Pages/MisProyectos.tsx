@@ -7,7 +7,9 @@ import {
   eliminarProyecto,
   listarProyectos,
   listarTecnologias,
+  subirEvidencia,
   type Tecnologia,
+  type EvidenciaProyecto,
 } from "../Services/proyectos";
 
 type ProyectoLocal = {
@@ -19,6 +21,7 @@ type ProyectoLocal = {
   fechaFin: string;
   tecnologias: string[];
   imagen: string;
+  archivoPdf: File | null;
 };
 
 type Proyecto = {
@@ -31,6 +34,7 @@ type Proyecto = {
   fecha_fin: string | null;
   demo?: string | null;
   tecnologias?: Tecnologia[];
+  evidencias?: EvidenciaProyecto[];
 };
 
 function MisProyectos() {
@@ -209,8 +213,7 @@ function MisProyectos() {
         tecnologias: form.tecnologias,
       };
 
-      console.log("ID PORTAFOLIO ACTUAL:", idPortafolioActual);
-      console.log("PAYLOAD:", payload);
+      let idProyectoGuardado = "";
 
       if (proyectoEditando) {
         const response = await actualizarProyecto(
@@ -219,6 +222,7 @@ function MisProyectos() {
         );
 
         const actualizado = response.data?.data ?? response.data;
+        idProyectoGuardado = proyectoEditando.id_proyecto;
 
         setProyectos((prev) =>
           prev.map((p) =>
@@ -227,19 +231,35 @@ function MisProyectos() {
               : p
           )
         );
-
-        setSuccessMessage("Proyecto actualizado correctamente.");
       } else {
         const response = await crearProyecto(payload);
         const nuevo = response.data?.data ?? response.data;
+        idProyectoGuardado = nuevo.id_proyecto;
 
         setProyectos((prev) => [...prev, { ...nuevo, demo: form.demo }]);
+      }
 
-        setSuccessMessage("Proyecto guardado correctamente.");
+      if (form.archivoPdf && idProyectoGuardado) {
+        try {
+          await subirEvidencia(idProyectoGuardado, form.archivoPdf);
+        } catch (error: any) {
+          console.error("Error subiendo PDF:", error?.response?.data || error);
+          setErrorMessage(
+            "El proyecto se guardó, pero el PDF no se pudo subir."
+          );
+          setTimeout(() => setErrorMessage(""), 4000);
+        }
       }
 
       cerrarModal();
       await recargarProyectos(idPortafolioActual, buscar);
+
+      setSuccessMessage(
+        proyectoEditando
+          ? "Proyecto actualizado correctamente."
+          : "Proyecto guardado correctamente."
+      );
+
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error: any) {
       console.error("Error guardando proyecto:", error?.response?.data || error);
@@ -311,6 +331,9 @@ function MisProyectos() {
                 ? proyecto.tecnologias.map((tec) => tec.nombre || "Tecnología")
                 : [];
 
+            const evidenciasPdf =
+              proyecto.evidencias?.filter((ev) => ev.tipo === "pdf") ?? [];
+
             return (
               <div
                 key={proyecto.id_proyecto}
@@ -381,6 +404,28 @@ function MisProyectos() {
                         ))}
                       </div>
                     )}
+
+                    {evidenciasPdf.length > 0 && (
+                      <div className="mt-4">
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                          PDF adjunto
+                        </p>
+
+                        <div className="flex flex-wrap gap-2">
+                          {evidenciasPdf.map((ev) => (
+                            <a
+                              key={ev.id_evidencia}
+                              href={ev.url_evidencia}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-200"
+                            >
+                              {ev.nombre_archivo || "Ver PDF"}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-end">
@@ -426,6 +471,7 @@ function MisProyectos() {
                 tecnologias:
                   proyectoEditando.tecnologias?.map((tec) => tec.id_tecnologia) ?? [],
                 imagen: proyectoEditando.imagen_url ?? "",
+                archivoPdf: null,
               }
             : null
         }

@@ -16,6 +16,7 @@ type ProyectoLocal = {
   fechaFin: string;
   tecnologias: string[];
   imagen: string;
+  archivoPdf: File | null;
 };
 
 type NuevoProyectoModalProps = {
@@ -42,13 +43,16 @@ function NuevoProyectoModal({
     fechaFin: "",
     tecnologias: [],
     imagen: "",
+    archivoPdf: null,
   });
 
   const [formError, setFormError] = useState("");
+  const [archivoPdf, setArchivoPdf] = useState<File | null>(null);
 
   useEffect(() => {
     if (proyectoInicial) {
       setForm(proyectoInicial);
+      setArchivoPdf(null);
     } else {
       setForm({
         nombre: "",
@@ -59,7 +63,9 @@ function NuevoProyectoModal({
         fechaFin: "",
         tecnologias: [],
         imagen: "",
+        archivoPdf: null,
       });
+      setArchivoPdf(null);
     }
     setFormError("");
   }, [proyectoInicial, isOpen]);
@@ -102,6 +108,7 @@ function NuevoProyectoModal({
       github: githubLimpio,
       demo: form.demo.trim(),
       imagen: form.imagen.trim(),
+      archivoPdf,
     });
 
     onClose();
@@ -222,9 +229,7 @@ function NuevoProyectoModal({
               placeholder="https://demo.com"
               className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm text-app-text outline-none placeholder:text-app-muted"
             />
-            <p className="mt-1 text-xs text-app-muted">
-              Campo opcional.
-            </p>
+            <p className="mt-1 text-xs text-app-muted">Campo opcional.</p>
           </div>
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -340,6 +345,30 @@ function NuevoProyectoModal({
               placeholder="https://..."
               className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm text-app-text outline-none placeholder:text-app-muted"
             />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-base font-medium text-app-text">
+              Subir archivo PDF:
+            </label>
+            <input
+              type="file"
+              accept="application/pdf,.pdf"
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                setArchivoPdf(file);
+              }}
+              className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm text-app-text outline-none"
+            />
+            <p className="mt-1 text-xs text-app-muted">
+              Este archivo se subirá como evidencia al guardar el proyecto.
+            </p>
+
+            {archivoPdf && (
+              <p className="mt-2 text-sm text-green-700">
+                Archivo seleccionado: {archivoPdf.name}
+              </p>
+            )}
           </div>
 
           {formError && (

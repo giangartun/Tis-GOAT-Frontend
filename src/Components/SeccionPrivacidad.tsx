@@ -13,7 +13,6 @@ interface SeccionPrivacidadProps {
 
 const SeccionPrivacidad: React.FC<SeccionPrivacidadProps> = ({
   titulo,
-  descripcion,
   icon: Icon,
   items,
   nombres,

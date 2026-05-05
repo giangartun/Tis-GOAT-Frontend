@@ -133,6 +133,8 @@ function PersonalizacionPortafolio() {
     }
   };
 
+  /*
+
   const tarjetaBase =
     "rounded-2xl border bg-white p-4 shadow-sm transition-all duration-300 hover:shadow-lg";
 
@@ -143,6 +145,7 @@ function PersonalizacionPortafolio() {
       </div>
     );
   }
+  */
 
   return (
     <div className="min-h-screen bg-[#f8fafc] p-6 md:p-8">

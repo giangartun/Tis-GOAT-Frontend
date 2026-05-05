@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
-import { Check, Layout, Palette } from "lucide-react";
+import { Check, Layout } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
+const API_URL = "http://localhost:8000";
 
 interface Plantilla {
   id_plantilla: string;
@@ -10,16 +13,13 @@ interface Plantilla {
 }
 
 function PersonalizacionPortafolio() {
-  const [tema, setTema] = useState("claro");
+  const navigate = useNavigate();
   const [plantillaSeleccionada, setPlantillaSeleccionada] = useState<string>("");
   const [plantillas, setPlantillas] = useState<Plantilla[]>([]);
   const [mostrarMensaje, setMostrarMensaje] = useState(false);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    const temaGuardado = localStorage.getItem("portafolio_tema");
-    if (temaGuardado) setTema(temaGuardado);
-
     cargarPlantillas();
     cargarPlantillaActual();
   }, []);
@@ -34,11 +34,16 @@ function PersonalizacionPortafolio() {
 
   const cargarPlantillas = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8000/api/plantillas",
-        getAuthHeaders()
+      const response = await axios.get(`${API_URL}/api/plantillas/catalogo`);
+
+      const plantillasFiltradas = (response.data.data || []).filter(
+        (p: Plantilla) =>
+          p.nombre === "Bento" ||
+          p.nombre === "Sidebar" ||
+          p.nombre === "Editorial"
       );
-      setPlantillas(response.data);
+
+      setPlantillas(plantillasFiltradas);
     } catch (error) {
       console.error("Error al cargar plantillas:", error);
     }
@@ -47,13 +52,15 @@ function PersonalizacionPortafolio() {
   const cargarPlantillaActual = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/api/portafolio/completo",
+        `${API_URL}/api/portafolio/completo`,
         getAuthHeaders()
       );
 
       const portafolio = response.data.portafolio;
+
       if (portafolio?.id_plantilla) {
         setPlantillaSeleccionada(portafolio.id_plantilla);
+        localStorage.setItem("portafolio_plantilla", portafolio.id_plantilla);
       }
     } catch (error) {
       console.error("Error al cargar plantilla actual:", error);
@@ -64,15 +71,15 @@ function PersonalizacionPortafolio() {
 
   const aplicarCambios = async () => {
     try {
-      await axios.put(
-        "http://localhost:8000/api/portafolio/plantilla",
+      await axios.patch(
+        `${API_URL}/api/portafolio/actualizar-plantilla`,
         {
           id_plantilla: plantillaSeleccionada,
         },
         getAuthHeaders()
       );
 
-      localStorage.setItem("portafolio_tema", tema);
+      localStorage.setItem("portafolio_plantilla", plantillaSeleccionada);
       setMostrarMensaje(true);
     } catch (error) {
       console.error("Error al guardar la plantilla:", error);
@@ -80,48 +87,47 @@ function PersonalizacionPortafolio() {
     }
   };
 
-  const obtenerVistaPrevia = (urlVista: string) => {
-    switch (urlVista) {
-      case "bento":
-      case "v1_modern":
+  const obtenerVistaPrevia = (nombre: string) => {
+    switch (nombre) {
+      case "Bento":
         return (
           <div className="grid h-full grid-cols-3 grid-rows-3 gap-1">
-            <div className="rounded bg-[#4f81bd]" />
-            <div className="col-span-2 rounded bg-[#2a4b73]" />
-            <div className="col-span-2 rounded bg-[#162a44]" />
-            <div className="rounded bg-[#2a4b73]" />
-            <div className="row-span-2 rounded bg-[#162a44]" />
-            <div className="row-span-2 rounded bg-[#2a4b73]" />
-            <div className="rounded bg-[#4f81bd]" />
+            <div className="rounded bg-blue-500" />
+            <div className="col-span-2 rounded bg-blue-700" />
+            <div className="col-span-2 rounded bg-blue-900" />
+            <div className="rounded bg-blue-700" />
+            <div className="row-span-2 rounded bg-blue-900" />
+            <div className="row-span-2 rounded bg-blue-700" />
+            <div className="rounded bg-blue-500" />
           </div>
         );
 
-      case "sidebar":
+      case "Sidebar":
         return (
           <div className="grid h-full grid-cols-3 gap-1">
-            <div className="rounded bg-[#162a44]" />
-            <div className="col-span-2 rounded bg-[#0f2035]" />
+            <div className="col-span-1 rounded bg-blue-900" />
+            <div className="col-span-2 rounded bg-blue-950" />
           </div>
         );
 
-      case "editorial":
+      case "Editorial":
         return (
           <div className="grid h-full grid-cols-3 grid-rows-3 gap-1">
-            <div className="col-span-3 rounded bg-[#4f81bd]" />
-            <div className="col-span-3 rounded bg-[#162a44]" />
-            <div className="rounded bg-[#2a4b73]" />
-            <div className="rounded bg-[#2a4b73]" />
-            <div className="rounded bg-[#2a4b73]" />
+            <div className="col-span-3 rounded bg-blue-500" />
+            <div className="col-span-3 rounded bg-blue-900" />
+            <div className="rounded bg-blue-700" />
+            <div className="rounded bg-blue-700" />
+            <div className="rounded bg-blue-700" />
           </div>
         );
 
       default:
         return (
           <div className="grid h-full grid-cols-3 grid-rows-3 gap-1">
-            <div className="rounded bg-[#4f81bd]" />
-            <div className="col-span-2 rounded bg-[#2a4b73]" />
-            <div className="col-span-3 rounded bg-[#162a44]" />
-            <div className="col-span-3 rounded bg-[#2a4b73]" />
+            <div className="rounded bg-blue-500" />
+            <div className="col-span-2 rounded bg-blue-700" />
+            <div className="col-span-3 rounded bg-blue-900" />
+            <div className="col-span-3 rounded bg-blue-700" />
           </div>
         );
     }
@@ -132,86 +138,29 @@ function PersonalizacionPortafolio() {
 
   if (cargando) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-app-bg">
-        <p className="text-lg text-app-text">Cargando personalización...</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#f8fafc]">
+        <p className="text-lg text-slate-700">Cargando personalización...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-app-bg p-6 md:p-8">
+    <div className="min-h-screen bg-[#f8fafc] p-6 md:p-8">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-app-text">
+          <h1 className="text-4xl font-bold text-blue-700">
             Personalización del Portafolio
           </h1>
-          <p className="mt-2 text-lg text-app-muted">
-            Elige el color y la estructura de tu portafolio.
+          <p className="mt-2 text-lg text-slate-600">
+            Elige la plantilla que prefieras para tu portafolio.
           </p>
         </div>
 
         <div className="space-y-10 rounded-3xl bg-white p-8 shadow-xl">
           <section>
             <div className="mb-6 flex items-center gap-3">
-              <Palette className="text-blue-600" size={28} />
-              <h2 className="text-2xl font-semibold text-app-text">
-                Color y estilo de tipografía
-              </h2>
-            </div>
-
-            <div className="grid max-w-2xl gap-6 md:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => setTema("claro")}
-                className={`${tarjetaBase} ${
-                  tema === "claro"
-                    ? "border-blue-500 ring-4 ring-blue-100"
-                    : "border-gray-200"
-                }`}
-              >
-                <div className="overflow-hidden rounded-xl border">
-                  <div className="bg-white px-6 py-8 text-left">
-                    <h3 className="text-4xl font-light leading-tight text-gray-800">
-                      Portafolio
-                      <br />
-                      Estilo
-                    </h3>
-                  </div>
-                  <div className="bg-gray-300 px-6 py-4">
-                    <span className="text-4xl font-light text-blue-600">Aa</span>
-                  </div>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setTema("oscuro")}
-                className={`${tarjetaBase} ${
-                  tema === "oscuro"
-                    ? "border-blue-500 ring-4 ring-blue-100"
-                    : "border-gray-200"
-                }`}
-              >
-                <div className="overflow-hidden rounded-xl border">
-                  <div className="bg-slate-700 px-6 py-8 text-left">
-                    <h3 className="text-4xl font-light leading-tight text-white">
-                      Portafolio
-                      <br />
-                      Estilo
-                    </h3>
-                  </div>
-                  <div className="bg-blue-800 px-6 py-4">
-                    <span className="text-4xl font-light text-sky-400">Aa</span>
-                  </div>
-                </div>
-              </button>
-            </div>
-          </section>
-
-          <section>
-            <div className="mb-6 flex items-center gap-3">
               <Layout className="text-blue-600" size={28} />
-              <h2 className="text-2xl font-semibold text-app-text">
+              <h2 className="text-2xl font-semibold text-slate-900">
                 Plantillas disponibles
               </h2>
             </div>
@@ -231,18 +180,15 @@ function PersonalizacionPortafolio() {
                   <div
                     className={`mx-auto h-[116px] w-[170px] rounded border-4 p-2 shadow-sm ${
                       plantillaSeleccionada === plantilla.id_plantilla
-                        ? "border-[#1d3557] ring-4 ring-blue-100"
+                        ? "border-blue-500 ring-4 ring-blue-100"
                         : "border-gray-200"
                     } bg-[#203a5c]`}
                   >
-                    {obtenerVistaPrevia(plantilla.url_vista)}
+                    {obtenerVistaPrevia(plantilla.nombre)}
                   </div>
 
-                  <p className="mt-3 text-center font-medium text-app-text">
+                  <p className="mt-3 text-center font-medium text-slate-900">
                     {plantilla.nombre}
-                  </p>
-                  <p className="mt-1 text-center text-sm text-app-muted">
-                    {plantilla.descripcion}
                   </p>
                 </button>
               ))}
@@ -263,27 +209,36 @@ function PersonalizacionPortafolio() {
 
       {mostrarMensaje && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="w-full max-w-md rounded-2xl bg-[#1f2937] p-6 shadow-2xl">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/20 text-green-400">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/20 text-green-600">
                 <Check size={28} />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-semibold text-white">
+                <h3 className="text-xl font-semibold text-slate-900">
                   Cambios aplicados correctamente
                 </h3>
-                <p className="mt-2 text-sm text-white/70">
-                  La personalización del portafolio se guardó correctamente.
+                <p className="mt-2 text-sm text-slate-600">
+                  La plantilla del portafolio se guardó correctamente.
                 </p>
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={() => setMostrarMensaje(false)}
+                className="rounded-full border border-slate-200 px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                Quedarme aquí
+              </button>
+              <button
+                onClick={() => {
+                  setMostrarMensaje(false);
+                  navigate("/portafolio", { replace: true });
+                }}
                 className="rounded-full bg-blue-500 px-5 py-2 text-sm font-medium text-white transition hover:bg-blue-600"
               >
-                Aceptar
+                Ver mi portafolio
               </button>
             </div>
           </div>

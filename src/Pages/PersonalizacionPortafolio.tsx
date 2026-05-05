@@ -17,7 +17,7 @@ function PersonalizacionPortafolio() {
   const [plantillaSeleccionada, setPlantillaSeleccionada] = useState<string>("");
   const [plantillas, setPlantillas] = useState<Plantilla[]>([]);
   const [mostrarMensaje, setMostrarMensaje] = useState(false);
-  const [cargando, setCargando] = useState(true);
+  //const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
     cargarPlantillas();
@@ -65,7 +65,7 @@ function PersonalizacionPortafolio() {
     } catch (error) {
       console.error("Error al cargar plantilla actual:", error);
     } finally {
-      setCargando(false);
+      //setCargando(false);
     }
   };
 

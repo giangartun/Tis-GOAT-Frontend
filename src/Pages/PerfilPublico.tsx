@@ -125,11 +125,19 @@ function PerfilPublico() {
           <div className="bg-[#1F4E79] text-white p-6 md:p-12 relative overflow-hidden shrink-0">
             <div className="flex flex-col md:flex-row justify-between items-center md:items-start relative z-10 gap-6 md:gap-0">
               <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 md:gap-10">
-                <div className="w-32 h-32 rounded-full mx-auto md:mx-0 border-2 border-white/20 bg-white/5 flex items-center justify-center shadow-inner shrink-0">
-                  <div className="w-28 h-28 rounded-full bg-white/10 flex items-center justify-center text-4xl font-bold">
-                    {usuario.nombre?.charAt(0) || "?"}
-                  </div>
-                </div>
+                <div className="w-32 h-32 rounded-full mx-auto md:mx-0 border-2 border-white/20 shadow-inner shrink-0 overflow-hidden">
+  {usuario.foto ? (
+    <img
+      src={usuario.foto}
+      alt={getFullName(usuario)}
+      className="w-full h-full object-cover"
+    />
+  ) : (
+    <div className="w-full h-full bg-white/10 flex items-center justify-center text-4xl font-bold">
+      {usuario.nombre?.charAt(0) || "?"}
+    </div>
+  )}
+</div>
 
                 <div className="flex flex-col">
                   <h2 className="text-[32px] md:text-[42px] font-bold mb-1 tracking-tight">

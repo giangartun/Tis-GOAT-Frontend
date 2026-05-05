@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
-import { Home, Settings, UserRound, LogOut, Menu, X } from "lucide-react";
+import { Home, Settings, UserRound, LogOut, Menu, X, Palette } from "lucide-react";
 
 interface Usuario {
   nombre?: string;
@@ -117,20 +117,25 @@ function Layout() {
 
       <nav className="border-b border-app-border bg-app-topbar px-4 py-3 text-white sm:px-6">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-6 overflow-x-auto whitespace-nowrap text-sm font-medium">
-            <Link to="/" className="hover:text-white/80 transition">
+          <div className="flex flex-1 items-center justify-start gap-6 overflow-x-auto whitespace-nowrap text-sm font-medium">
+            <Link to="/" className="transition hover:text-white/80">
               Inicio
             </Link>
-            {usuario && localStorage.getItem("token") && (
-              <>
-                <Link to="/perfil" className="hover:text-white/80 transition">
-                  Mi perfil
-                </Link>
-                <Link to="/mis-proyectos" className="hover:text-white/80 transition">
-                  Mis proyectos
-                </Link>
-              </>
-            )}
+{usuario && localStorage.getItem("token") && (
+  <>
+    <Link to="/perfil" className="hover:text-white/80 transition">
+      Mi perfil
+    </Link>
+
+    <Link to="/mis-proyectos" className="hover:text-white/80 transition">
+      Mis proyectos
+    </Link>
+
+    <Link to="/portafolio" className="hover:text-white/80 transition">
+      Portafolio
+    </Link>
+  </>
+)}
           </div>
 
           <button
@@ -146,16 +151,21 @@ function Layout() {
             <Link to="/" className="hover:text-white/80 transition">
               Inicio
             </Link>
-            {usuario && localStorage.getItem("token") && (
-              <>
-                <Link to="/perfil" className="hover:text-white/80 transition">
-                  Mi perfil
-                </Link>
-                <Link to="/mis-proyectos" className="hover:text-white/80 transition">
-                  Mis proyectos
-                </Link>
-              </>
-            )}
+{usuario && localStorage.getItem("token") && (
+  <>
+    <Link to="/perfil" className="hover:text-white/80 transition">
+      Mi perfil
+    </Link>
+
+    <Link to="/mis-proyectos" className="hover:text-white/80 transition">
+      Mis proyectos
+    </Link>
+
+    <Link to="/portafolio" className="hover:text-white/80 transition">
+      Portafolio
+    </Link>
+  </>
+)}
           </div>
         )}
       </nav>
@@ -186,6 +196,14 @@ function Layout() {
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
               <Settings size={22} />
             </div>
+            <button
+              type="button"
+              onClick={() => navigate("/personalizacion-portafolio")}
+              className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 transition hover:bg-white/25"
+              title="Personalización del portafolio"
+            >
+              <Palette size={22} />
+            </button>
           </aside>
         )}
 

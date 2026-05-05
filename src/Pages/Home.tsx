@@ -1,5 +1,6 @@
 import { Search } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Habilidad {
   nombre: string;
@@ -20,6 +21,8 @@ interface Portafolio {
 }
 
 function Home() {
+  const navigate = useNavigate();
+
   const [portafolios, setPortafolios] = useState<Portafolio[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +38,7 @@ function Home() {
         return res.json();
       })
       .then((data) => {
-        setPortafolios(data);
+        setPortafolios(Array.isArray(data) ? data : []);
         setCargando(false);
       })
       .catch((err) => {
@@ -62,6 +65,7 @@ function Home() {
 
   return (
     <section className="bg-app-bg px-6 py-6">
+      {/* Buscador */}
       <div className="mb-6 flex items-center gap-3 rounded-2xl border border-app-border bg-app-surface px-4 py-3">
         <Search size={18} className="text-app-muted" />
         <input
@@ -71,6 +75,7 @@ function Home() {
         />
       </div>
 
+      {/* Texto */}
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-app-text">
           ¡Hola de nuevo! Explora nuevos perfiles y amplía tus conexiones
@@ -80,6 +85,7 @@ function Home() {
         </p>
       </div>
 
+      {/* Lista */}
       <div className="space-y-4">
         {portafolios.map((portafolio) => (
           <article
@@ -88,8 +94,8 @@ function Home() {
           >
             <div className="flex items-center gap-4">
 
-              {/* Foto o inicial */}
-              {portafolio.usuario.foto ? (
+              {/* Foto */}
+              {portafolio.usuario?.foto ? (
                 <img
                   src={portafolio.usuario.foto}
                   alt={portafolio.usuario.nombre}
@@ -97,23 +103,27 @@ function Home() {
                 />
               ) : (
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-app-card text-lg font-bold text-app-text">
-                  {portafolio.usuario.nombre.charAt(0)}
+                  {portafolio.usuario?.nombre?.charAt(0) || "?"}
                 </div>
               )}
 
+              {/* Info */}
               <div>
                 <h3 className="text-base font-semibold text-app-text">
-                  {portafolio.usuario.nombre}
+                  {portafolio.usuario?.nombre || "Usuario"}
                 </h3>
+
                 <p className="text-sm text-app-muted">
-                  {portafolio.usuario.profesion ?? "Sin profesión"}
-                </p>
-                <p className="text-xs text-app-muted">
-                  {portafolio.usuario.ubicacion ?? ""}
+                  {portafolio.usuario?.profesion ?? "Sin profesión"}
                 </p>
 
+                <p className="text-xs text-app-muted">
+                  {portafolio.usuario?.ubicacion ?? ""}
+                </p>
+
+                {/* Habilidades */}
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {portafolio.habilidades.map((habilidad) => (
+                  {portafolio.habilidades?.map((habilidad) => (
                     <span
                       key={habilidad.nombre}
                       className="rounded-full border border-app-border bg-app-card px-3 py-1 text-xs text-app-text"
@@ -125,8 +135,9 @@ function Home() {
               </div>
             </div>
 
+            {/* BOTÓN CORREGIDO 🔥 */}
             <button
-              onClick={() => window.location.href = portafolio.enlace_pagi_web}
+              onClick={() => navigate(`/perfil-publico/${portafolio.id_portafolio}`)}
               className="rounded-full border border-app-border bg-app-card px-4 py-2 text-sm font-medium transition hover:bg-zinc-200"
             >
               Ver perfil
@@ -135,7 +146,9 @@ function Home() {
         ))}
 
         {portafolios.length === 0 && (
-          <p className="text-sm text-app-muted">No hay perfiles disponibles.</p>
+          <p className="text-sm text-app-muted">
+            No hay perfiles disponibles.
+          </p>
         )}
       </div>
 

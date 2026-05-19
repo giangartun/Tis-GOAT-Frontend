@@ -19,5 +19,34 @@
       "invalid": "Invalid credentials",
       "connection": "Server connection error"
     }
+  },
+  "register": {
+    "title": "Create your account",
+    "subtitle": "Sign up to get started",
+    "nombre": "First Name",
+    "nombre_placeholder": "Enter your first name",
+    "apellido_paterno": "Last Name",
+    "apellido_paterno_placeholder": "Enter your last name",
+    "apellido_materno": "Second Last Name",
+    "apellido_materno_placeholder": "Enter your second last name",
+    "email": "Email",
+    "email_placeholder": "Enter your email",
+    "password": "Password",
+    "password_placeholder": "Choose a password",
+    "confirm_password": "Confirm Password",
+    "confirm_password_placeholder": "Repeat your password",
+    "submit": "Register",
+    "loading": "Registering...",
+    "google": "Register with Google",
+    "login_link": "Already have an account? Login",
+    "errors": {
+      "required": "All fields are required",
+      "name": "Name must contain only letters",
+      "lastname1": "Last name must contain only letters",
+      "lastname2": "Second last name must contain only letters",
+      "passwordMatch": "Passwords do not match",
+      "passwordLength": "Password must be at least 6 characters",
+      "email": "Enter a valid email"
+    }
   }
 }

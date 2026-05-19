@@ -1,3 +1,4 @@
+import i18n from "../locales/i18n";
 import { useEffect, useRef, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import {
@@ -65,6 +66,7 @@ function SelectorIdioma() {
   const cambiarIdioma = (idioma: Idioma) => {
     setIdiomaActual(idioma);
     localStorage.setItem("idioma", idioma.codigo);
+    i18n.changeLanguage(idioma.codigo);
     setAbierto(false);
   };
 

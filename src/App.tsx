@@ -12,6 +12,7 @@ import AnadirEnlaces from "./Pages/AnadirEnlaces";
 import PerfilUsuario from "./Pages/perfilusuario";
 import PrivacidadPortafolio from "./Pages/PrivacidadPortafolio";
 import PerfilPublico from "./Pages/PerfilPublico";
+import "./locales/i18n";
 
 function App() {
   return (

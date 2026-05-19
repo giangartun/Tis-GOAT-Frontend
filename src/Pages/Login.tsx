@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next'; // 🔥 IMPORTANTE
 
 interface LoginProps {
   onSwitchToRegister?: () => void;
@@ -10,6 +11,8 @@ export const Login: React.FC<LoginProps> = ({
   onSwitchToRegister, 
   onLoginSuccess 
 }) => {
+  const { t } = useTranslation(); // 🔥 HOOK DE TRADUCCIÓN
+
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -53,7 +56,6 @@ export const Login: React.FC<LoginProps> = ({
     setLoading(true);
 
     try {
-      // LIMPIAR SESIÓN COMPLETA
       localStorage.clear();
 
       const response = await fetch(
@@ -69,8 +71,6 @@ export const Login: React.FC<LoginProps> = ({
       );
 
       const data = await response.json();
-
-      console.log("LOGIN RESPONSE:", data);
 
       if (response.ok && data.token) {
         localStorage.setItem('token', data.token);
@@ -91,11 +91,11 @@ export const Login: React.FC<LoginProps> = ({
         if (data.errors) {
           setErrors(data.errors);
         } else {
-          setError(data.message || 'Credenciales incorrectas');
+          setError(data.message || t('login.errors.invalid'));
         }
       }
     } catch (err) {
-      setError('Error de conexión con el servidor.');
+      setError(t('login.errors.connection'));
     } finally {
       setLoading(false);
     }
@@ -108,30 +108,30 @@ export const Login: React.FC<LoginProps> = ({
   return (
     <div className="min-h-screen flex">
       
-      {/* PANEL IZQUIERDO */}
+      {/* IZQUIERDA */}
       <div className="w-1/2 bg-[#2E3A4D] flex flex-col justify-center items-center text-center text-white p-8">
         <div className="max-w-sm">
           <h1 className="text-4xl font-bold mb-4">GOAT</h1>
           <p className="text-xl mb-4">
-            Sistema Generador de Portafolios Digitales
+            {t("login.left.title")}
           </p>
           <div className="w-16 h-1 bg-white mx-auto mb-4"></div>
           <p className="text-blue-100">
-            Accede a tu cuenta y gestiona tu portafolio profesional.
+            {t("login.left.subtitle")}
           </p>
         </div>
       </div>
 
-      {/* PANEL DERECHO */}
+      {/* DERECHA */}
       <div className="w-1/2 flex flex-col justify-center p-8 bg-gray-50">
         <div className="max-w-md mx-auto w-full">
 
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-800">
-              Iniciar Sesión
+              {t("login.title")}
             </h2>
             <p className="text-gray-500 text-sm mt-1">
-              Accede a tu cuenta
+              {t("login.subtitle")}
             </p>
           </div>
 
@@ -152,17 +152,15 @@ export const Login: React.FC<LoginProps> = ({
             {/* EMAIL */}
             <div>
               <label className="block text-sm text-gray-700 mb-1">
-                Correo Electrónico
+                {t("login.email")}
               </label>
               <input
                 type="email"
                 name="email"
                 value={credentials.email}
                 onChange={handleChange}
-                placeholder="Ingresa tu correo electrónico"
-                className="w-full px-4 py-2 rounded-md border border-gray-300 
-                           bg-[#E5E5E5] text-gray-700 placeholder-gray-500
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder={t("login.email_placeholder")}
+                className="w-full px-4 py-2 rounded-md border border-gray-300 bg-[#E5E5E5]"
                 required
               />
             </div>
@@ -170,7 +168,7 @@ export const Login: React.FC<LoginProps> = ({
             {/* PASSWORD */}
             <div>
               <label className="block text-sm text-gray-700 mb-1">
-                Contraseña
+                {t("login.password")}
               </label>
 
               <div className="relative">
@@ -179,17 +177,15 @@ export const Login: React.FC<LoginProps> = ({
                   name="contrasena"
                   value={credentials.contrasena}
                   onChange={handleChange}
-                  placeholder="Ingresa tu contraseña"
-                  className="w-full px-4 py-2 rounded-md border border-gray-300 
-                             bg-[#E5E5E5] text-gray-700 placeholder-gray-500
-                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={t("login.password_placeholder")}
+                  className="w-full px-4 py-2 rounded-md border border-gray-300 bg-[#E5E5E5]"
                   required
                 />
 
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-gray-600 hover:text-gray-800"
+                  className="absolute right-3 top-2.5"
                 >
                   👁
                 </button>
@@ -200,10 +196,9 @@ export const Login: React.FC<LoginProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded-md 
-                         hover:bg-blue-700 transition font-medium disabled:opacity-50"
+              className="w-full bg-blue-600 text-white py-2 rounded-md"
             >
-              {loading ? 'Cargando...' : 'Iniciar sesión'}
+              {loading ? t("login.loading") : t("login.button")}
             </button>
 
           </form>
@@ -213,7 +208,7 @@ export const Login: React.FC<LoginProps> = ({
               onClick={handleSwitchToRegister}
               className="text-sm text-blue-600 hover:underline"
             >
-              ¿No tienes una cuenta? Regístrate
+              {t("login.register_link")}
             </button>
           </div>
 

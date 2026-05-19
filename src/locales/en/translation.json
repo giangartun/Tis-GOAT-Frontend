@@ -1,0 +1,23 @@
+{
+  "login": {
+    "title": "Login",
+    "subtitle": "Access your account",
+    "email": "Email",
+    "email_placeholder": "Enter your email",
+    "password": "Password",
+    "password_placeholder": "Enter your password",
+    "button": "Sign in",
+    "loading": "Loading...",
+    "register_link": "Don't have an account? Sign up",
+
+    "left": {
+      "title": "Digital Portfolio Generator System",
+      "subtitle": "Access your account and manage your professional portfolio."
+    },
+
+    "errors": {
+      "invalid": "Invalid credentials",
+      "connection": "Server connection error"
+    }
+  }
+}

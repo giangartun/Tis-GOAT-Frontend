@@ -1,0 +1,23 @@
+{
+  "login": {
+    "title": "Iniciar sesión",
+    "subtitle": "Accede a tu cuenta",
+    "email": "Correo electrónico",
+    "email_placeholder": "Ingresa tu correo electrónico",
+    "password": "Contraseña",
+    "password_placeholder": "Ingresa tu contraseña",
+    "button": "Iniciar sesión",
+    "loading": "Cargando...",
+    "register_link": "¿No tienes una cuenta? Regístrate",
+
+    "left": {
+      "title": "Sistema Generador de Portafolios Digitales",
+      "subtitle": "Accede a tu cuenta y gestiona tu portafolio profesional."
+    },
+
+    "errors": {
+      "invalid": "Credenciales incorrectas",
+      "connection": "Error de conexión con el servidor"
+    }
+  }
+}

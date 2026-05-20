@@ -1,0 +1,53 @@
+{
+  "login": {
+    "title": "Iniciar sesión",
+    "subtitle": "Accede a tu cuenta",
+    "email": "Correo electrónico",
+    "email_placeholder": "Ingresa tu correo electrónico",
+    "password": "Contraseña",
+    "password_placeholder": "Ingresa tu contraseña",
+    "button": "Iniciar sesión",
+    "loading": "Cargando...",
+    "register_link": "¿No tienes una cuenta? Regístrate",
+
+    "left": {
+      "title": "Sistema Generador de Portafolios Digitales",
+      "subtitle": "Accede a tu cuenta y gestiona tu portafolio profesional."
+    },
+
+    "errors": {
+      "invalid": "Credenciales incorrectas",
+      "connection": "Error de conexión con el servidor"
+    }
+  },
+
+  "register": {
+    "title": "Crea tu cuenta",
+    "subtitle": "Regístrate para empezar",
+    "nombre": "Nombre",
+    "nombre_placeholder": "Ingresa tu nombre",
+    "apellido_paterno": "Apellido Paterno",
+    "apellido_paterno_placeholder": "Ingresa tu apellido paterno",
+    "apellido_materno": "Apellido Materno",
+    "apellido_materno_placeholder": "Ingresa tu apellido materno",
+    "email": "Correo Electrónico",
+    "email_placeholder": "Ingresa tu correo electrónico",
+    "password": "Contraseña",
+    "password_placeholder": "Elige una contraseña",
+    "confirm_password": "Confirmar Contraseña",
+    "confirm_password_placeholder": "Repite la contraseña",
+    "submit": "Registrarse",
+    "loading": "Registrando...",
+    "google": "Registrarse con Google",
+    "login_link": "¿Ya tienes una cuenta? Inicia sesión",
+    "errors": {
+      "required": "Todos los campos son obligatorios",
+      "name": "El nombre solo debe contener letras",
+      "lastname1": "El apellido paterno solo debe contener letras",
+      "lastname2": "El apellido materno solo debe contener letras",
+      "passwordMatch": "Las contraseñas no coinciden",
+      "passwordLength": "La contraseña debe tener al menos 6 caracteres",
+      "email": "Ingresa un correo electrónico válido"
+    }
+  }
+}

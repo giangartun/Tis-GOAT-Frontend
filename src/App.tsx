@@ -12,7 +12,6 @@ import AnadirEnlaces from "./Pages/AnadirEnlaces";
 import PerfilUsuario from "./Pages/perfilusuario";
 import PrivacidadPortafolio from "./Pages/PrivacidadPortafolio";
 import PerfilPublico from "./Pages/PerfilPublico";
-import { ResetPassword } from "./Pages/RestablecerContraseña";
 
 function App() {
   return (

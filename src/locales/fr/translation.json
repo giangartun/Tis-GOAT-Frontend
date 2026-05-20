@@ -1,0 +1,15 @@
+{
+  "login": {
+    "title": "Connexion",
+    "subtitle": "Accédez à votre compte",
+    "email": "Email",
+    "email_placeholder": "Entrez votre email",
+    "password": "Mot de passe",
+    "password_placeholder": "Entrez votre mot de passe",
+    "button": "Se connecter",
+    "loading": "Chargement...",
+    "no_account": "Vous n'avez pas de compte ? Inscrivez-vous",
+    "error": "Identifiants incorrects",
+    "connection_error": "Erreur de connexion au serveur"
+  }
+}

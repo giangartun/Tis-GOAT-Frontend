@@ -12,6 +12,7 @@ import AnadirEnlaces from "./Pages/AnadirEnlaces";
 import PerfilUsuario from "./Pages/perfilusuario";
 import PrivacidadPortafolio from "./Pages/PrivacidadPortafolio";
 import PerfilPublico from "./Pages/PerfilPublico";
+import { ResetPassword } from "./Pages/RestablecerContraseña";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verificar-email/:token" element={<VerificarEmail />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Rutas con layout */}
         <Route element={<Layout />}>

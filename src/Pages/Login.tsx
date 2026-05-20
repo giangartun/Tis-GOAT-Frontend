@@ -6,15 +6,15 @@ interface LoginProps {
   onLoginSuccess?: () => void;
 }
 
-export const Login: React.FC<LoginProps> = ({ 
-  onSwitchToRegister, 
-  onLoginSuccess 
+export const Login: React.FC<LoginProps> = ({
+  onSwitchToRegister,
+  onLoginSuccess
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const [infoMessage, setInfoMessage] = useState(location.state?.message || '');
-  
+
   const [credentials, setCredentials] = useState({
     email: '',
     contrasena: ''
@@ -24,6 +24,12 @@ export const Login: React.FC<LoginProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const [showRecovery, setShowRecovery] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState('');
+  const [recoveryMessage, setRecoveryMessage] = useState('');
+  const [recoveryError, setRecoveryError] = useState('');
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
 
   useEffect(() => {
     if (infoMessage) {
@@ -53,7 +59,6 @@ export const Login: React.FC<LoginProps> = ({
     setLoading(true);
 
     try {
-      // LIMPIAR SESIÓN COMPLETA
       localStorage.clear();
 
       const response = await fetch(
@@ -70,8 +75,6 @@ export const Login: React.FC<LoginProps> = ({
 
       const data = await response.json();
 
-      console.log("LOGIN RESPONSE:", data);
-
       if (response.ok && data.token) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('usuario', JSON.stringify(data.usuario));
@@ -80,9 +83,9 @@ export const Login: React.FC<LoginProps> = ({
           data.id_portafolio ?? data.usuario?.id_portafolio ?? null;
 
         if (idPortafolio) {
-          localStorage.setItem("id_portafolio", String(idPortafolio));
+          localStorage.setItem('id_portafolio', String(idPortafolio));
         } else {
-          localStorage.removeItem("id_portafolio");
+          localStorage.removeItem('id_portafolio');
         }
 
         onLoginSuccess?.();
@@ -105,9 +108,44 @@ export const Login: React.FC<LoginProps> = ({
     onSwitchToRegister ? onSwitchToRegister() : navigate('/register');
   };
 
+  const handleRecoverySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setRecoveryError('');
+    setRecoveryMessage('');
+    setRecoveryLoading(true);
+
+    try {
+      const response = await fetch(
+        import.meta.env.VITE_API_URL + '/api/usuario/contrasena/olvido',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ email: recoveryEmail })
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setRecoveryMessage(
+          data.message || 'Se envió el enlace de recuperación a tu correo.'
+        );
+      } else {
+        setRecoveryError(data.message || 'No se pudo enviar el enlace.');
+      }
+    } catch (err) {
+      setRecoveryError('Error de conexión con el servidor.');
+    } finally {
+      setRecoveryLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex">
-      
       {/* PANEL IZQUIERDO */}
       <div className="w-1/2 bg-[#2E3A4D] flex flex-col justify-center items-center text-center text-white p-8">
         <div className="max-w-sm">
@@ -125,7 +163,6 @@ export const Login: React.FC<LoginProps> = ({
       {/* PANEL DERECHO */}
       <div className="w-1/2 flex flex-col justify-center p-8 bg-gray-50">
         <div className="max-w-md mx-auto w-full">
-
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-800">
               Iniciar Sesión
@@ -148,8 +185,6 @@ export const Login: React.FC<LoginProps> = ({
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-
-            {/* EMAIL */}
             <div>
               <label className="block text-sm text-gray-700 mb-1">
                 Correo Electrónico
@@ -160,14 +195,11 @@ export const Login: React.FC<LoginProps> = ({
                 value={credentials.email}
                 onChange={handleChange}
                 placeholder="Ingresa tu correo electrónico"
-                className="w-full px-4 py-2 rounded-md border border-gray-300 
-                           bg-[#E5E5E5] text-gray-700 placeholder-gray-500
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 rounded-md border border-gray-300 bg-[#E5E5E5] text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               />
             </div>
 
-            {/* PASSWORD */}
             <div>
               <label className="block text-sm text-gray-700 mb-1">
                 Contraseña
@@ -175,14 +207,12 @@ export const Login: React.FC<LoginProps> = ({
 
               <div className="relative">
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   name="contrasena"
                   value={credentials.contrasena}
                   onChange={handleChange}
                   placeholder="Ingresa tu contraseña"
-                  className="w-full px-4 py-2 rounded-md border border-gray-300 
-                             bg-[#E5E5E5] text-gray-700 placeholder-gray-500
-                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-2 rounded-md border border-gray-300 bg-[#E5E5E5] text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
 
@@ -196,16 +226,75 @@ export const Login: React.FC<LoginProps> = ({
               </div>
             </div>
 
-            {/* BOTÓN */}
+            <div className="flex justify-between items-center">
+              <button
+                type="button"
+                onClick={() => setShowRecovery(!showRecovery)}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
+
+            {showRecovery && (
+              <div className="border border-gray-300 rounded-md p-4 bg-white space-y-3">
+                <h3 className="text-sm font-semibold text-gray-700">
+                  Recuperar contraseña
+                </h3>
+
+                <p className="text-xs text-gray-500">
+                  Escribe tu correo y te enviaremos un enlace para restablecer tu contraseña.
+                </p>
+
+                {recoveryMessage && (
+                  <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded text-sm">
+                    {recoveryMessage}
+                  </div>
+                )}
+
+                {recoveryError && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-sm">
+                    {recoveryError}
+                  </div>
+                )}
+
+                <input
+                  type="email"
+                  value={recoveryEmail}
+                  onChange={(e) => setRecoveryEmail(e.target.value)}
+                  placeholder="Ingresa tu correo"
+                  className="w-full px-4 py-2 rounded-md border border-gray-300 bg-[#E5E5E5] text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={handleRecoverySubmit}
+                    disabled={recoveryLoading}
+                    className="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition font-medium disabled:opacity-50"
+                  >
+                    {recoveryLoading ? 'Enviando...' : 'Enviar enlace'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowRecovery(false)}
+                    className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-md hover:bg-gray-300 transition font-medium"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded-md 
-                         hover:bg-blue-700 transition font-medium disabled:opacity-50"
+              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition font-medium disabled:opacity-50"
             >
               {loading ? 'Cargando...' : 'Iniciar sesión'}
             </button>
-
           </form>
 
           <div className="text-center mt-6">
@@ -216,7 +305,6 @@ export const Login: React.FC<LoginProps> = ({
               ¿No tienes una cuenta? Regístrate
             </button>
           </div>
-
         </div>
       </div>
     </div>

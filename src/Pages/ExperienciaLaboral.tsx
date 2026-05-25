@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { X, Upload, FileText, CalendarDays, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export interface ExperienciaLaboralModalSubmit {
   empresa: string;
@@ -24,6 +26,8 @@ function ExperienciaLaboralModal({
   onCerrar,
   onGuardar,
 }: ExperienciaLaboralModalProps) {
+  const { t } = useTranslation();
+
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -64,7 +68,7 @@ function ExperienciaLaboralModal({
   if (!abierto) return null;
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -72,11 +76,16 @@ function ExperienciaLaboralModal({
 
   const validarArchivo = (file: File) => {
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      return `El archivo ${file.name} no es válido. Solo PDF, JPG o PNG.`;
+      return t("workExperience.errors.invalid_file", {
+        fileName: file.name,
+      });
     }
 
     if (file.size > maxBytes) {
-      return `El archivo ${file.name} supera el límite de ${MAX_FILE_SIZE_MB} MB.`;
+      return t("workExperience.errors.file_too_large", {
+        fileName: file.name,
+        size: MAX_FILE_SIZE_MB,
+      });
     }
 
     return null;
@@ -87,10 +96,12 @@ function ExperienciaLaboralModal({
 
     Array.from(files).forEach((file) => {
       const errorArchivo = validarArchivo(file);
+
       if (errorArchivo) {
         setError(errorArchivo);
         return;
       }
+
       nuevos.push(file);
     });
 
@@ -101,23 +112,40 @@ function ExperienciaLaboralModal({
   };
 
   const validar = () => {
-    if (!form.empresa.trim()) return setError("La empresa es obligatoria."), false;
-    if (!form.cargo.trim()) return setError("El cargo es obligatorio."), false;
-    if (!form.descripcion.trim()) return setError("La descripción es obligatoria."), false;
-    if (form.descripcion.trim().length > 1000) {
-      setError("La descripción no debe superar los 1000 caracteres.");
+    if (!form.empresa.trim()) {
+      setError(t("workExperience.errors.company_required"));
       return false;
     }
-    if (!form.fecha_ini) return setError("La fecha de inicio es obligatoria."), false;
+
+    if (!form.cargo.trim()) {
+      setError(t("workExperience.errors.position_required"));
+      return false;
+    }
+
+    if (!form.descripcion.trim()) {
+      setError(t("workExperience.errors.description_required"));
+      return false;
+    }
+
+    if (form.descripcion.trim().length > 1000) {
+      setError(t("workExperience.errors.description_max"));
+      return false;
+    }
+
+    if (!form.fecha_ini) {
+      setError(t("workExperience.errors.start_date_required"));
+      return false;
+    }
+
     if (!sigueActivo && !form.fecha_fin) {
-      setError("La fecha fin es obligatoria o puedes dejarla vacía si sigue activo.");
+      setError(t("workExperience.errors.end_date_required"));
       return false;
     }
 
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -138,7 +166,7 @@ function ExperienciaLaboralModal({
       onCerrar();
     } catch (err) {
       console.error(err);
-      setError("No se pudo guardar la experiencia laboral.");
+      setError(t("workExperience.errors.save_failed"));
     } finally {
       setLoading(false);
     }
@@ -156,14 +184,17 @@ function ExperienciaLaboralModal({
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10">
               <FileText size={17} />
             </span>
-            <h3 className="text-[17px] font-bold sm:text-[18px]">Registrar experiencia laboral</h3>
+
+            <h3 className="text-[17px] font-bold sm:text-[18px]">
+              {t("workExperience.title")}
+            </h3>
           </div>
 
           <button
             type="button"
             onClick={onCerrar}
             className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
-            aria-label="Cerrar modal"
+            aria-label={t("workExperience.actions.close_modal")}
           >
             <X size={18} />
           </button>
@@ -172,34 +203,37 @@ function ExperienciaLaboralModal({
         <form onSubmit={handleSubmit} className="px-4 py-4 sm:px-5 sm:py-5">
           <div className="mb-3 flex items-center gap-3">
             <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
-              Empresa
+              {t("workExperience.sections.company")}
             </span>
+
             <div className="h-px flex-1 bg-slate-200" />
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
               <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-                Empresa
+                {t("workExperience.fields.company")}
               </label>
+
               <input
                 name="empresa"
                 value={form.empresa}
                 onChange={handleChange}
-                placeholder="Ej. Google, Startup XYZ..."
+                placeholder={t("workExperience.placeholders.company")}
                 className="h-10 w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 text-[15px] text-white outline-none placeholder:text-white/70 focus:border-slate-900"
               />
             </div>
 
             <div>
               <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-                Cargo
+                {t("workExperience.fields.position")}
               </label>
+
               <input
                 name="cargo"
                 value={form.cargo}
                 onChange={handleChange}
-                placeholder="Ej. Desarrolladora Backend"
+                placeholder={t("workExperience.placeholders.position")}
                 className="h-10 w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 text-[15px] text-white outline-none placeholder:text-white/70 focus:border-slate-900"
               />
             </div>
@@ -207,30 +241,33 @@ function ExperienciaLaboralModal({
 
           <div className="mt-4">
             <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-              Descripción
+              {t("workExperience.fields.description")}
             </label>
+
             <textarea
               name="descripcion"
               value={form.descripcion}
               onChange={handleChange}
               rows={2}
-              placeholder="Describe tus responsabilidades, tecnologías usadas o logros..."
+              placeholder={t("workExperience.placeholders.description")}
               className="w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 py-2.5 text-[15px] text-white outline-none placeholder:text-white/70 focus:border-slate-900"
             />
           </div>
 
           <div className="mt-4 mb-3 flex items-center gap-3">
             <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
-              Periodo
+              {t("workExperience.sections.period")}
             </span>
+
             <div className="h-px flex-1 bg-slate-200" />
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
               <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-                Fecha de inicio
+                {t("workExperience.fields.start_date")}
               </label>
+
               <div className="relative">
                 <input
                   type="date"
@@ -239,6 +276,7 @@ function ExperienciaLaboralModal({
                   onChange={handleChange}
                   className="h-10 w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 pr-10 text-[15px] text-white outline-none focus:border-slate-900"
                 />
+
                 <CalendarDays
                   className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/80"
                   size={15}
@@ -248,8 +286,9 @@ function ExperienciaLaboralModal({
 
             <div>
               <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-                Fecha de fin
+                {t("workExperience.fields.end_date")}
               </label>
+
               <div className="relative">
                 <input
                   type="date"
@@ -259,19 +298,24 @@ function ExperienciaLaboralModal({
                   disabled={sigueActivo}
                   className="h-10 w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 pr-10 text-[15px] text-white outline-none disabled:opacity-60 focus:border-slate-900"
                 />
+
                 <CalendarDays
                   className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/80"
                   size={15}
                 />
               </div>
-              <p className="mt-1 text-[11px] text-slate-400">Dejar vacío si sigue activo</p>
+
+              <p className="mt-1 text-[11px] text-slate-400">
+                {t("workExperience.helpers.empty_if_active")}
+              </p>
             </div>
           </div>
 
           <div className="mt-4 mb-3 flex items-center gap-3">
             <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
-              Documentos
+              {t("workExperience.sections.documents")}
             </span>
+
             <div className="h-px flex-1 bg-slate-200" />
           </div>
 
@@ -284,6 +328,7 @@ function ExperienciaLaboralModal({
             onDrop={(e) => {
               e.preventDefault();
               setDragActive(false);
+
               if (e.dataTransfer.files?.length) {
                 agregarArchivos(e.dataTransfer.files);
               }
@@ -298,10 +343,13 @@ function ExperienciaLaboralModal({
               </div>
 
               <p className="text-[14px] font-extrabold text-[#1E5AA8]">
-                Arrastrá o seleccioná archivos
+                {t("workExperience.upload.title")}
               </p>
+
               <p className="mt-1 text-[11px] text-slate-500">
-                PDF, JPG, PNG - Máx. {MAX_FILE_SIZE_MB} MB por archivo
+                {t("workExperience.upload.subtitle", {
+                  size: MAX_FILE_SIZE_MB,
+                })}
               </p>
 
               <input
@@ -322,7 +370,7 @@ function ExperienciaLaboralModal({
                 className="mt-2.5 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-500 shadow-sm transition hover:border-slate-300 hover:text-slate-700"
               >
                 <Plus size={15} />
-                Explorar archivos
+                {t("workExperience.actions.browse_files")}
               </button>
 
               {archivos.length > 0 && (
@@ -336,6 +384,7 @@ function ExperienciaLaboralModal({
                         <p className="truncate text-[13px] font-semibold text-slate-700">
                           {file.name}
                         </p>
+
                         <p className="text-[11px] text-slate-400">
                           {(file.size / 1024 / 1024).toFixed(2)} MB
                         </p>
@@ -345,7 +394,9 @@ function ExperienciaLaboralModal({
                         type="button"
                         onClick={() => eliminarArchivo(index)}
                         className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                        aria-label={`Eliminar ${file.name}`}
+                        aria-label={t("workExperience.actions.delete_file", {
+                          fileName: file.name,
+                        })}
                       >
                         <X size={14} />
                       </button>
@@ -368,15 +419,18 @@ function ExperienciaLaboralModal({
               onClick={onCerrar}
               className="rounded-xl border border-slate-200 px-5 py-2 text-[13px] font-semibold text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
             >
-              Cancelar
+              {t("workExperience.actions.cancel")}
             </button>
+
             <button
               type="submit"
               disabled={loading}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#203A63] px-5 py-2 text-[13px] font-semibold text-white transition hover:bg-[#182d4b] disabled:cursor-not-allowed disabled:opacity-70"
             >
               <Plus size={15} />
-              {loading ? "Guardando..." : "Guardar"}
+              {loading
+                ? t("workExperience.actions.saving")
+                : t("workExperience.actions.save")}
             </button>
           </div>
         </form>

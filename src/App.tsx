@@ -27,6 +27,7 @@ function App() {
         {/* Rutas con layout */}
         <Route element={<Layout />}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/home" element={<HomePage />} />
           <Route path="/mis-proyectos" element={<MisProyectosPage />} />
           <Route path="/perfil" element={<PerfilUsuario />} />
           <Route path="/privacidad" element={<PrivacidadPortafolio />} />

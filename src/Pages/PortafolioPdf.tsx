@@ -6,7 +6,7 @@
  * NO requiere librerías externas.
  */
 
-// ─── Tipos ────────────────────────────────────────────────────────────────────
+import i18n from "../locales/i18n";
 
 interface Habilidad {
   id_habilidad: string;
@@ -74,10 +74,11 @@ export interface PortafolioData {
   proyectos: Proyecto[];
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+const t = (key: string, options?: Record<string, unknown>) =>
+  i18n.t(key, options);
 
 function formatPeriod(fechaIni: string, fechaFin?: string | null): string {
-  return `${fechaIni} — ${fechaFin ?? "Actual"}`;
+  return `${fechaIni} — ${fechaFin ?? t("portfolioPdf.current")}`;
 }
 
 function esc(str: string | null | undefined): string {
@@ -93,11 +94,17 @@ function getInicial(nombre: string): string {
   return nombre?.trim()?.charAt(0)?.toUpperCase() ?? "P";
 }
 
-// ─── Fragmentos HTML ──────────────────────────────────────────────────────────
+function obtenerLocaleActual() {
+  if (i18n.language?.startsWith("en")) return "en-US";
+  if (i18n.language?.startsWith("fr")) return "fr-FR";
+  return "es-BO";
+}
 
 function htmlSkillBars(habilidades: Habilidad[]): string {
-  if (!habilidades.length)
-    return `<p class="empty-text">Sin habilidades registradas</p>`;
+  if (!habilidades.length) {
+    return `<p class="empty-text">${t("portfolioPdf.empty.no_skills")}</p>`;
+  }
+
   return habilidades
     .slice(0, 6)
     .map((h) => {
@@ -125,25 +132,32 @@ function htmlTags(habilidades: Habilidad[]): string {
 
 function htmlContactRow(data: PortafolioData): string {
   const items: string[] = [];
-  if (data.usuario.email)
+
+  if (data.usuario.email) {
     items.push(`<span class="contact-item">✉ ${esc(data.usuario.email)}</span>`);
+  }
+
   (data.redes_profesionales ?? [])
     .filter((r) => r.visible !== false)
     .slice(0, 2)
     .forEach((r) =>
       items.push(`<span class="contact-item">${esc(r.nombre_red)}</span>`)
     );
+
   return items.join("");
 }
 
 function htmlInfoSidebar(data: PortafolioData): string {
   const rows: string[] = [];
-  if (data.usuario.email)
+
+  if (data.usuario.email) {
     rows.push(`
       <div class="info-row">
-        <div class="info-label">Email</div>
+        <div class="info-label">${t("portfolioPdf.labels.email")}</div>
         <div class="info-value">${esc(data.usuario.email)}</div>
       </div>`);
+  }
+
   (data.redes_profesionales ?? [])
     .filter((r) => r.visible !== false)
     .forEach((r) =>
@@ -153,18 +167,23 @@ function htmlInfoSidebar(data: PortafolioData): string {
           <div class="info-value">${esc(r.url_red)}</div>
         </div>`)
     );
-  if (data.portafolio?.enlace_pagi_web)
+
+  if (data.portafolio?.enlace_pagi_web) {
     rows.push(`
       <div class="info-row">
-        <div class="info-label">Portafolio web</div>
+        <div class="info-label">${t("portfolioPdf.labels.web_portfolio")}</div>
         <div class="info-value">${esc(data.portafolio.enlace_pagi_web)}</div>
       </div>`);
+  }
+
   return rows.join("");
 }
 
 function htmlExpLaboral(exps: ExperienciaLaboral[]): string {
-  if (!exps.length)
-    return `<p class="empty-text">Sin experiencia laboral registrada.</p>`;
+  if (!exps.length) {
+    return `<p class="empty-text">${t("portfolioPdf.empty.no_work_experience")}</p>`;
+  }
+
   return exps
     .map(
       (e) => `
@@ -182,8 +201,10 @@ function htmlExpLaboral(exps: ExperienciaLaboral[]): string {
 }
 
 function htmlExpAcademica(exps: ExperienciaAcademica[]): string {
-  if (!exps.length)
-    return `<p class="empty-text">Sin experiencia académica registrada.</p>`;
+  if (!exps.length) {
+    return `<p class="empty-text">${t("portfolioPdf.empty.no_academic_experience")}</p>`;
+  }
+
   return exps
     .map(
       (e) => `
@@ -202,13 +223,21 @@ function htmlExpAcademica(exps: ExperienciaAcademica[]): string {
 
 function htmlProjectCard(p: Proyecto, index: number): string {
   const badge = p.tecnologias?.[0]?.nombre ?? "";
-  const tech = (p.tecnologias ?? []).slice(0, 3).map((t) => t.nombre).join(" · ");
+
+  const tech = (p.tecnologias ?? [])
+    .slice(0, 3)
+    .map((tec) => tec.nombre)
+    .join(" · ");
+
   const tags = (p.tecnologias ?? [])
     .slice(0, 3)
-    .map((t) => `<span class="proj-tag">${esc(t.nombre)}</span>`)
+    .map((tec) => `<span class="proj-tag">${esc(tec.nombre)}</span>`)
     .join("");
+
   const desc =
-    p.descripcion.length > 130 ? p.descripcion.slice(0, 130) + "…" : p.descripcion;
+    p.descripcion.length > 130
+      ? p.descripcion.slice(0, 130) + "…"
+      : p.descripcion;
 
   return `
     <div class="proj-card">
@@ -238,25 +267,28 @@ function htmlProjectPage(
   return `
     <div class="page">
       <div class="p2-header">
-        <span class="p2-header-title">${isFirst ? "Proyectos destacados" : "Proyectos (continuación)"}</span>
+        <span class="p2-header-title">
+          ${
+            isFirst
+              ? t("portfolioPdf.sections.featured_projects")
+              : t("portfolioPdf.sections.projects_continuation")
+          }
+        </span>
         <span class="p2-header-name">${esc(nombre)}</span>
       </div>
       <div class="p2-body">
-        <div class="section-label">Proyectos</div>
+        <div class="section-label">${t("portfolioPdf.sections.projects")}</div>
         <div class="proj-grid">
           ${proyectos.map((p, i) => htmlProjectCard(p, startIdx + i + 1)).join("")}
         </div>
       </div>
       <div class="pdf-footer">
-        <span>Generado desde Sistema de Portafolios Digitales · ${fecha}</span>
+        <span>${t("portfolioPdf.footer.generated_from")} · ${fecha}</span>
         <span class="footer-email">${esc(email)}</span>
       </div>
       <span class="page-num">${pageNum}</span>
     </div>`;
 }
-
-// ─── CSS ──────────────────────────────────────────────────────────────────────
-// Formato CARTA: 216mm × 279mm
 
 const CSS = `
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -387,24 +419,30 @@ body {
 }
 `;
 
-// ─── Generador HTML ───────────────────────────────────────────────────────────
-
 function generarHTML(data: PortafolioData, nombreCompleto: string): string {
   const ini = getInicial(data.usuario.nombre);
-  const fecha = new Date().toLocaleDateString("es-BO", {
+
+  const fecha = new Date().toLocaleDateString(obtenerLocaleActual(), {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
 
-  const expLaboral  = (data.experiencias_laborales  ?? []).filter((e) => e.visible !== false);
-  const expAcad     = (data.experiencias_academicas ?? []).filter((e) => e.visible !== false);
-  const habilidades = (data.habilidades             ?? []).filter((h) => h.visible !== false);
-  const proyectos   = (data.proyectos               ?? []).filter((p) => p.visible !== false);
-  const email       = data.usuario.email ?? "";
+  const expLaboral = (data.experiencias_laborales ?? []).filter(
+    (e) => e.visible !== false
+  );
+  const expAcad = (data.experiencias_academicas ?? []).filter(
+    (e) => e.visible !== false
+  );
+  const habilidades = (data.habilidades ?? []).filter((h) => h.visible !== false);
+  const proyectos = (data.proyectos ?? []).filter((p) => p.visible !== false);
+  const email = data.usuario.email ?? "";
 
   const chunks: Proyecto[][] = [];
-  for (let i = 0; i < proyectos.length; i += 4) chunks.push(proyectos.slice(i, i + 4));
+
+  for (let i = 0; i < proyectos.length; i += 4) {
+    chunks.push(proyectos.slice(i, i + 4));
+  }
 
   const projectPages = chunks
     .map((chunk, ci) =>
@@ -415,31 +453,35 @@ function generarHTML(data: PortafolioData, nombreCompleto: string): string {
   const totalPages = 1 + chunks.length;
   const archivo = `portafolio_${nombreCompleto.replace(/\s+/g, "_").toLowerCase()}.pdf`;
 
+  const paginasTexto =
+    totalPages !== 1
+      ? t("portfolioPdf.actions.pages")
+      : t("portfolioPdf.actions.page");
+
   return `<!DOCTYPE html>
-<html lang="es">
+<html lang="${i18n.language || "es"}">
 <head>
   <meta charset="UTF-8"/>
-  <title>Portafolio — ${esc(nombreCompleto)}</title>
+  <title>${t("portfolioPdf.title")} — ${esc(nombreCompleto)}</title>
   <style>${CSS}</style>
 </head>
 <body>
 
   <div class="action-bar no-print">
-    <div class="action-bar-left">📄 ${esc(archivo)} &nbsp;·&nbsp; ${totalPages} página${totalPages !== 1 ? "s" : ""}</div>
+    <div class="action-bar-left">📄 ${esc(archivo)} &nbsp;·&nbsp; ${totalPages} ${paginasTexto}</div>
     <div class="action-bar-right">
-      <button class="btn-close" onclick="window.close()">✕ Cerrar</button>
-      <button class="btn-print" onclick="window.print()">⬇ Guardar PDF</button>
+      <button class="btn-close" onclick="window.close()">✕ ${t("portfolioPdf.actions.close")}</button>
+      <button class="btn-print" onclick="window.print()">⬇ ${t("portfolioPdf.actions.save_pdf")}</button>
     </div>
   </div>
 
   <div class="pages-wrapper">
 
-    <!-- PÁGINA 1 -->
     <div class="page">
       <div class="hero">
         <div class="avatar-circle">${esc(ini)}</div>
         <div class="hero-content">
-          <div class="hero-role">Full Stack Developer</div>
+          <div class="hero-role">${t("portfolioPdf.labels.role")}</div>
           <div class="hero-name">${esc(nombreCompleto)}</div>
           ${data.usuario.biografia ? `<div class="hero-bio">${esc(data.usuario.biografia)}</div>` : ""}
           <div class="tag-row">${htmlTags(habilidades)}</div>
@@ -450,21 +492,21 @@ function generarHTML(data: PortafolioData, nombreCompleto: string): string {
       <div class="body-2col">
         <div class="sidebar">
           <div class="sidebar-section">
-            <div class="section-title">Habilidades</div>
+            <div class="section-title">${t("portfolioPdf.sections.skills")}</div>
             ${htmlSkillBars(habilidades)}
           </div>
           <div class="sidebar-section">
-            <div class="section-title">Información</div>
+            <div class="section-title">${t("portfolioPdf.sections.information")}</div>
             ${htmlInfoSidebar(data)}
           </div>
         </div>
         <div class="main-col">
           <div class="exp-section">
-            <div class="section-title">Experiencia Laboral</div>
+            <div class="section-title">${t("portfolioPdf.sections.work_experience")}</div>
             ${htmlExpLaboral(expLaboral)}
           </div>
           <div class="exp-section">
-            <div class="section-title">Experiencia Académica</div>
+            <div class="section-title">${t("portfolioPdf.sections.academic_experience")}</div>
             ${htmlExpAcademica(expAcad)}
           </div>
         </div>
@@ -480,21 +522,18 @@ function generarHTML(data: PortafolioData, nombreCompleto: string): string {
 </html>`;
 }
 
-// ─── Export ───────────────────────────────────────────────────────────────────
-
 export function descargarPortafolioPDF(
   data: PortafolioData,
   nombreCompleto: string
 ): void {
   const html = generarHTML(data, nombreCompleto);
   const ventana = window.open("", "_blank", "width=960,height=820,scrollbars=yes");
+
   if (!ventana) {
-    alert(
-      "El navegador bloqueó la ventana emergente.\n" +
-      "Permitila para este sitio en la barra de direcciones e intentá de nuevo."
-    );
+    alert(t("portfolioPdf.errors.popup_blocked"));
     return;
   }
+
   ventana.document.open();
   ventana.document.write(html);
   ventana.document.close();

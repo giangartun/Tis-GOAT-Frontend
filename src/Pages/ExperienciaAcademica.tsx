@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { X, Upload, FileText, CalendarDays, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export interface ExperienciaAcademicaModalSubmit {
   institucion: string;
@@ -35,6 +37,8 @@ function ExperienciaAcademicaModal({
   onGuardar,
   initialData,
 }: ExperienciaAcademicaModalProps) {
+  const { t } = useTranslation();
+
   const inputRef = useRef<HTMLInputElement | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
 
@@ -110,7 +114,7 @@ function ExperienciaAcademicaModal({
   if (!abierto) return null;
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -118,11 +122,16 @@ function ExperienciaAcademicaModal({
 
   const validarArchivo = (file: File) => {
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      return `El archivo ${file.name} no es válido. Solo PDF, JPG o PNG.`;
+      return t("academicExperience.errors.invalid_file", {
+        fileName: file.name,
+      });
     }
 
     if (file.size > maxBytes) {
-      return `El archivo ${file.name} supera el límite de ${MAX_FILE_SIZE_MB} MB.`;
+      return t("academicExperience.errors.file_too_large", {
+        fileName: file.name,
+        size: MAX_FILE_SIZE_MB,
+      });
     }
 
     return null;
@@ -133,10 +142,12 @@ function ExperienciaAcademicaModal({
 
     Array.from(files).forEach((file) => {
       const errorArchivo = validarArchivo(file);
+
       if (errorArchivo) {
         setError(errorArchivo);
         return;
       }
+
       nuevos.push(file);
     });
 
@@ -148,39 +159,43 @@ function ExperienciaAcademicaModal({
 
   const validar = () => {
     if (!form.institucion.trim()) {
-      setError("La institución es obligatoria.");
+      setError(t("academicExperience.errors.institution_required"));
       return false;
     }
 
     if (!form.titulo.trim()) {
-      setError("El título es obligatorio.");
+      setError(t("academicExperience.errors.title_required"));
       return false;
     }
 
     if (!form.descripcion.trim()) {
-      setError("La descripción es obligatoria.");
+      setError(t("academicExperience.errors.description_required"));
       return false;
     }
 
     if (form.descripcion.trim().length > MAX_DESC) {
-      setError(`La descripción no debe superar los ${MAX_DESC} caracteres.`);
+      setError(
+        t("academicExperience.errors.description_max", {
+          max: MAX_DESC,
+        })
+      );
       return false;
     }
 
     if (!form.fecha_ini) {
-      setError("La fecha de inicio es obligatoria.");
+      setError(t("academicExperience.errors.start_date_required"));
       return false;
     }
 
     if (!sigueCursando && !form.fecha_fin) {
-      setError("La fecha fin es obligatoria o puedes marcar que sigues cursando.");
+      setError(t("academicExperience.errors.end_date_required"));
       return false;
     }
 
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -201,7 +216,7 @@ function ExperienciaAcademicaModal({
       onCerrar();
     } catch (err) {
       console.error(err);
-      setError("No se pudo guardar la experiencia académica.");
+      setError(t("academicExperience.errors.save_failed"));
     } finally {
       setLoading(false);
     }
@@ -229,11 +244,12 @@ function ExperienciaAcademicaModal({
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10">
               <FileText size={17} />
             </span>
+
             <h3
               id="experiencia-academica-title"
               className="text-[17px] font-bold sm:text-[18px]"
             >
-              Registrar experiencia académica
+              {t("academicExperience.title")}
             </h3>
           </div>
 
@@ -241,7 +257,7 @@ function ExperienciaAcademicaModal({
             type="button"
             onClick={onCerrar}
             className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
-            aria-label="Cerrar modal"
+            aria-label={t("academicExperience.actions.close_modal")}
           >
             <X size={18} />
           </button>
@@ -253,34 +269,37 @@ function ExperienciaAcademicaModal({
         >
           <div className="mb-3 flex items-center gap-3">
             <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
-              Institución
+              {t("academicExperience.sections.institution")}
             </span>
+
             <div className="h-px flex-1 bg-slate-200" />
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
               <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-                Institución
+                {t("academicExperience.fields.institution")}
               </label>
+
               <input
                 name="institucion"
                 value={form.institucion}
                 onChange={handleChange}
-                placeholder="Ej. UMSS, UMSA..."
+                placeholder={t("academicExperience.placeholders.institution")}
                 className="h-10 w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 text-[15px] text-white outline-none placeholder:text-white/70 focus:border-slate-900"
               />
             </div>
 
             <div>
               <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-                Título obtenido
+                {t("academicExperience.fields.title")}
               </label>
+
               <input
                 name="titulo"
                 value={form.titulo}
                 onChange={handleChange}
-                placeholder="Ej. Ingeniería de Sistemas"
+                placeholder={t("academicExperience.placeholders.title")}
                 className="h-10 w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 text-[15px] text-white outline-none placeholder:text-white/70 focus:border-slate-900"
               />
             </div>
@@ -288,34 +307,39 @@ function ExperienciaAcademicaModal({
 
           <div className="mt-4">
             <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-              Descripción
+              {t("academicExperience.fields.description")}
             </label>
+
             <textarea
               name="descripcion"
               value={form.descripcion}
               onChange={handleChange}
               rows={3}
               maxLength={MAX_DESC}
-              placeholder="Describe brevemente tus logros, menciones o actividades..."
+              placeholder={t("academicExperience.placeholders.description")}
               className="w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 py-2.5 text-[15px] text-white outline-none placeholder:text-white/70 focus:border-slate-900"
             />
+
             <p className="mt-1 text-right text-[11px] text-slate-400">
-              {form.descripcion.length}/{MAX_DESC} caracteres
+              {form.descripcion.length}/{MAX_DESC}{" "}
+              {t("academicExperience.helpers.characters")}
             </p>
           </div>
 
           <div className="mt-4 mb-3 flex items-center gap-3">
             <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
-              Periodo
+              {t("academicExperience.sections.period")}
             </span>
+
             <div className="h-px flex-1 bg-slate-200" />
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
               <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-                Fecha de inicio
+                {t("academicExperience.fields.start_date")}
               </label>
+
               <div className="relative">
                 <input
                   type="date"
@@ -324,6 +348,7 @@ function ExperienciaAcademicaModal({
                   onChange={handleChange}
                   className="h-10 w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 pr-10 text-[15px] text-white outline-none focus:border-slate-900"
                 />
+
                 <CalendarDays
                   className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/80"
                   size={15}
@@ -333,8 +358,9 @@ function ExperienciaAcademicaModal({
 
             <div>
               <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-                Fecha de fin
+                {t("academicExperience.fields.end_date")}
               </label>
+
               <div className="relative">
                 <input
                   type="date"
@@ -344,6 +370,7 @@ function ExperienciaAcademicaModal({
                   disabled={sigueCursando}
                   className="h-10 w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 pr-10 text-[15px] text-white outline-none disabled:opacity-60 focus:border-slate-900"
                 />
+
                 <CalendarDays
                   className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/80"
                   size={15}
@@ -358,27 +385,33 @@ function ExperienciaAcademicaModal({
                   onChange={(e) => {
                     const checked = e.target.checked;
                     setSigueCursando(checked);
+
                     if (checked) {
                       setForm((prev) => ({ ...prev, fecha_fin: "" }));
                     }
                   }}
                   className="h-4 w-4"
                 />
-                <label htmlFor="sigueCursando" className="text-[13px] text-slate-600">
-                  Sigo cursando
+
+                <label
+                  htmlFor="sigueCursando"
+                  className="text-[13px] text-slate-600"
+                >
+                  {t("academicExperience.fields.currently_studying")}
                 </label>
               </div>
 
               <p className="mt-1 text-[11px] text-slate-400">
-                Dejar vacío si aún está en curso
+                {t("academicExperience.helpers.empty_if_current")}
               </p>
             </div>
           </div>
 
           <div className="mt-4 mb-3 flex items-center gap-3">
             <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
-              Documentos
+              {t("academicExperience.sections.documents")}
             </span>
+
             <div className="h-px flex-1 bg-slate-200" />
           </div>
 
@@ -391,6 +424,7 @@ function ExperienciaAcademicaModal({
             onDrop={(e) => {
               e.preventDefault();
               setDragActive(false);
+
               if (e.dataTransfer.files?.length) {
                 agregarArchivos(e.dataTransfer.files);
               }
@@ -405,10 +439,13 @@ function ExperienciaAcademicaModal({
               </div>
 
               <p className="text-[14px] font-extrabold text-[#1E5AA8]">
-                Arrastrá o seleccioná archivos
+                {t("academicExperience.upload.title")}
               </p>
+
               <p className="mt-1 text-[11px] text-slate-500">
-                PDF, JPG, PNG - Máx. {MAX_FILE_SIZE_MB} MB por archivo
+                {t("academicExperience.upload.subtitle", {
+                  size: MAX_FILE_SIZE_MB,
+                })}
               </p>
 
               <input
@@ -429,7 +466,7 @@ function ExperienciaAcademicaModal({
                 className="mt-2.5 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-500 shadow-sm transition hover:border-slate-300 hover:text-slate-700"
               >
                 <Plus size={15} />
-                Explorar archivos
+                {t("academicExperience.actions.browse_files")}
               </button>
 
               {archivos.length > 0 && (
@@ -443,6 +480,7 @@ function ExperienciaAcademicaModal({
                         <p className="truncate text-[13px] font-semibold text-slate-700">
                           {file.name}
                         </p>
+
                         <p className="text-[11px] text-slate-400">
                           {(file.size / 1024 / 1024).toFixed(2)} MB
                         </p>
@@ -452,7 +490,9 @@ function ExperienciaAcademicaModal({
                         type="button"
                         onClick={() => eliminarArchivo(index)}
                         className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                        aria-label={`Eliminar ${file.name}`}
+                        aria-label={t("academicExperience.actions.delete_file", {
+                          fileName: file.name,
+                        })}
                       >
                         <X size={14} />
                       </button>
@@ -475,7 +515,7 @@ function ExperienciaAcademicaModal({
               onClick={onCerrar}
               className="rounded-xl border border-slate-200 px-5 py-2 text-[13px] font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-700"
             >
-              Cancelar
+              {t("academicExperience.actions.cancel")}
             </button>
 
             <button
@@ -484,7 +524,9 @@ function ExperienciaAcademicaModal({
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#203A63] px-5 py-2 text-[13px] font-semibold text-white transition hover:bg-[#182d4b] disabled:cursor-not-allowed disabled:opacity-70"
             >
               <Plus size={15} />
-              {loading ? "Guardando..." : "Guardar"}
+              {loading
+                ? t("academicExperience.actions.saving")
+                : t("academicExperience.actions.save")}
             </button>
           </div>
         </form>

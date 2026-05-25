@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import './ConfirmModal.css';
 
 interface ConfirmModalProps {
@@ -20,10 +21,12 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onConfirm,
   onCancel,
   loading = false,
-  textoConfirmar = 'Confirmar',
-  textoCancelar = 'Cancelar',
+  textoConfirmar,
+  textoCancelar,
   tipo = 'info',
 }) => {
+  const { t } = useTranslation();
+
   if (!isOpen) return null;
 
   return (
@@ -40,18 +43,28 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
             </svg>
           )}
         </div>
+
         <h3 className="modal-title">{titulo}</h3>
+
         <p className="modal-desc">{mensaje}</p>
+
         <div className="modal-actions">
-          <button className="btn-modal-cancel" onClick={onCancel} disabled={loading}>
-            {textoCancelar}
+          <button
+            className="btn-modal-cancel"
+            onClick={onCancel}
+            disabled={loading}
+          >
+            {textoCancelar || t('confirmModal.cancel')}
           </button>
+
           <button
             className={`btn-modal-confirm ${tipo === 'warning' ? 'danger' : ''}`}
             onClick={onConfirm}
             disabled={loading}
           >
-            {loading ? 'Procesando...' : textoConfirmar}
+            {loading
+              ? t('confirmModal.processing')
+              : textoConfirmar || t('confirmModal.confirm')}
           </button>
         </div>
       </div>

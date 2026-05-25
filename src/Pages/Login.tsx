@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next'; // 🔥 IMPORTANTE
+import { useTranslation } from 'react-i18next';
 
 interface LoginProps {
   onSwitchToRegister?: () => void;
@@ -11,7 +11,7 @@ export const Login: React.FC<LoginProps> = ({
   onSwitchToRegister,
   onLoginSuccess
 }) => {
-  const { t } = useTranslation(); // 🔥 HOOK DE TRADUCCIÓN
+  const { t } = useTranslation();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,20 +35,25 @@ export const Login: React.FC<LoginProps> = ({
   const [recoveryLoading, setRecoveryLoading] = useState(false);
 
   useEffect(() => {
-    if (infoMessage) {
-      const timer = setTimeout(() => setInfoMessage(''), 5000);
-      return () => clearTimeout(timer);
-    }
+    if (!infoMessage) return;
+
+    const timer = setTimeout(() => setInfoMessage(''), 5000);
+    return () => clearTimeout(timer);
   }, [infoMessage]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCredentials({
-      ...credentials,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
 
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: '' });
+    setCredentials((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: ''
+      }));
     }
 
     if (error) setError('');
@@ -62,15 +67,17 @@ export const Login: React.FC<LoginProps> = ({
     setLoading(true);
 
     try {
-      localStorage.clear();
+      localStorage.removeItem('token');
+      localStorage.removeItem('usuario');
+      localStorage.removeItem('id_portafolio');
 
       const response = await fetch(
-        import.meta.env.VITE_API_URL + '/api/usuario/login',
+        `${import.meta.env.VITE_API_URL}/api/usuario/login`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            Accept: 'application/json'
           },
           body: JSON.stringify(credentials)
         }
@@ -87,20 +94,19 @@ export const Login: React.FC<LoginProps> = ({
 
         if (idPortafolio) {
           localStorage.setItem('id_portafolio', String(idPortafolio));
-        } else {
-          localStorage.removeItem('id_portafolio');
         }
 
         onLoginSuccess?.();
         navigate('/', { replace: true });
-      } else {
-        if (data.errors) {
-          setErrors(data.errors);
-        } else {
-          setError(data.message || t('login.errors.invalid'));
-        }
+        return;
       }
-    } catch (err) {
+
+      if (data.errors) {
+        setErrors(data.errors);
+      } else {
+        setError(data.message || t('login.errors.invalid'));
+      }
+    } catch {
       setError(t('login.errors.connection'));
     } finally {
       setLoading(false);
@@ -108,7 +114,12 @@ export const Login: React.FC<LoginProps> = ({
   };
 
   const handleSwitchToRegister = () => {
-    onSwitchToRegister ? onSwitchToRegister() : navigate('/register');
+    if (onSwitchToRegister) {
+      onSwitchToRegister();
+      return;
+    }
+
+    navigate('/register');
   };
 
   const handleRecoverySubmit = async (e: React.FormEvent) => {
@@ -120,12 +131,12 @@ export const Login: React.FC<LoginProps> = ({
 
     try {
       const response = await fetch(
-        import.meta.env.VITE_API_URL + '/api/usuario/contrasena/olvido',
+        `${import.meta.env.VITE_API_URL}/api/usuario/contrasena/olvido`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            Accept: 'application/json'
           },
           body: JSON.stringify({ email: recoveryEmail })
         }
@@ -134,14 +145,12 @@ export const Login: React.FC<LoginProps> = ({
       const data = await response.json();
 
       if (response.ok) {
-        setRecoveryMessage(
-          data.message || 'Se envió el enlace de recuperación a tu correo.'
-        );
+        setRecoveryMessage(data.message || t('login.recovery.success'));
       } else {
-        setRecoveryError(data.message || 'No se pudo enviar el enlace.');
+        setRecoveryError(data.message || t('login.recovery.error'));
       }
-    } catch (err) {
-      setRecoveryError('Error de conexión con el servidor.');
+    } catch {
+      setRecoveryError(t('login.errors.connection'));
     } finally {
       setRecoveryLoading(false);
     }
@@ -149,30 +158,27 @@ export const Login: React.FC<LoginProps> = ({
 
   return (
     <div className="min-h-screen flex">
-      
-      {/* PANEL IZQUIERDO */}
       <div className="w-1/2 bg-[#2E3A4D] flex flex-col justify-center items-center text-center text-white p-8">
         <div className="max-w-sm">
           <h1 className="text-4xl font-bold mb-4">GOAT</h1>
-          <p className="text-xl mb-4">
-            {t("login.left.title")}
-          </p>
-          <div className="w-16 h-1 bg-white mx-auto mb-4"></div>
-          <p className="text-blue-100">
-            {t("login.left.subtitle")}
-          </p>
+
+          <p className="text-xl mb-4">{t('login.left.title')}</p>
+
+          <div className="w-16 h-1 bg-white mx-auto mb-4" />
+
+          <p className="text-blue-100">{t('login.left.subtitle')}</p>
         </div>
       </div>
 
-      {/* DERECHA */}
       <div className="w-1/2 flex flex-col justify-center p-8 bg-gray-50">
         <div className="max-w-md mx-auto w-full">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-800">
-              {t("login.title")}
+              {t('login.title')}
             </h2>
+
             <p className="text-gray-500 text-sm mt-1">
-              {t("login.subtitle")}
+              {t('login.subtitle')}
             </p>
           </div>
 
@@ -191,24 +197,27 @@ export const Login: React.FC<LoginProps> = ({
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm text-gray-700 mb-1">
-                {t("login.email")}
+                {t('login.email')}
               </label>
+
               <input
                 type="email"
                 name="email"
                 value={credentials.email}
                 onChange={handleChange}
-                placeholder="Ingresa tu correo electrónico"
-                className="w-full px-4 py-2 rounded-md border border-gray-300 
-                           bg-[#E5E5E5] text-gray-700 placeholder-gray-500
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder={t('login.placeholders.email')}
+                className="w-full px-4 py-2 rounded-md border border-gray-300 bg-[#E5E5E5] text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               />
+
+              {errors.email && (
+                <p className="text-red-600 text-xs mt-1">{errors.email}</p>
+              )}
             </div>
 
             <div>
               <label className="block text-sm text-gray-700 mb-1">
-                {t("login.password")}
+                {t('login.password')}
               </label>
 
               <div className="relative">
@@ -217,41 +226,45 @@ export const Login: React.FC<LoginProps> = ({
                   name="contrasena"
                   value={credentials.contrasena}
                   onChange={handleChange}
-                  placeholder="Ingresa tu contraseña"
-                  className="w-full px-4 py-2 rounded-md border border-gray-300 
-                             bg-[#E5E5E5] text-gray-700 placeholder-gray-500
-                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={t('login.placeholders.password')}
+                  className="w-full px-4 py-2 pr-10 rounded-md border border-gray-300 bg-[#E5E5E5] text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
 
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowPassword((prev) => !prev)}
                   className="absolute right-3 top-2.5"
                 >
                   👁
                 </button>
               </div>
+
+              {errors.contrasena && (
+                <p className="text-red-600 text-xs mt-1">
+                  {errors.contrasena}
+                </p>
+              )}
             </div>
 
             <div className="flex justify-between items-center">
               <button
                 type="button"
-                onClick={() => setShowRecovery(!showRecovery)}
+                onClick={() => setShowRecovery((prev) => !prev)}
                 className="text-sm text-blue-600 hover:underline"
               >
-                ¿Olvidaste tu contraseña?
+                {t('login.forgot_password')}
               </button>
             </div>
 
             {showRecovery && (
               <div className="border border-gray-300 rounded-md p-4 bg-white space-y-3">
                 <h3 className="text-sm font-semibold text-gray-700">
-                  Recuperar contraseña
+                  {t('login.recovery.title')}
                 </h3>
 
                 <p className="text-xs text-gray-500">
-                  Escribe tu correo y te enviaremos un enlace para restablecer tu contraseña.
+                  {t('login.recovery.description')}
                 </p>
 
                 {recoveryMessage && (
@@ -270,7 +283,7 @@ export const Login: React.FC<LoginProps> = ({
                   type="email"
                   value={recoveryEmail}
                   onChange={(e) => setRecoveryEmail(e.target.value)}
-                  placeholder="Ingresa tu correo"
+                  placeholder={t('login.recovery.placeholder')}
                   className="w-full px-4 py-2 rounded-md border border-gray-300 bg-[#E5E5E5] text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
@@ -282,7 +295,9 @@ export const Login: React.FC<LoginProps> = ({
                     disabled={recoveryLoading}
                     className="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition font-medium disabled:opacity-50"
                   >
-                    {recoveryLoading ? 'Enviando...' : 'Enviar enlace'}
+                    {recoveryLoading
+                      ? t('login.recovery.sending')
+                      : t('login.recovery.send')}
                   </button>
 
                   <button
@@ -290,7 +305,7 @@ export const Login: React.FC<LoginProps> = ({
                     onClick={() => setShowRecovery(false)}
                     className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-md hover:bg-gray-300 transition font-medium"
                   >
-                    Cancelar
+                    {t('login.recovery.cancel')}
                   </button>
                 </div>
               </div>
@@ -299,10 +314,9 @@ export const Login: React.FC<LoginProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded-md 
-                         hover:bg-blue-700 transition font-medium disabled:opacity-50"
+              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition font-medium disabled:opacity-50"
             >
-              {loading ? t("login.loading") : t("login.button")}
+              {loading ? t('login.loading') : t('login.button')}
             </button>
           </form>
 
@@ -311,7 +325,7 @@ export const Login: React.FC<LoginProps> = ({
               onClick={handleSwitchToRegister}
               className="text-sm text-blue-600 hover:underline"
             >
-              {t("login.register_link")}
+              {t('login.register_link')}
             </button>
           </div>
         </div>

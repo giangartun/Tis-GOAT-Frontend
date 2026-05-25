@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Mail, MapPin, GraduationCap } from "lucide-react";
 
 interface Usuario {
@@ -45,6 +46,7 @@ const isVisible = (value?: boolean | number | string) => {
 };
 
 function PerfilPublico() {
+  const { t } = useTranslation();
   const { id } = useParams();
 
   const [usuario, setUsuario] = useState<Usuario | null>(null);
@@ -69,7 +71,7 @@ function PerfilPublico() {
         const data: PortafolioResponse = await response.json();
 
         if (!response.ok) {
-          throw new Error("No se pudo cargar el perfil público");
+          throw new Error(t("profileUser.errors.load_public_profile"));
         }
 
         setUsuario(data.usuario || null);
@@ -83,19 +85,21 @@ function PerfilPublico() {
         );
         setProyectos(Array.isArray(data.proyectos) ? data.proyectos : []);
       } catch (err: any) {
-        setError(err.message || "Error al cargar el perfil");
+        setError(err.message || t("profileUser.errors.load_profile"));
       } finally {
         setCargando(false);
       }
     };
 
     cargarPerfil();
-  }, [id]);
+  }, [id, t]);
 
   if (cargando) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5]">
-        <p className="text-gray-500 font-medium">Cargando perfil público...</p>
+        <p className="text-gray-500 font-medium">
+          {t("profileUser.loading")}
+        </p>
       </div>
     );
   }
@@ -104,7 +108,7 @@ function PerfilPublico() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5]">
         <p className="text-red-500 font-bold">
-          {error || "Perfil no encontrado"}
+          {error || t("profileUser.errors.profile_not_found")}
         </p>
       </div>
     );
@@ -126,18 +130,18 @@ function PerfilPublico() {
             <div className="flex flex-col md:flex-row justify-between items-center md:items-start relative z-10 gap-6 md:gap-0">
               <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 md:gap-10">
                 <div className="w-32 h-32 rounded-full mx-auto md:mx-0 border-2 border-white/20 shadow-inner shrink-0 overflow-hidden">
-  {usuario.foto ? (
-    <img
-      src={usuario.foto}
-      alt={getFullName(usuario)}
-      className="w-full h-full object-cover"
-    />
-  ) : (
-    <div className="w-full h-full bg-white/10 flex items-center justify-center text-4xl font-bold">
-      {usuario.nombre?.charAt(0) || "?"}
-    </div>
-  )}
-</div>
+                  {usuario.foto ? (
+                    <img
+                      src={usuario.foto}
+                      alt={getFullName(usuario)}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-white/10 flex items-center justify-center text-4xl font-bold">
+                      {usuario.nombre?.charAt(0) || "?"}
+                    </div>
+                  )}
+                </div>
 
                 <div className="flex flex-col">
                   <h2 className="text-[32px] md:text-[42px] font-bold mb-1 tracking-tight">
@@ -145,7 +149,7 @@ function PerfilPublico() {
                   </h2>
 
                   <p className="text-blue-200 text-[18px] md:text-[20px] font-medium opacity-90 mb-6 italic">
-                    {usuario.profesion || "Profesional"}
+                    {usuario.profesion || t("profileUser.defaults.professional")}
                   </p>
 
                   <div className="flex flex-wrap justify-center md:justify-start gap-x-6 md:gap-x-12 gap-y-4 text-[13px] font-medium">
@@ -180,16 +184,17 @@ function PerfilPublico() {
           <div className="bg-white p-6 md:p-16 flex flex-col gap-12 md:gap-16 border-t border-white/10">
             <section>
               <h3 className="text-[22px] font-extrabold text-gray-800 mb-4">
-                Sobre mi
+                {t("profileUser.sections.about_me")}
               </h3>
+
               <p className="text-gray-500 text-[18px] leading-relaxed max-w-5xl font-medium">
-                {usuario.biografia || "Sin biografía disponible."}
+                {usuario.biografia || t("profileUser.defaults.no_biography")}
               </p>
             </section>
 
             <section>
               <h3 className="text-[22px] font-extrabold text-gray-800 uppercase tracking-tight mb-8">
-                Experiencia
+                {t("profileUser.sections.experience")}
               </h3>
 
               {experiencias.length > 0 ? (
@@ -200,27 +205,32 @@ function PerfilPublico() {
                       className="w-full sm:w-[340px] rounded-[14px] border border-gray-100 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
                     >
                       <h4 className="font-extrabold text-gray-800 text-[17px]">
-                        {exp.cargo || exp.titulo || "Cargo no especificado"}
+                        {exp.cargo ||
+                          exp.titulo ||
+                          t("profileUser.defaults.unspecified_position")}
                       </h4>
+
                       <p className="text-[13px] font-bold text-gray-400 mt-1">
-                        {exp.fecha_ini || ""} {exp.fecha_fin ? `- ${exp.fecha_fin}` : ""}
+                        {exp.fecha_ini || ""}{" "}
+                        {exp.fecha_fin ? `- ${exp.fecha_fin}` : ""}
                       </p>
+
                       <p className="mt-4 text-[14px] text-gray-500 leading-snug font-medium">
-                        {exp.descripcion || "Sin descripción."}
+                        {exp.descripcion || t("profileUser.defaults.no_description")}
                       </p>
                     </div>
                   ))}
                 </div>
               ) : (
                 <p className="text-gray-400 font-medium">
-                  No hay experiencia registrada.
+                  {t("profileUser.empty.no_experience")}
                 </p>
               )}
             </section>
 
             <section>
               <h3 className="text-[22px] font-extrabold text-gray-800 uppercase tracking-tight mb-10">
-                Habilidades
+                {t("profileUser.sections.skills")}
               </h3>
 
               {habilidadesTecnicas.length > 0 ? (
@@ -232,7 +242,9 @@ function PerfilPublico() {
                     >
                       <div className="flex justify-between text-[13px] font-bold text-gray-600 mb-1.5">
                         <span>{habilidad.nombre}</span>
-                        <span className="opacity-60">{habilidad.nivel || 0}%</span>
+                        <span className="opacity-60">
+                          {habilidad.nivel || 0}%
+                        </span>
                       </div>
 
                       <div className="h-2.5 w-full bg-blue-50/50 rounded-full overflow-hidden border border-gray-100">
@@ -246,14 +258,14 @@ function PerfilPublico() {
                 </div>
               ) : (
                 <p className="text-gray-400 font-medium">
-                  No hay habilidades técnicas añadidas.
+                  {t("profileUser.empty.no_technical_skills")}
                 </p>
               )}
             </section>
 
             <section>
               <h3 className="text-[22px] font-extrabold text-gray-800 uppercase tracking-tight mb-8">
-                Habilidades Blandas Desarrolladas
+                {t("profileUser.sections.soft_skills")}
               </h3>
 
               <div className="flex flex-wrap gap-4">
@@ -268,7 +280,7 @@ function PerfilPublico() {
                   ))
                 ) : (
                   <p className="text-gray-400 font-medium">
-                    No hay habilidades blandas añadidas.
+                    {t("profileUser.empty.no_soft_skills")}
                   </p>
                 )}
               </div>
@@ -276,7 +288,7 @@ function PerfilPublico() {
 
             <section>
               <h3 className="text-[22px] font-extrabold text-gray-800 uppercase tracking-tight mb-10">
-                Proyectos
+                {t("profileUser.sections.projects")}
               </h3>
 
               {proyectos.length > 0 ? (
@@ -292,11 +304,14 @@ function PerfilPublico() {
 
                       <div className="p-8 pb-12 flex flex-col flex-1 bg-white">
                         <h4 className="text-[22px] font-extrabold text-gray-800 mb-2">
-                          {proyecto.nombre || proyecto.nombre_proyecto || "Proyecto"}
+                          {proyecto.nombre ||
+                            proyecto.nombre_proyecto ||
+                            t("profileUser.defaults.project")}
                         </h4>
 
                         <p className="text-gray-400 text-[15px] mb-8 font-semibold">
-                          {proyecto.descripcion || "Sin descripción."}
+                          {proyecto.descripcion ||
+                            t("profileUser.defaults.no_description")}
                         </p>
                       </div>
                     </article>
@@ -304,7 +319,7 @@ function PerfilPublico() {
                 </div>
               ) : (
                 <p className="text-gray-400 font-medium">
-                  No hay proyectos registrados.
+                  {t("profileUser.empty.no_projects")}
                 </p>
               )}
             </section>

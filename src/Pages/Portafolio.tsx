@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ArrowRight,
   ExternalLink,
@@ -163,6 +164,8 @@ const PLANTILLA_ID_MAP: Record<string, TemplateName> = {
 };
 
 function Portafolio() {
+  const { t } = useTranslation();
+
   const [data, setData] = useState<PortafolioData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -218,7 +221,7 @@ function Portafolio() {
     };
 
     fetchPortafolio();
-  }, []);
+  }, [t]);
 
   const usuario = data?.usuario;
   const portafolio = data?.portafolio;

@@ -6,23 +6,23 @@ interface LoginProps {
   onLoginSuccess?: () => void;
 }
 
-export const Login: React.FC<LoginProps> = ({ 
-  onSwitchToRegister, 
-  onLoginSuccess 
+export const Login: React.FC<LoginProps> = ({
+  onSwitchToRegister,
+  onLoginSuccess
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const [infoMessage, setInfoMessage] = useState(location.state?.message || '');
-  
+
   const [credentials, setCredentials] = useState({
     email: '',
     contrasena: ''
   });
 
-  const [error, setError] = useState('');
+  const [error, setError]   = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading]       = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
@@ -33,27 +33,18 @@ export const Login: React.FC<LoginProps> = ({
   }, [infoMessage]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCredentials({
-      ...credentials,
-      [e.target.name]: e.target.value
-    });
-
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: '' });
-    }
-
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: '' });
     if (error) setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setError('');
     setErrors({});
     setLoading(true);
 
     try {
-      // LIMPIAR SESIÓN COMPLETA
       localStorage.clear();
 
       const response = await fetch(
@@ -62,15 +53,14 @@ export const Login: React.FC<LoginProps> = ({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
           },
-          body: JSON.stringify(credentials)
+          body: JSON.stringify(credentials),
         }
       );
 
       const data = await response.json();
-
-      console.log("LOGIN RESPONSE:", data);
+      console.log('LOGIN RESPONSE:', data);
 
       if (response.ok && data.token) {
         localStorage.setItem('token', data.token);
@@ -80,13 +70,27 @@ export const Login: React.FC<LoginProps> = ({
           data.id_portafolio ?? data.usuario?.id_portafolio ?? null;
 
         if (idPortafolio) {
-          localStorage.setItem("id_portafolio", String(idPortafolio));
+          localStorage.setItem('id_portafolio', String(idPortafolio));
         } else {
-          localStorage.removeItem("id_portafolio");
+          localStorage.removeItem('id_portafolio');
         }
 
         onLoginSuccess?.();
-        navigate('/', { replace: true });
+
+        // ── Redirección según rol ──────────────────────
+        const tipoUsuario = data.tipo_usuario ?? data.usuario?.tipo_usuario ?? null;
+        if (tipoUsuario === 'admin') {
+          navigate('/admin/usuarios', { replace: true });
+        } else {
+          navigate('/', { replace: true });
+        }
+
+      } else if (response.status === 403) {
+        // ── Cuenta suspendida ──────────────────────────
+        setError(
+          data.message ||
+          'Tu cuenta ha sido suspendida. Contacta al administrador.'
+        );
       } else {
         if (data.errors) {
           setErrors(data.errors);
@@ -94,7 +98,7 @@ export const Login: React.FC<LoginProps> = ({
           setError(data.message || 'Credenciales incorrectas');
         }
       }
-    } catch (err) {
+    } catch {
       setError('Error de conexión con el servidor.');
     } finally {
       setLoading(false);
@@ -107,14 +111,12 @@ export const Login: React.FC<LoginProps> = ({
 
   return (
     <div className="min-h-screen flex">
-      
+
       {/* PANEL IZQUIERDO */}
       <div className="w-1/2 bg-[#2E3A4D] flex flex-col justify-center items-center text-center text-white p-8">
         <div className="max-w-sm">
           <h1 className="text-4xl font-bold mb-4">GOAT</h1>
-          <p className="text-xl mb-4">
-            Sistema Generador de Portafolios Digitales
-          </p>
+          <p className="text-xl mb-4">Sistema Generador de Portafolios Digitales</p>
           <div className="w-16 h-1 bg-white mx-auto mb-4"></div>
           <p className="text-blue-100">
             Accede a tu cuenta y gestiona tu portafolio profesional.
@@ -127,12 +129,8 @@ export const Login: React.FC<LoginProps> = ({
         <div className="max-w-md mx-auto w-full">
 
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-800">
-              Iniciar Sesión
-            </h2>
-            <p className="text-gray-500 text-sm mt-1">
-              Accede a tu cuenta
-            </p>
+            <h2 className="text-2xl font-bold text-gray-800">Iniciar Sesión</h2>
+            <p className="text-gray-500 text-sm mt-1">Accede a tu cuenta</p>
           </div>
 
           {infoMessage && (
@@ -149,7 +147,6 @@ export const Login: React.FC<LoginProps> = ({
 
           <form onSubmit={handleSubmit} className="space-y-5">
 
-            {/* EMAIL */}
             <div>
               <label className="block text-sm text-gray-700 mb-1">
                 Correo Electrónico
@@ -160,32 +157,27 @@ export const Login: React.FC<LoginProps> = ({
                 value={credentials.email}
                 onChange={handleChange}
                 placeholder="Ingresa tu correo electrónico"
-                className="w-full px-4 py-2 rounded-md border border-gray-300 
+                className="w-full px-4 py-2 rounded-md border border-gray-300
                            bg-[#E5E5E5] text-gray-700 placeholder-gray-500
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               />
             </div>
 
-            {/* PASSWORD */}
             <div>
-              <label className="block text-sm text-gray-700 mb-1">
-                Contraseña
-              </label>
-
+              <label className="block text-sm text-gray-700 mb-1">Contraseña</label>
               <div className="relative">
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   name="contrasena"
                   value={credentials.contrasena}
                   onChange={handleChange}
                   placeholder="Ingresa tu contraseña"
-                  className="w-full px-4 py-2 rounded-md border border-gray-300 
+                  className="w-full px-4 py-2 rounded-md border border-gray-300
                              bg-[#E5E5E5] text-gray-700 placeholder-gray-500
                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
-
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -196,11 +188,10 @@ export const Login: React.FC<LoginProps> = ({
               </div>
             </div>
 
-            {/* BOTÓN */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded-md 
+              className="w-full bg-blue-600 text-white py-2 rounded-md
                          hover:bg-blue-700 transition font-medium disabled:opacity-50"
             >
               {loading ? 'Cargando...' : 'Iniciar sesión'}

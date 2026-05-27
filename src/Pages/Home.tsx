@@ -1,6 +1,7 @@
 import { ChevronDown, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface Habilidad {
   nombre: string;
@@ -18,7 +19,6 @@ interface Portafolio {
   enlace_pagi_web: string;
   usuario: Usuario;
   habilidades: Habilidad[];
-
   cantidad_proyectos?: number;
   total_proyectos?: number;
   proyectos_count?: number;
@@ -42,130 +42,16 @@ const AREAS_PROFESIONALES = [
 type AreaProfesional = (typeof AREAS_PROFESIONALES)[number];
 
 const PALABRAS_CLAVE_POR_AREA: Record<AreaProfesional, string[]> = {
-  Frontend: [
-    "frontend",
-    "front end",
-    "html",
-    "css",
-    "javascript",
-    "typescript",
-    "react",
-    "angular",
-    "vue",
-    "tailwind",
-    "bootstrap",
-  ],
-  Backend: [
-    "backend",
-    "back end",
-    "java",
-    "python",
-    "php",
-    "node",
-    "node.js",
-    "express",
-    "laravel",
-    "spring",
-    "django",
-    "api",
-  ],
-  "Full Stack": [
-    "full stack",
-    "fullstack",
-    "frontend",
-    "backend",
-    "react",
-    "node",
-    "laravel",
-    "javascript",
-    "typescript",
-    "mysql",
-    "mongodb",
-  ],
-  Mobile: [
-    "mobile",
-    "movil",
-    "móvil",
-    "android",
-    "ios",
-    "flutter",
-    "react native",
-    "kotlin",
-    "swift",
-    "dart",
-  ],
-  "UX/UI": [
-    "ux",
-    "ui",
-    "ux/ui",
-    "diseñador ux",
-    "diseñador ui",
-    "figma",
-    "adobe xd",
-    "photoshop",
-    "prototipo",
-    "wireframe",
-  ],
-  "Data Science": [
-    "data science",
-    "ciencia de datos",
-    "python",
-    "sql",
-    "power bi",
-    "pandas",
-    "numpy",
-    "machine learning",
-    "ia",
-    "inteligencia artificial",
-    "analista de datos",
-  ],
-  Ciberseguridad: [
-    "ciberseguridad",
-    "seguridad",
-    "seguridad informática",
-    "cybersecurity",
-    "ethical hacking",
-    "hacking ético",
-    "pentesting",
-    "linux",
-    "redes",
-  ],
-  DevOps: [
-    "devops",
-    "docker",
-    "kubernetes",
-    "aws",
-    "azure",
-    "linux",
-    "ci/cd",
-    "jenkins",
-    "gitlab",
-    "deploy",
-  ],
-  "QA Testing": [
-    "qa",
-    "testing",
-    "tester",
-    "pruebas",
-    "automatización",
-    "selenium",
-    "cypress",
-    "jest",
-    "postman",
-  ],
-  "Bases de Datos": [
-    "bases de datos",
-    "base de datos",
-    "database",
-    "sql",
-    "mysql",
-    "postgresql",
-    "postgres",
-    "mongodb",
-    "oracle",
-    "sqlite",
-    "sql server",
-  ],
+  Frontend: ["frontend", "front end", "html", "css", "javascript", "typescript", "react", "angular", "vue", "tailwind", "bootstrap"],
+  Backend: ["backend", "back end", "java", "python", "php", "node", "node.js", "express", "laravel", "spring", "django", "api"],
+  "Full Stack": ["full stack", "fullstack", "frontend", "backend", "react", "node", "laravel", "javascript", "typescript", "mysql", "mongodb"],
+  Mobile: ["mobile", "movil", "móvil", "android", "ios", "flutter", "react native", "kotlin", "swift", "dart"],
+  "UX/UI": ["ux", "ui", "ux/ui", "diseñador ux", "diseñador ui", "figma", "adobe xd", "photoshop", "prototipo", "wireframe"],
+  "Data Science": ["data science", "ciencia de datos", "python", "sql", "power bi", "pandas", "numpy", "machine learning", "ia", "inteligencia artificial", "analista de datos"],
+  Ciberseguridad: ["ciberseguridad", "seguridad", "seguridad informática", "cybersecurity", "ethical hacking", "hacking ético", "pentesting", "linux", "redes"],
+  DevOps: ["devops", "docker", "kubernetes", "aws", "azure", "linux", "ci/cd", "jenkins", "gitlab", "deploy"],
+  "QA Testing": ["qa", "testing", "tester", "pruebas", "automatización", "selenium", "cypress", "jest", "postman"],
+  "Bases de Datos": ["bases de datos", "base de datos", "database", "sql", "mysql", "postgresql", "postgres", "mongodb", "oracle", "sqlite", "sql server"],
 };
 
 const normalizarTexto = (texto: string | number | null | undefined) => {
@@ -201,30 +87,17 @@ const obtenerTextoProfesional = (portafolio: Portafolio) => {
 };
 
 const obtenerCantidadProyectos = (portafolio: Portafolio) => {
-  if (typeof portafolio.cantidad_proyectos === "number") {
-    return portafolio.cantidad_proyectos;
-  }
-
-  if (typeof portafolio.total_proyectos === "number") {
-    return portafolio.total_proyectos;
-  }
-
-  if (typeof portafolio.proyectos_count === "number") {
-    return portafolio.proyectos_count;
-  }
-
-  if (typeof portafolio.numero_proyectos === "number") {
-    return portafolio.numero_proyectos;
-  }
-
-  if (Array.isArray(portafolio.proyectos)) {
-    return portafolio.proyectos.length;
-  }
+  if (typeof portafolio.cantidad_proyectos === "number") return portafolio.cantidad_proyectos;
+  if (typeof portafolio.total_proyectos === "number") return portafolio.total_proyectos;
+  if (typeof portafolio.proyectos_count === "number") return portafolio.proyectos_count;
+  if (typeof portafolio.numero_proyectos === "number") return portafolio.numero_proyectos;
+  if (Array.isArray(portafolio.proyectos)) return portafolio.proyectos.length;
 
   return 0;
 };
 
 function Home() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [portafolios, setPortafolios] = useState<Portafolio[]>([]);
@@ -242,7 +115,7 @@ function Home() {
       },
     })
       .then((res) => {
-        if (!res.ok) throw new Error("Error al cargar los perfiles");
+        if (!res.ok) throw new Error(t("home.errors.load_profiles"));
         return res.json();
       })
       .then((data) => {
@@ -253,7 +126,7 @@ function Home() {
         setError(err.message);
         setCargando(false);
       });
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     setCantidadVisible(5);
@@ -263,23 +136,21 @@ function Home() {
     const textoBusqueda = normalizarTexto(busqueda);
 
     return [...portafolios]
-      .sort(
-        (a, b) =>
-          obtenerCantidadProyectos(b) - obtenerCantidadProyectos(a)
-      )
+      .sort((a, b) => obtenerCantidadProyectos(b) - obtenerCantidadProyectos(a))
       .filter((portafolio) => {
         const textoBuscable = obtenerTextoBuscable(portafolio);
         const textoProfesional = obtenerTextoProfesional(portafolio);
 
+        const palabrasBusqueda = textoBusqueda.split(/\s+/).filter(Boolean);
         const coincideBusqueda =
-          textoBusqueda === "" || textoBuscable.includes(textoBusqueda);
+          palabrasBusqueda.length === 0 ||
+          palabrasBusqueda.every((palabra) => textoBuscable.includes(palabra));
 
         const coincideArea =
           areaSeleccionada === "" ||
-          PALABRAS_CLAVE_POR_AREA[
-            areaSeleccionada as AreaProfesional
-          ].some((palabraClave) =>
-            textoProfesional.includes(normalizarTexto(palabraClave))
+          PALABRAS_CLAVE_POR_AREA[areaSeleccionada as AreaProfesional].some(
+            (palabraClave) =>
+              textoProfesional.includes(normalizarTexto(palabraClave))
           );
 
         return coincideBusqueda && coincideArea;
@@ -287,7 +158,6 @@ function Home() {
   }, [portafolios, busqueda, areaSeleccionada]);
 
   const portafoliosVisibles = portafoliosFiltrados.slice(0, cantidadVisible);
-
   const hayMasPerfiles = cantidadVisible < portafoliosFiltrados.length;
 
   const limpiarFiltros = () => {
@@ -299,7 +169,7 @@ function Home() {
   if (cargando) {
     return (
       <section className="bg-app-bg px-6 py-6">
-        <p className="text-sm text-app-muted">Cargando perfiles...</p>
+        <p className="text-sm text-app-muted">{t("home.loading")}</p>
       </section>
     );
   }
@@ -314,30 +184,27 @@ function Home() {
 
   return (
     <section className="bg-app-bg px-6 py-6">
-      {/* Buscador */}
       <div className="mb-6 flex items-center gap-3 rounded-2xl border border-app-border bg-app-surface px-4 py-3">
         <Search size={18} className="text-app-muted" />
         <input
           type="text"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
-          placeholder="Buscar por nombre, profesión o habilidad..."
+          placeholder={t("home.search_placeholder")}
           className="w-full bg-transparent text-sm text-app-text outline-none placeholder:text-app-muted"
         />
       </div>
 
-      {/* Texto */}
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-app-text">
-          ¡Hola de nuevo! Explora nuevos perfiles y amplía tus conexiones
+          {t("home.title")}
         </h2>
 
         <p className="mt-2 max-w-2xl text-sm text-app-muted">
-          Descubre otros perfiles de desarrolladores y conecta con colegas del sector tecnológico.
+          {t("home.subtitle")}
         </p>
       </div>
 
-      {/* Filtros */}
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <div className="relative inline-flex items-center">
           <select
@@ -345,10 +212,11 @@ function Home() {
             onChange={(e) => setAreaSeleccionada(e.target.value)}
             className="h-12 appearance-none rounded-2xl border border-app-border bg-app-surface px-4 pr-11 text-sm font-medium text-app-text outline-none transition hover:bg-app-card"
           >
-            <option value="">Área profesional</option>
+            <option value="">{t("home.filters.professional_area")}</option>
+
             {AREAS_PROFESIONALES.map((area) => (
               <option key={area} value={area}>
-                {area}
+                {t(`home.areas.${area}`)}
               </option>
             ))}
           </select>
@@ -364,11 +232,10 @@ function Home() {
           onClick={limpiarFiltros}
           className="h-12 rounded-2xl border border-app-border bg-app-surface px-5 text-sm font-medium text-app-text transition hover:bg-app-card"
         >
-          Limpiar filtro
+          {t("home.filters.clear")}
         </button>
       </div>
 
-      {/* Lista */}
       <div className="space-y-4">
         {portafoliosVisibles.map((portafolio) => (
           <article
@@ -376,7 +243,6 @@ function Home() {
             className="flex items-center justify-between rounded-2xl border border-app-border bg-app-surface p-5 shadow-sm"
           >
             <div className="flex items-center gap-4">
-              {/* Foto */}
               {portafolio.usuario?.foto ? (
                 <img
                   src={portafolio.usuario.foto}
@@ -389,21 +255,19 @@ function Home() {
                 </div>
               )}
 
-              {/* Info */}
               <div>
                 <h3 className="text-base font-semibold text-app-text">
-                  {portafolio.usuario?.nombre || "Usuario"}
+                  {portafolio.usuario?.nombre || t("home.card.default_user")}
                 </h3>
 
                 <p className="text-sm text-app-muted">
-                  {portafolio.usuario?.profesion ?? "Sin profesión"}
+                  {portafolio.usuario?.profesion ?? t("home.card.no_profession")}
                 </p>
 
                 <p className="text-xs text-app-muted">
                   {portafolio.usuario?.ubicacion ?? ""}
                 </p>
 
-                {/* Habilidades */}
                 <div className="mt-3 flex flex-wrap gap-2">
                   {portafolio.habilidades?.map((habilidad) => (
                     <span
@@ -423,19 +287,18 @@ function Home() {
               }
               className="rounded-full border border-app-border bg-app-card px-4 py-2 text-sm font-medium text-app-text transition hover:bg-zinc-200"
             >
-              Ver perfil
+              {t("home.card.view_profile")}
             </button>
           </article>
         ))}
 
         {portafoliosVisibles.length === 0 && (
           <p className="text-sm text-app-muted">
-            No hay perfiles disponibles con los filtros seleccionados.
+            {busqueda ? "No se encontraron perfiles con esas habilidades" : t("home.empty")}
           </p>
         )}
       </div>
 
-      {/* Ver más perfiles */}
       {hayMasPerfiles && (
         <div className="mt-6 flex justify-center">
           <button
@@ -443,7 +306,7 @@ function Home() {
             onClick={() => setCantidadVisible((prev) => prev + 5)}
             className="rounded-full border border-app-border bg-app-card px-5 py-2 text-sm font-medium text-app-text transition hover:bg-zinc-200"
           >
-            Ver más perfiles
+            {t("home.show_more")}
           </button>
         </div>
       )}

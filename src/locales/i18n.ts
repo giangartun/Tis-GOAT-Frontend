@@ -5,16 +5,16 @@ import es from "./es/translation.json";
 import en from "./en/translation.json";
 import fr from "./fr/translation.json";
 
-const idiomaGuardado = localStorage.getItem("idioma") || "ES";
+const idiomaGuardado = localStorage.getItem("lang") || "es";
 
 i18n.use(initReactI18next).init({
   resources: {
-    ES: { translation: es },
-    EN: { translation: en },
-    FR: { translation: fr },
+    es: { translation: es },
+    en: { translation: en },
+    fr: { translation: fr },
   },
   lng: idiomaGuardado,
-  fallbackLng: "ES",
+  fallbackLng: "es",
   interpolation: {
     escapeValue: false,
   },

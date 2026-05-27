@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface RegisterProps {
   onSwitchToLogin?: () => void;
   onRegisterSuccess?: () => void;
 }
 
-export const Register: React.FC<RegisterProps> = ({ 
-  onSwitchToLogin, 
-  onRegisterSuccess 
+export const Register: React.FC<RegisterProps> = ({
+  onSwitchToLogin,
+  onRegisterSuccess
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState({
     nombre: '',
     apellido_paterno: '',
@@ -20,117 +22,127 @@ export const Register: React.FC<RegisterProps> = ({
     contrasena: '',
     contrasena_confirmation: ''
   });
-  
+
   const [error, setError] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Función para validar que solo contenga letras y espacios
   const soloLetras = (texto: string): boolean => {
     const regex = /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]*$/;
     return regex.test(texto);
   };
 
-  // Función para limpiar números de un texto
   const limpiarNumeros = (texto: string): string => {
     return texto.replace(/[0-9]/g, '');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
+
     let nuevoValor = value;
-    
-    // Para campos de nombre y apellidos, filtrar números
-    if (name === 'nombre' || name === 'apellido_paterno' || name === 'apellido_materno') {
+
+    if (
+      name === 'nombre' ||
+      name === 'apellido_paterno' ||
+      name === 'apellido_materno'
+    ) {
       nuevoValor = limpiarNumeros(value);
     }
-    
+
     setFormData({
       ...formData,
       [name]: nuevoValor
     });
-    
+
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
     }
+
     if (error) setError('');
     if (message) setMessage('');
   };
 
   const validateForm = (): boolean => {
-    if (!formData.nombre || !formData.apellido_paterno || !formData.apellido_materno || 
-        !formData.email || !formData.contrasena || !formData.contrasena_confirmation) {
-      setError('Todos los campos son obligatorios');
+    if (
+      !formData.nombre ||
+      !formData.apellido_paterno ||
+      !formData.apellido_materno ||
+      !formData.email ||
+      !formData.contrasena ||
+      !formData.contrasena_confirmation
+    ) {
+      setError(t('register.errors.required'));
       return false;
     }
-    
-    // Validación: solo letras para nombre
+
     if (!soloLetras(formData.nombre)) {
-      setError('El nombre solo debe contener letras');
+      setError(t('register.errors.name_letters'));
       return false;
     }
-    
-    // Validación: solo letras para apellido paterno
+
     if (!soloLetras(formData.apellido_paterno)) {
-      setError('El apellido paterno solo debe contener letras');
+      setError(t('register.errors.last_name_letters'));
       return false;
     }
-    
-    // Validación: solo letras para apellido materno
+
     if (!soloLetras(formData.apellido_materno)) {
-      setError('El apellido materno solo debe contener letras');
+      setError(t('register.errors.second_last_name_letters'));
       return false;
     }
-    
+
     if (formData.contrasena !== formData.contrasena_confirmation) {
-      setError('Las contraseñas no coinciden');
+      setError(t('register.errors.password_match'));
       return false;
     }
-    
+
     if (formData.contrasena.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+      setError(t('register.errors.password_length'));
       return false;
     }
-    
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!emailRegex.test(formData.email)) {
-      setError('Ingresa un correo electrónico válido');
+      setError(t('register.errors.email_invalid'));
       return false;
     }
-    
+
     return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setError('');
     setMessage('');
     setErrors({});
-    
+
     if (!validateForm()) return;
-    
+
     setLoading(true);
 
     try {
-      const response = await fetch(import.meta.env.VITE_API_URL+'/api/usuario/pre-registro', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
+      const response = await fetch(
+        import.meta.env.VITE_API_URL + '/api/usuario/pre-registro',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json'
+          },
+          body: JSON.stringify(formData)
+        }
+      );
 
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(data.message || 'Revisa tu correo para completar el registro. El enlace expira en 5 minutos.');
-        
+        setMessage(data.message || t('register.success.check_email'));
+
         setFormData({
           nombre: '',
           apellido_paterno: '',
@@ -139,14 +151,14 @@ export const Register: React.FC<RegisterProps> = ({
           contrasena: '',
           contrasena_confirmation: ''
         });
-        
+
         setTimeout(() => {
           if (onRegisterSuccess) {
             onRegisterSuccess();
           } else {
-            navigate('/login', { 
-              state: { 
-                message: '✅ Registro exitoso. Revisa tu correo electrónico para verificar tu cuenta antes de iniciar sesión.' 
+            navigate('/login', {
+              state: {
+                message: t('register.success.login_message')
               }
             });
           }
@@ -155,18 +167,14 @@ export const Register: React.FC<RegisterProps> = ({
         if (data.errors) {
           setErrors(data.errors);
         } else {
-          setError(data.message || 'Error al registrarse');
+          setError(data.message || t('register.errors.register_failed'));
         }
       }
-    } catch (err) {
-      setError('Error de conexión con el servidor.');
+    } catch {
+      setError(t('register.errors.connection'));
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoogleRegister = () => {
-    console.log('Registro con Google - Pendiente de implementación');
   };
 
   const handleSwitchToLogin = () => {
@@ -180,32 +188,36 @@ export const Register: React.FC<RegisterProps> = ({
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="w-full h-screen flex">
-        {/* Columna Izquierda */}
         <div className="w-1/2 bg-[#2E3A4D] p-8 flex flex-col justify-center items-center text-center text-white">
           <div className="max-w-sm">
             <h1 className="text-4xl font-bold mb-4">GOAT</h1>
-            <p className="text-xl mb-4">Sistema Generador de Portafolios Digitales</p>
+
+            <p className="text-xl mb-4">{t('register.left.title')}</p>
+
             <div className="w-16 h-1 bg-white mx-auto mb-4"></div>
-            <p className="text-blue-100">
-              Crea tu portafolio profesional de manera fácil y rápida. 
-              Conecta con oportunidades laborales y muestra tus habilidades.
-            </p>
+
+            <p className="text-blue-100">{t('register.left.subtitle')}</p>
           </div>
         </div>
 
-        {/* Columna Derecha - Ajustada para evitar desbordamiento */}
         <div className="w-1/2 flex flex-col justify-center overflow-y-auto py-6">
           <div className="max-w-md mx-auto w-full px-6">
             <div className="text-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-800">Crea tu cuenta</h2>
-              <p className="text-gray-500 text-sm mt-1">Regístrate para empezar</p>
+              <h2 className="text-2xl font-bold text-gray-800">
+                {t('register.title')}
+              </h2>
+
+              <p className="text-gray-500 text-sm mt-1">
+                {t('register.subtitle')}
+              </p>
             </div>
 
             {message && (
               <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded mb-3 text-sm">
                 {message}
+
                 <div className="text-xs mt-1 text-green-600">
-                  Redirigiendo al login en 7 segundos...
+                  {t('register.redirecting')}
                 </div>
               </div>
             )}
@@ -219,18 +231,20 @@ export const Register: React.FC<RegisterProps> = ({
             <form onSubmit={handleSubmit} className="space-y-3">
               <div className="text-left">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre *
+                  {t('register.fields.name')} *
                 </label>
+
                 <input
                   type="text"
                   name="nombre"
                   value={formData.nombre}
                   onChange={handleChange}
-                  placeholder="Ingresa tu nombre (solo letras)"
+                  placeholder={t('register.placeholders.name')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                   required
                 />
+
                 {errors.nombre && (
                   <p className="text-red-500 text-xs mt-1">{errors.nombre}</p>
                 )}
@@ -238,56 +252,66 @@ export const Register: React.FC<RegisterProps> = ({
 
               <div className="text-left">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Apellido Paterno *
+                  {t('register.fields.last_name')} *
                 </label>
+
                 <input
                   type="text"
                   name="apellido_paterno"
                   value={formData.apellido_paterno}
                   onChange={handleChange}
-                  placeholder="Ingresa tu apellido paterno (solo letras)"
+                  placeholder={t('register.placeholders.last_name')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                   required
                 />
+
                 {errors.apellido_paterno && (
-                  <p className="text-red-500 text-xs mt-1">{errors.apellido_paterno}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.apellido_paterno}
+                  </p>
                 )}
               </div>
 
               <div className="text-left">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Apellido Materno *
+                  {t('register.fields.second_last_name')} *
                 </label>
+
                 <input
                   type="text"
                   name="apellido_materno"
                   value={formData.apellido_materno}
                   onChange={handleChange}
-                  placeholder="Ingresa tu apellido materno (solo letras)"
+                  placeholder={t('register.placeholders.second_last_name')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                   required
                 />
+
                 {errors.apellido_materno && (
-                  <p className="text-red-500 text-xs mt-1">{errors.apellido_materno}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.apellido_materno}
+                  </p>
                 )}
               </div>
 
               <div className="text-left">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Correo Electrónico *
+                  {t('register.fields.email')} *
                 </label>
+
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="Ingresa tu correo electrónico"
+                  placeholder={t('register.placeholders.email')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                   required
                 />
+
                 {errors.email && (
                   <p className="text-red-500 text-xs mt-1">{errors.email}</p>
                 )}
@@ -295,124 +319,87 @@ export const Register: React.FC<RegisterProps> = ({
 
               <div className="text-left">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Contraseña * (mínimo 6 caracteres)
+                  {t('register.fields.password')} *
                 </label>
+
                 <div className="relative">
                   <input
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     name="contrasena"
                     value={formData.contrasena}
                     onChange={handleChange}
-                    placeholder="Elige una contraseña"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder={t('register.placeholders.password')}
+                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                     required
                   />
+
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-600 hover:text-gray-800"
+                    className="absolute right-3 top-2.5"
                   >
-                    {showPassword ? (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    )}
+                    👁
                   </button>
                 </div>
+
                 {errors.contrasena && (
-                  <p className="text-red-500 text-xs mt-1">{errors.contrasena}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.contrasena}
+                  </p>
                 )}
               </div>
 
               <div className="text-left">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirmar Contraseña *
+                  {t('register.fields.confirm_password')} *
                 </label>
+
                 <div className="relative">
                   <input
-                    type={showConfirmPassword ? "text" : "password"}
+                    type={showConfirmPassword ? 'text' : 'password'}
                     name="contrasena_confirmation"
                     value={formData.contrasena_confirmation}
                     onChange={handleChange}
-                    placeholder="Repite la contraseña"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder={t('register.placeholders.confirm_password')}
+                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
                     required
                   />
+
                   <button
                     type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-600 hover:text-gray-800"
+                    onClick={() =>
+                      setShowConfirmPassword(!showConfirmPassword)
+                    }
+                    className="absolute right-3 top-2.5"
                   >
-                    {showConfirmPassword ? (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    )}
+                    👁
                   </button>
                 </div>
+
+                {errors.contrasena_confirmation && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.contrasena_confirmation}
+                  </p>
+                )}
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50 font-medium mt-2"
+                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition font-medium disabled:opacity-50"
               >
-                {loading ? 'Registrando...' : 'Registrarse'}
+                {loading ? t('register.loading') : t('register.button')}
               </button>
             </form>
-
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">O regístrate con</span>
-              </div>
-            </div>
-
-            <button
-              onClick={handleGoogleRegister}
-              className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-md py-2 hover:bg-gray-50 transition"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
-              <span className="text-sm text-gray-600">Registrarse con Google</span>
-            </button>
 
             <div className="text-center mt-4">
               <button
                 onClick={handleSwitchToLogin}
                 className="text-sm text-blue-600 hover:underline"
               >
-                ¿Ya tienes una cuenta? Inicia sesión
+                {t('register.login_link')}
               </button>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Check, Layout } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import axios from "axios";
 
 const API_URL = "http://localhost:8000";
@@ -14,6 +15,8 @@ interface Plantilla {
 
 function PersonalizacionPortafolio() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
   const [plantillaSeleccionada, setPlantillaSeleccionada] = useState<string>("");
   const [plantillas, setPlantillas] = useState<Plantilla[]>([]);
   const [mostrarMensaje, setMostrarMensaje] = useState(false);
@@ -83,7 +86,7 @@ function PersonalizacionPortafolio() {
       setMostrarMensaje(true);
     } catch (error) {
       console.error("Error al guardar la plantilla:", error);
-      alert("No se pudo guardar la configuración del portafolio.");
+      alert(t("portfolioCustomization.errors.save"));
     }
   };
 
@@ -133,13 +136,12 @@ function PersonalizacionPortafolio() {
     }
   };
 
-  const tarjetaBase =
-    "rounded-2xl border bg-white p-4 shadow-sm transition-all duration-300 hover:shadow-lg";
-
   if (cargando) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f8fafc]">
-        <p className="text-lg text-slate-700">Cargando personalización...</p>
+        <p className="text-lg text-slate-700">
+          {t("portfolioCustomization.loading")}
+        </p>
       </div>
     );
   }
@@ -149,10 +151,11 @@ function PersonalizacionPortafolio() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-blue-700">
-            Personalización del Portafolio
+            {t("portfolioCustomization.title")}
           </h1>
+
           <p className="mt-2 text-lg text-slate-600">
-            Elige la plantilla que prefieras para tu portafolio.
+            {t("portfolioCustomization.subtitle")}
           </p>
         </div>
 
@@ -160,8 +163,9 @@ function PersonalizacionPortafolio() {
           <section>
             <div className="mb-6 flex items-center gap-3">
               <Layout className="text-blue-600" size={28} />
+
               <h2 className="text-2xl font-semibold text-slate-900">
-                Plantillas disponibles
+                {t("portfolioCustomization.available_templates")}
               </h2>
             </div>
 
@@ -201,7 +205,7 @@ function PersonalizacionPortafolio() {
               disabled={!plantillaSeleccionada}
               className="rounded-full bg-blue-500 px-8 py-3 text-lg font-medium text-white shadow-lg transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Aplicar cambios
+              {t("portfolioCustomization.apply_changes")}
             </button>
           </div>
         </div>
@@ -214,12 +218,14 @@ function PersonalizacionPortafolio() {
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/20 text-green-600">
                 <Check size={28} />
               </div>
+
               <div className="flex-1">
                 <h3 className="text-xl font-semibold text-slate-900">
-                  Cambios aplicados correctamente
+                  {t("portfolioCustomization.success.title")}
                 </h3>
+
                 <p className="mt-2 text-sm text-slate-600">
-                  La plantilla del portafolio se guardó correctamente.
+                  {t("portfolioCustomization.success.description")}
                 </p>
               </div>
             </div>
@@ -229,8 +235,9 @@ function PersonalizacionPortafolio() {
                 onClick={() => setMostrarMensaje(false)}
                 className="rounded-full border border-slate-200 px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
               >
-                Quedarme aquí
+                {t("portfolioCustomization.actions.stay")}
               </button>
+
               <button
                 onClick={() => {
                   setMostrarMensaje(false);
@@ -238,7 +245,7 @@ function PersonalizacionPortafolio() {
                 }}
                 className="rounded-full bg-blue-500 px-5 py-2 text-sm font-medium text-white transition hover:bg-blue-600"
               >
-                Ver mi portafolio
+                {t("portfolioCustomization.actions.view_portfolio")}
               </button>
             </div>
           </div>

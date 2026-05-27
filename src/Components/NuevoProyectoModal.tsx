@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Check, X } from "lucide-react";
 
 type Tecnologia = {
@@ -34,6 +35,8 @@ function NuevoProyectoModal({
   proyectoInicial,
   tecnologiasDisponibles,
 }: NuevoProyectoModalProps) {
+  const { t } = useTranslation();
+
   const [form, setForm] = useState<ProyectoLocal>({
     nombre: "",
     descripcion: "",
@@ -67,6 +70,7 @@ function NuevoProyectoModal({
       });
       setArchivoPdf(null);
     }
+
     setFormError("");
   }, [proyectoInicial, isOpen]);
 
@@ -74,6 +78,7 @@ function NuevoProyectoModal({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+
     setForm((prev) => ({
       ...prev,
       [name]: value,
@@ -99,7 +104,7 @@ function NuevoProyectoModal({
     const githubLimpio = form.github.trim();
 
     if (!githubRegex.test(githubLimpio)) {
-      setFormError("El enlace de GitHub debe comenzar con https://github.com/");
+      setFormError(t("projectModal.errors.github_invalid"));
       return;
     }
 
@@ -140,6 +145,18 @@ function NuevoProyectoModal({
     ),
   ];
 
+  const traducirCategoria = (categoria: string) => {
+    const categorias: Record<string, string> = {
+      "Lenguajes de programación": t("projectModal.categories.programming_languages"),
+      "Frameworks y Librerías": t("projectModal.categories.frameworks"),
+      "Base de Datos": t("projectModal.categories.databases"),
+      "Herramientas y Tecnologías": t("projectModal.categories.tools"),
+      Otros: t("projectModal.categories.others"),
+    };
+
+    return categorias[categoria] || categoria;
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -150,7 +167,9 @@ function NuevoProyectoModal({
       >
         <div className="flex items-center justify-between border-b border-app-border px-4 py-3 sm:px-6 sm:py-4">
           <h2 className="text-2xl font-extrabold text-app-text sm:text-3xl">
-            {proyectoInicial ? "Editar Proyecto" : "Nuevo Proyecto"}
+            {proyectoInicial
+              ? t("projectModal.title_edit")
+              : t("projectModal.title_new")}
           </h2>
 
           <button
@@ -165,14 +184,15 @@ function NuevoProyectoModal({
         <div className="flex-1 space-y-5 overflow-y-auto px-4 py-5 sm:px-8 sm:py-6">
           <div>
             <label className="mb-1 block text-base font-medium text-app-text">
-              Nombre del proyecto:
+              {t("projectModal.fields.name")}
             </label>
+
             <input
               name="nombre"
               value={form.nombre}
               onChange={handleChange}
               type="text"
-              placeholder="nombredelproyecto"
+              placeholder={t("projectModal.placeholders.name")}
               required
               className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm text-app-text outline-none placeholder:text-app-muted"
             />
@@ -180,8 +200,9 @@ function NuevoProyectoModal({
 
           <div>
             <label className="mb-1 block text-base font-medium text-app-text">
-              Descripción:
+              {t("projectModal.fields.description")}
             </label>
+
             <textarea
               name="descripcion"
               value={form.descripcion}
@@ -189,18 +210,20 @@ function NuevoProyectoModal({
               rows={5}
               maxLength={200}
               required
-              placeholder="Máximo 200 caracteres"
+              placeholder={t("projectModal.placeholders.description")}
               className="w-full rounded-2xl border border-app-border bg-white px-4 py-3 text-sm text-app-text outline-none placeholder:text-app-muted"
             />
+
             <p className="mt-1 text-xs text-app-muted">
-              {form.descripcion.length}/200 caracteres
+              {form.descripcion.length}/200 {t("projectModal.helpers.characters")}
             </p>
           </div>
 
           <div>
             <label className="mb-1 block text-base font-medium text-app-text">
-              Link GitHub:
+              {t("projectModal.fields.github")}
             </label>
+
             <input
               name="github"
               value={form.github}
@@ -209,18 +232,20 @@ function NuevoProyectoModal({
               placeholder="https://github.com/usuario/proyecto"
               required
               pattern="^https?:\/\/(www\.)?github\.com\/.+"
-              title="Ingresa un enlace válido de GitHub, por ejemplo: https://github.com/usuario/proyecto"
+              title={t("projectModal.helpers.github_title")}
               className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm text-app-text outline-none placeholder:text-app-muted"
             />
+
             <p className="mt-1 text-xs text-app-muted">
-              Debe ser un enlace de GitHub.
+              {t("projectModal.helpers.github_required")}
             </p>
           </div>
 
           <div>
             <label className="mb-1 block text-base font-medium text-app-text">
-              URL de la demo:
+              {t("projectModal.fields.demo")}
             </label>
+
             <input
               name="demo"
               value={form.demo}
@@ -229,14 +254,18 @@ function NuevoProyectoModal({
               placeholder="https://demo.com"
               className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm text-app-text outline-none placeholder:text-app-muted"
             />
-            <p className="mt-1 text-xs text-app-muted">Campo opcional.</p>
+
+            <p className="mt-1 text-xs text-app-muted">
+              {t("projectModal.helpers.optional")}
+            </p>
           </div>
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div>
               <label className="mb-1 block text-base font-medium text-app-text">
-                Fecha inicio:
+                {t("projectModal.fields.start_date")}
               </label>
+
               <input
                 name="fechaInicio"
                 value={form.fechaInicio}
@@ -250,8 +279,9 @@ function NuevoProyectoModal({
 
             <div>
               <label className="mb-1 block text-base font-medium text-app-text">
-                Fecha fin:
+                {t("projectModal.fields.end_date")}
               </label>
+
               <input
                 name="fechaFin"
                 value={form.fechaFin}
@@ -266,7 +296,7 @@ function NuevoProyectoModal({
 
           <div>
             <label className="mb-3 block text-base font-medium text-app-text">
-              Tecnologías:
+              {t("projectModal.fields.technologies")}
             </label>
 
             <div className="space-y-5">
@@ -283,12 +313,14 @@ function NuevoProyectoModal({
                     className="rounded-2xl border border-app-border bg-app-bg p-4 shadow-sm"
                   >
                     <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-app-text">
-                      {categoria}
+                      {traducirCategoria(categoria)}
                     </h3>
 
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                       {tecnologiasDeCategoria.map((tec) => {
-                        const checked = form.tecnologias.includes(tec.id_tecnologia);
+                        const checked = form.tecnologias.includes(
+                          tec.id_tecnologia
+                        );
 
                         return (
                           <label
@@ -316,10 +348,13 @@ function NuevoProyectoModal({
                             </span>
 
                             <div className="min-w-0">
-                              <span className="block font-medium">{tec.nombre}</span>
+                              <span className="block font-medium">
+                                {tec.nombre}
+                              </span>
+
                               {tec.categoria && (
                                 <span className="block text-xs text-app-muted">
-                                  {tec.categoria}
+                                  {traducirCategoria(tec.categoria)}
                                 </span>
                               )}
                             </div>
@@ -335,8 +370,9 @@ function NuevoProyectoModal({
 
           <div>
             <label className="mb-1 block text-base font-medium text-app-text">
-              URL de imagen:
+              {t("projectModal.fields.image_url")}
             </label>
+
             <input
               name="imagen"
               value={form.imagen}
@@ -349,8 +385,9 @@ function NuevoProyectoModal({
 
           <div>
             <label className="mb-1 block text-base font-medium text-app-text">
-              Subir archivo PDF:
+              {t("projectModal.fields.pdf")}
             </label>
+
             <input
               type="file"
               accept="application/pdf,.pdf"
@@ -360,13 +397,14 @@ function NuevoProyectoModal({
               }}
               className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm text-app-text outline-none"
             />
+
             <p className="mt-1 text-xs text-app-muted">
-              Este archivo se subirá como evidencia al guardar el proyecto.
+              {t("projectModal.helpers.pdf")}
             </p>
 
             {archivoPdf && (
               <p className="mt-2 text-sm text-green-700">
-                Archivo seleccionado: {archivoPdf.name}
+                {t("projectModal.helpers.selected_file")}: {archivoPdf.name}
               </p>
             )}
           </div>
@@ -384,14 +422,16 @@ function NuevoProyectoModal({
             onClick={onClose}
             className="rounded-full bg-red-600 px-6 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
           >
-            Cancelar
+            {t("projectModal.actions.cancel")}
           </button>
 
           <button
             type="submit"
             className="rounded-full bg-app-topbar px-6 py-2 text-sm font-semibold text-white transition hover:opacity-90"
           >
-            {proyectoInicial ? "Actualizar" : "Guardar"}
+            {proyectoInicial
+              ? t("projectModal.actions.update")
+              : t("projectModal.actions.save")}
           </button>
         </div>
       </form>

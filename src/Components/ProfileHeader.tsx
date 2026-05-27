@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Mail, MapPin, GraduationCap } from 'lucide-react';
 
 interface Usuario {
@@ -13,8 +14,8 @@ interface Usuario {
   institucion?: string;
 }
 
-const getFullName = (u?: Usuario) => {
-  if (!u) return 'Cargando...';
+const getFullName = (u?: Usuario, loadingText = 'Cargando...') => {
+  if (!u) return loadingText;
   return [u.nombre, u.apellido_paterno, u.apellido_materno].filter(Boolean).join(' ');
 };
 
@@ -24,6 +25,7 @@ interface ProfileHeaderProps {
 }
 
 export default function ProfileHeader({ usuario, children }: ProfileHeaderProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
@@ -41,21 +43,21 @@ export default function ProfileHeader({ usuario, children }: ProfileHeaderProps)
                 </div>
                 <div className="flex flex-col">
                   <h2 className="text-[42px] font-bold mb-1 tracking-tight">
-                    {getFullName(usuario)}
+                    {getFullName(usuario, t('profileHeader.loading'))}
                   </h2>
                   <p className="text-blue-200 text-[20px] font-medium opacity-90 mb-6 italic">
-                    {usuario.profesion || 'Ingeniera de Software'}
+                    {usuario.profesion || t('profileHeader.defaults.profession')}
                   </p>
 
                   <div className="flex flex-wrap gap-x-12 gap-y-4 text-[13px] font-medium">
                     <span className="flex items-center gap-2.5 opacity-80">
-                      <Mail size={16} /> {usuario.email || 'correo@ejemplo.com'}
+                      <Mail size={16} /> {usuario.email || t('profileHeader.defaults.email')}
                     </span>
                     <span className="flex items-center gap-2.5 opacity-80">
-                      <MapPin size={16} /> {usuario.ciudad || 'Cochabamba'}, {usuario.pais || 'BO'}
+                      <MapPin size={16} /> {usuario.ciudad || t('profileHeader.defaults.city')}, {usuario.pais || t('profileHeader.defaults.country')}
                     </span>
                     <span className="flex items-center gap-2.5 opacity-80">
-                      <GraduationCap size={18} /> {usuario.institucion || 'Universidad Mayor de San Simon'}
+                      <GraduationCap size={18} /> {usuario.institucion || t('profileHeader.defaults.institution')}
                     </span>
                   </div>
                 </div>
@@ -65,7 +67,7 @@ export default function ProfileHeader({ usuario, children }: ProfileHeaderProps)
                 onClick={() => navigate('/perfil')}
                 className="bg-white/10 hover:bg-white/25 text-white px-10 py-2.5 rounded-[14px] text-[14px] font-bold border border-white/20 transition-all shadow-lg active:scale-95"
               >
-                Editar
+                {t('profileHeader.actions.edit')}
               </button>
             </div>
           </div>
@@ -80,7 +82,7 @@ export default function ProfileHeader({ usuario, children }: ProfileHeaderProps)
                   : 'text-gray-400 border-transparent hover:text-gray-700'
               }`}
             >
-              Proyectos
+              {t('profileHeader.tabs.projects')}
             </button>
             <button
               onClick={() => navigate('/habilidades')}
@@ -90,7 +92,7 @@ export default function ProfileHeader({ usuario, children }: ProfileHeaderProps)
                   : 'text-gray-400 border-transparent hover:text-gray-700'
               }`}
             >
-              Habilidades
+              {t('profileHeader.tabs.skills')}
             </button>
             <button
               onClick={() => navigate('/enlaces')}
@@ -100,7 +102,7 @@ export default function ProfileHeader({ usuario, children }: ProfileHeaderProps)
                   : 'text-gray-400 border-transparent hover:text-gray-700'
               }`}
             >
-              Enlaces
+              {t('profileHeader.tabs.links')}
             </button>
           </div>
 

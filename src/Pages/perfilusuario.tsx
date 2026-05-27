@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import type { FormEvent } from 'react';
+import type { TFunction } from 'i18next';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Mail,
   MapPin,
@@ -41,6 +43,47 @@ const CATS: Record<string, string[]> = {
 
 const SOFT = ['Trabajo en equipo', 'Liderazgo', 'Comunicación', 'Resolución de problemas', 'Adaptabilidad', 'Pensamiento crítico', 'Gestión del tiempo', 'Creatividad', 'Inteligencia emocional', 'Proactividad', 'Empatía', 'Negociación', 'Toma de decisiones', 'Gestión del estrés', 'Orientación a resultados'];
 
+const CAT_LABEL_KEYS: Record<string, string> = {
+  'Lenguajes de Programación': 'profile.categories.programming_languages',
+  'Desarrollo Web Frontend': 'profile.categories.frontend',
+  'Desarrollo Web Backend': 'profile.categories.backend',
+  'Desarrollo Móvil': 'profile.categories.mobile',
+  'Bases de Datos': 'profile.categories.databases',
+  'Frameworks y Librerías': 'profile.categories.frameworks',
+  'DevOps / Infraestructura': 'profile.categories.devops',
+  'Cloud Computing': 'profile.categories.cloud',
+  'Seguridad Informática': 'profile.categories.security',
+  'Inteligencia Artificial / Data Science': 'profile.categories.ai',
+  'Testing / QA': 'profile.categories.testing',
+  'Herramientas de Diseño': 'profile.categories.design',
+  'Habilidades Blandas': 'profile.categories.soft_skills',
+  'Habilidades Técnicas': 'profile.categories.technical_skills',
+};
+
+const SOFT_LABEL_KEYS: Record<string, string> = {
+  'Trabajo en equipo': 'profile.soft.work_team',
+  'Liderazgo': 'profile.soft.leadership',
+  'Comunicación': 'profile.soft.communication',
+  'Resolución de problemas': 'profile.soft.problem_solving',
+  'Adaptabilidad': 'profile.soft.adaptability',
+  'Pensamiento crítico': 'profile.soft.critical_thinking',
+  'Gestión del tiempo': 'profile.soft.time_management',
+  'Creatividad': 'profile.soft.creativity',
+  'Inteligencia emocional': 'profile.soft.emotional_intelligence',
+  'Proactividad': 'profile.soft.proactivity',
+  'Empatía': 'profile.soft.empathy',
+  'Negociación': 'profile.soft.negotiation',
+  'Toma de decisiones': 'profile.soft.decision_making',
+  'Gestión del estrés': 'profile.soft.stress_management',
+  'Orientación a resultados': 'profile.soft.results_oriented',
+};
+
+const translateCategory = (t: (key: string, fallback?: string) => string, value: string) =>
+  CAT_LABEL_KEYS[value] ? t(CAT_LABEL_KEYS[value], value) : value;
+
+const translateSoftSkill = (t: (key: string, fallback?: string) => string, value: string) =>
+  SOFT_LABEL_KEYS[value] ? t(SOFT_LABEL_KEYS[value], value) : value;
+
 const PLATFORMS: Record<string, string> = {
   LinkedIn: 'https://www.linkedin.com/in/',
   GitHub: 'https://github.com/',
@@ -66,11 +109,11 @@ const NET_LABELS: Record<string, string> = {
 };
 
 const TABS = [
-  { id: 'datosPersonales', label: 'Datos Personales' },
-  { id: 'habilidades', label: 'Habilidades' },
-  { id: 'enlaces', label: 'Enlaces Profesionales' },
-  { id: 'academica', label: 'Exp. Académica' },
-  { id: 'laboral', label: 'Exp. Laboral' },
+  { id: 'datosPersonales', labelKey: 'profile.tabs.personal_data' },
+  { id: 'habilidades', labelKey: 'profile.tabs.skills' },
+  { id: 'enlaces', labelKey: 'profile.tabs.professional_links' },
+  { id: 'academica', labelKey: 'profile.tabs.academic_experience' },
+  { id: 'laboral', labelKey: 'profile.tabs.work_experience' },
 ] as const;
 
 type Tab = typeof TABS[number]['id'];
@@ -339,6 +382,8 @@ function SuccessModal({
   msg: string;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <ModalWrap>
       <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-[380px] p-10 text-center my-auto">
@@ -355,7 +400,7 @@ function SuccessModal({
           onClick={onClose}
           className="w-full bg-[#1F4E79] text-white font-bold py-3 rounded-2xl hover:opacity-90 transition"
         >
-          Aceptar
+          {t('profile.common.accept')}
         </button>
       </div>
     </ModalWrap>
@@ -375,6 +420,8 @@ function ConfirmModal({
   onCancel: () => void;
   loading?: boolean;
 }) {
+  const { t } = useTranslation();
+
   return (
     <ModalWrap>
       <div className="bg-white rounded-[24px] shadow-2xl p-8 max-w-sm w-full text-center">
@@ -391,14 +438,14 @@ function ConfirmModal({
             onClick={onOk}
             className="px-6 py-2.5 bg-[#1F4E79] text-white font-bold rounded-xl hover:opacity-90 active:scale-95 disabled:opacity-60 transition"
           >
-            Aceptar
+            {t('profile.common.accept')}
           </button>
           <button
             disabled={loading}
             onClick={onCancel}
             className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl transition disabled:opacity-60"
           >
-            Cancelar
+            {t('profile.common.cancel')}
           </button>
         </div>
       </div>
@@ -415,6 +462,8 @@ function DeleteSuccessModal({
   msg: string;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <ModalWrap>
       <div className="bg-white rounded-[24px] shadow-2xl p-8 max-w-sm w-full text-center">
@@ -429,7 +478,7 @@ function DeleteSuccessModal({
           onClick={onClose}
           className="px-10 py-2.5 bg-[#1F4E79] hover:opacity-90 text-white font-bold rounded-xl shadow active:scale-95 transition"
         >
-          Aceptar
+          {t('profile.common.accept')}
         </button>
       </div>
     </ModalWrap>
@@ -444,6 +493,7 @@ function SkillModal({
   onClose: () => void;
   onSaved: (s: Skill) => void;
 }) {
+  const { t } = useTranslation();
   const token = localStorage.getItem('token') || '';
   const [tipo, setTipo] = useState<'Dura' | 'Blanda'>('Dura');
   const [cat, setCat] = useState('');
@@ -466,11 +516,11 @@ function SkillModal({
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
     if (!nombre) {
-      alert('Selecciona un nombre.');
+      alert(t('profile.alerts.select_name'));
       return;
     }
     if (tipo === 'Dura' && !cat) {
-      alert('Selecciona una categoría.');
+      alert(t('profile.alerts.select_category'));
       return;
     }
     setSaving(true);
@@ -491,7 +541,7 @@ function SkillModal({
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.message || 'Error al guardar.');
+      if (!res.ok) throw new Error(data?.message || t('profile.alerts.save_error'));
       const saved = normalizeSkill(data?.habilidad ?? data);
       saved.categoria = tipo === 'Dura' ? cat : 'Habilidades Blandas';
       onSaved(saved);
@@ -506,42 +556,42 @@ function SkillModal({
     <ModalWrap>
       <div className="bg-white rounded-[28px] shadow-2xl w-full max-w-[480px] max-h-[90vh] overflow-y-auto p-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-[20px] font-bold text-gray-900 uppercase tracking-tight">Añadir Habilidad</h2>
+          <h2 className="text-[20px] font-bold text-gray-900 uppercase tracking-tight">{t('profile.skill_modal.title')}</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-700 transition">
             <X size={20} />
           </button>
         </div>
         <form onSubmit={handleSave} className="flex flex-col gap-5">
           <Sel
-            label="Tipo de habilidad"
+            label={t('profile.skill_modal.skill_type')}
             value={tipo}
             onChange={handleTipo}
             opts={[
-              { value: 'Dura', label: 'Habilidad dura' },
-              { value: 'Blanda', label: 'Habilidad blanda' },
+              { value: 'Dura', label: t('profile.skill_modal.hard_skill') },
+              { value: 'Blanda', label: t('profile.skill_modal.soft_skill') },
             ]}
           />
           {tipo === 'Dura' && (
             <Sel
-              label="Categoría"
+              label={t('profile.skill_modal.category')}
               value={cat}
               onChange={handleCat}
-              placeholder="Selecciona categoría"
-              opts={Object.keys(CATS).map((c) => ({ value: c, label: c }))}
+              placeholder={t('profile.skill_modal.select_category')}
+              opts={Object.keys(CATS).map((c) => ({ value: c, label: translateCategory(t, c) }))}
             />
           )}
           <Sel
-            label={`Nombre de la habilidad ${tipo === 'Dura' ? 'dura' : 'blanda'}`}
+            label={tipo === 'Dura' ? t('profile.skill_modal.hard_skill_name') : t('profile.skill_modal.soft_skill_name')}
             value={nombre}
             onChange={setNombre}
-            placeholder="Selecciona una opción"
-            opts={opts.map((s) => ({ value: s, label: s }))}
+            placeholder={t('profile.common.select_option')}
+            opts={opts.map((s) => ({ value: s, label: tipo === 'Blanda' ? translateSoftSkill(t, s) : s }))}
             disabled={tipo === 'Dura' && !cat}
           />
           {tipo === 'Dura' && (
             <div>
               <div className="flex justify-between mb-2">
-                <label className={lblCls + ' mb-0'}>Nivel</label>
+                <label className={lblCls + ' mb-0'}>{t('profile.skill_modal.level')}</label>
                 <span className="text-[14px] font-bold text-gray-700">{nivel}%</span>
               </div>
               <input
@@ -556,8 +606,8 @@ function SkillModal({
           )}
           <div className="flex items-center justify-between">
             <div>
-              <p className={lblCls + ' mb-0'}>Visible</p>
-              <p className="text-[12px] text-gray-400">Mostrar en el perfil</p>
+              <p className={lblCls + ' mb-0'}>{t('profile.skill_modal.visible')}</p>
+              <p className="text-[12px] text-gray-400">{t('profile.skill_modal.show_in_profile')}</p>
             </div>
             <Toggle on={visible} toggle={() => setVisible((v) => !v)} />
           </div>
@@ -567,14 +617,14 @@ function SkillModal({
               onClick={onClose}
               className="flex-1 py-3 rounded-[14px] bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 transition"
             >
-              Cancelar
+              {t('profile.common.cancel')}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="flex-1 py-3 rounded-[14px] bg-[#1F4E79] text-white font-bold hover:opacity-90 active:scale-95 disabled:opacity-60 transition"
             >
-              {saving ? 'Guardando...' : 'Guardar Habilidad'}
+              {saving ? t('profile.common.saving') : t('profile.skill_modal.save')}
             </button>
           </div>
         </form>
@@ -593,6 +643,7 @@ function LinkModal({
   onClose: () => void;
   onSaved: (l: LinkItem) => void;
 }) {
+  const { t } = useTranslation();
   const token = localStorage.getItem('token') || '';
   const [red, setRed] = useState('');
   const [username, setUsername] = useState('');
@@ -601,11 +652,11 @@ function LinkModal({
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
     if (!red) {
-      alert('Selecciona una plataforma.');
+      alert(t('profile.alerts.select_platform'));
       return;
     }
     if (!username.trim()) {
-      alert('Ingresa tu nombre de usuario.');
+      alert(t('profile.alerts.enter_username'));
       return;
     }
     setSaving(true);
@@ -625,7 +676,7 @@ function LinkModal({
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.message || 'Error al guardar.');
+      if (!res.ok) throw new Error(data?.message || t('profile.alerts.save_error'));
       onSaved(data?.red ?? data);
     } catch (err: any) {
       alert(err.message);
@@ -638,20 +689,20 @@ function LinkModal({
     <ModalWrap>
       <div className="bg-white rounded-[28px] shadow-2xl w-full max-w-[480px] p-8 my-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-[20px] font-bold text-gray-900 uppercase tracking-tight">Añadir Enlace</h2>
+          <h2 className="text-[20px] font-bold text-gray-900 uppercase tracking-tight">{t('profile.link_modal.title')}</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-700 transition">
             <X size={20} />
           </button>
         </div>
         <form onSubmit={handleSave} className="flex flex-col gap-5">
           <Sel
-            label="Plataforma"
+            label={t('profile.link_modal.platform')}
             value={red}
             onChange={(v) => {
               setRed(v);
               setUsername('');
             }}
-            placeholder="Selecciona una opción"
+            placeholder={t('profile.common.select_option')}
             opts={Object.keys(PLATFORMS).map((p) => ({ value: p, label: p }))}
           />
           {red && (
@@ -665,11 +716,11 @@ function LinkModal({
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="tunombredeusuario"
+                  placeholder={t('profile.link_modal.username_placeholder')}
                   className="flex-1 px-3 py-3 text-[14px] text-gray-900 outline-none bg-transparent"
                 />
               </div>
-              <p className="text-[12px] text-gray-400 mt-1">Solo escribe tu nombre de usuario.</p>
+              <p className="text-[12px] text-gray-400 mt-1">{t('profile.link_modal.username_help')}</p>
             </div>
           )}
           <div className="flex gap-3 pt-2">
@@ -678,14 +729,14 @@ function LinkModal({
               onClick={onClose}
               className="flex-1 py-3 rounded-[14px] bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 transition"
             >
-              Cancelar
+              {t('profile.common.cancel')}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="flex-1 py-3 rounded-[14px] bg-[#1F4E79] text-white font-bold hover:opacity-90 disabled:opacity-60 transition"
             >
-              {saving ? 'Guardando...' : 'Guardar Enlace'}
+              {saving ? t('profile.common.saving') : t('profile.link_modal.save')}
             </button>
           </div>
         </form>
@@ -888,6 +939,7 @@ function DatosPersonalesModal({
   onClose: () => void;
   onSave: (photo: string | null, bio: string) => void;
 }) {
+  const { t } = useTranslation();
   const [draftPhoto, setDraftPhoto] = useState<string | null>(currentPhoto);
   const [draftBio, setDraftBio] = useState('');
   const [imageOk, setImageOk] = useState(false);
@@ -944,7 +996,7 @@ function DatosPersonalesModal({
       if (res.ok) {
         onSave(data.foto_url, draftBio);
       } else {
-        alert(data.message || 'Error al subir la foto');
+        alert(data.message || t('profile.alerts.upload_photo_error'));
       }
     } else {
       onSave(draftPhoto, draftBio);
@@ -957,7 +1009,7 @@ function DatosPersonalesModal({
     <ModalWrap>
       <div className="bg-white rounded-[24px] shadow-2xl w-full max-w-[620px] p-8 my-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-[20px] font-bold text-gray-900">Datos Personales</h2>
+          <h2 className="text-[20px] font-bold text-gray-900">{t('profile.personal_modal.title')}</h2>
           <button onClick={handleCancel} className="text-gray-400 hover:text-gray-700 transition">
             <X size={20} />
           </button>
@@ -965,15 +1017,15 @@ function DatosPersonalesModal({
 
         <div className="flex gap-8">
           <div className="flex flex-col items-start gap-3 min-w-[160px]">
-            <p className="text-[13px] font-bold text-gray-700">Foto de perfil</p>
+            <p className="text-[13px] font-bold text-gray-700">{t('profile.personal_modal.profile_photo')}</p>
 
             <div className="w-[130px] h-[130px] rounded-full border-2 border-gray-200 bg-gray-50 flex flex-col items-center justify-center overflow-hidden">
               {draftPhoto ? (
-                <img src={draftPhoto} alt="Vista previa" className="w-full h-full object-cover" />
+                <img src={draftPhoto} alt={t('profile.personal_modal.preview_alt')} className="w-full h-full object-cover" />
               ) : (
                 <div className="flex flex-col items-center gap-1 text-gray-400">
                   <Camera size={28} />
-                  <span className="text-[11px]">Foto</span>
+                  <span className="text-[11px]">{t('profile.personal_modal.photo')}</span>
                 </div>
               )}
             </div>
@@ -991,23 +1043,23 @@ function DatosPersonalesModal({
               onClick={handlePickImage}
               className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-full text-[13px] font-semibold text-gray-700 bg-white hover:bg-gray-50 transition"
             >
-              <Camera size={14} /> Cambiar Foto
+              <Camera size={14} /> {t('profile.personal_modal.change_photo')}
             </button>
           </div>
 
           <div className="flex-1 flex flex-col gap-2">
-            <p className="text-[13px] font-bold text-gray-700">Sobre mi</p>
+            <p className="text-[13px] font-bold text-gray-700">{t('profile.personal_modal.about_me')}</p>
 
             <textarea
               value={draftBio}
               onChange={handleBioChange}
-              placeholder="Cuéntanos un poco sobre ti…"
+              placeholder={t('profile.personal_modal.bio_placeholder')}
               maxLength={500}
               rows={7}
               className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-[14px] resize-none focus:ring-2 focus:ring-[#1F4E79] outline-none text-[14px] placeholder:text-gray-400"
             />
 
-            <p className="text-right text-[12px] text-gray-400">{draftBio.length}/500 caracteres</p>
+            <p className="text-right text-[12px] text-gray-400">{draftBio.length}/500 {t('profile.personal_modal.characters')}</p>
           </div>
         </div>
 
@@ -1017,7 +1069,7 @@ function DatosPersonalesModal({
               <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Imagen seleccionada correctamente
+              {t('profile.personal_modal.image_selected')}
             </div>
             <button onClick={() => setImageOk(false)} className="text-green-400 hover:text-green-600 transition">
               <X size={16} />
@@ -1031,7 +1083,7 @@ function DatosPersonalesModal({
             onClick={handleCancel}
             className="px-6 py-2.5 rounded-[14px] bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 transition"
           >
-            Cancelar
+            {t('profile.common.cancel')}
           </button>
           <button
             type="button"
@@ -1039,7 +1091,7 @@ function DatosPersonalesModal({
             disabled={saving}
             className="px-6 py-2.5 rounded-[14px] bg-[#1F4E79] text-white font-bold hover:opacity-90 active:scale-95 disabled:opacity-60 transition"
           >
-            {saving ? 'Guardando...' : 'Guardar Cambios'}
+            {saving ? t('profile.common.saving') : t('profile.personal_modal.save_changes')}
           </button>
         </div>
       </div>
@@ -1048,17 +1100,36 @@ function DatosPersonalesModal({
 }
 
 // ── Helper components ────────────────────────────────────────────────────────
-const Empty = ({ label }: { label: string }) => (
-  <div className="py-20 text-center rounded-3xl border-2 border-dashed border-gray-200 text-gray-400 font-bold uppercase tracking-widest text-sm">
-    No hay {label} añadidos aún.
-  </div>
-);
-const Loading = ({ label }: { label: string }) => (
-  <div className="text-center py-20 text-gray-400 font-medium">Cargando {label}...</div>
-);
+const Empty = ({ label }: { label: string }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="py-20 text-center rounded-3xl border-2 border-dashed border-gray-200 text-gray-400 font-bold uppercase tracking-widest text-sm">
+      {t('profile.empty.no_added_yet', { label })}
+    </div>
+  );
+};
+
+const Loading = ({ label }: { label: string }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="text-center py-20 text-gray-400 font-medium">
+      {t('profile.loading.label', { label })}
+    </div>
+  );
+};
+
+const Soon = ({ label }: { label: string }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="py-20 text-center rounded-3xl border-2 border-dashed border-gray-200 text-gray-400 font-bold uppercase tracking-widest text-sm">
+      {t('profile.soon', { label })}
+    </div>
+  );
+};
 
 // ── Main Component ───────────────────────────────────────────────────────────
 export default function PerfilUsuario() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [user, setUser] = useState<any>(() => {
@@ -1202,7 +1273,7 @@ export default function PerfilUsuario() {
     setDeleting(false);
     setDelSkill(null);
     if (ok) setDelSkillOk(true);
-    else alert('Error al eliminar.');
+    else alert(t('profile.alerts.delete_error'));
   };
 
   const handleDelLink = async () => {
@@ -1212,7 +1283,7 @@ export default function PerfilUsuario() {
     setDeleting(false);
     setDelLink(null);
     if (ok) setDelLinkOk(true);
-    else alert('Error al eliminar.');
+    else alert(t('profile.alerts.delete_error'));
   };
 
   const handleGuardarExperienciaLaboral = async (data: {
@@ -1300,7 +1371,7 @@ export default function PerfilUsuario() {
       setShowExpLaboralModal(false);
     } catch (error: any) {
       console.error(error);
-      alert(error.message || 'Error al guardar experiencia laboral');
+      alert(error.message || t('profile.alerts.work_experience_save_generic'));
     }
   };
 
@@ -1319,7 +1390,7 @@ export default function PerfilUsuario() {
       const portafolioId = String(idPortafolio || '').trim();
 
       if (!isEdit && !portafolioId) {
-        throw new Error('No se encontró el portafolio del usuario.');
+        throw new Error(t('profile.alerts.portfolio_not_found'));
       }
 
       const response = await fetch(
@@ -1352,7 +1423,7 @@ export default function PerfilUsuario() {
           result?.message ||
             (result?.errors
               ? Object.values(result.errors).flat().join(', ')
-              : 'No se pudo guardar la experiencia académica.')
+              : t('profile.alerts.academic_experience_save_error'))
         );
       }
 
@@ -1389,7 +1460,7 @@ export default function PerfilUsuario() {
       setShowExpAcademicaModal(false);
     } catch (error: any) {
       console.error(error);
-      alert(error.message || 'Error al guardar experiencia académica');
+      alert(error.message || t('profile.alerts.academic_experience_save_generic'));
     }
   };
 
@@ -1422,24 +1493,24 @@ export default function PerfilUsuario() {
       <aside className="hidden md:flex w-[240px] lg:w-[260px] bg-[#1D4A76] text-white flex-col items-center py-10 shadow-inner shrink-0">
         <div className="w-24 h-24 rounded-full border-2 border-white/20 bg-white/10 mb-4 flex items-center justify-center overflow-hidden">
           {profilePhoto ? (
-            <img src={profilePhoto} alt="Foto de perfil" className="w-full h-full object-cover" />
+            <img src={profilePhoto} alt={t('profile.personal_modal.profile_photo')} className="w-full h-full object-cover" />
           ) : (
             <span className="text-3xl font-bold uppercase">{user.nombre?.charAt(0) || '?'}</span>
           )}
         </div>
         <h2 className="text-[16px] font-bold text-center px-4 mb-1">{getFullName(user)}</h2>
         <p className="text-[13px] text-blue-200 font-medium mb-10 text-center px-2 opacity-80">
-          {user.profesion || 'Ingeniera de Software'}
+          {user.profesion || t('profile.defaults.profession')}
         </p>
         <div className="w-full">
           <button
             onClick={() => navigate('/')}
             className="flex items-center w-full pl-10 py-3 hover:bg-white/10 transition text-[14px] font-medium"
           >
-            <Home className="w-5 h-5 mr-3" /> Inicio
+            <Home className="w-5 h-5 mr-3" /> {t('profile.sidebar.home')}
           </button>
           <button className="flex items-center w-full pl-10 py-3 hover:bg-white/10 transition text-[14px] font-medium">
-            <Settings className="w-5 h-5 mr-3" /> Ajustes
+            <Settings className="w-5 h-5 mr-3" /> {t('profile.sidebar.settings')}
           </button>
         </div>
       </aside>
@@ -1449,7 +1520,7 @@ export default function PerfilUsuario() {
           <h2 className="text-[20px] md:text-[24px] font-bold text-gray-900 mb-1">{getFullName(user)}</h2>
           <p className="text-gray-500 text-[13px] md:text-[14px] max-w-2xl leading-relaxed">
             {biography ||
-              'Apasionada por las creaciones de aplicaciones web y la elaboración de experiencias de usuario excepcionales, con experiencia en trabajo equipo.'}
+              t('profile.defaults.biography')}
           </p>
         </div>
 
@@ -1460,25 +1531,25 @@ export default function PerfilUsuario() {
           </span>
           <span className="flex items-center gap-2">
             <MapPin size={14} />
-            {user.ciudad || 'Cochabamba'}
+            {user.ciudad || t('profile.defaults.city')}
           </span>
           <span className="flex items-center gap-2">
             <GraduationCap size={15} />
-            {user.institucion || 'UMSS'}
+            {user.institucion || t('profile.defaults.institution')}
           </span>
         </div>
 
         <div className="overflow-x-auto mb-5 -mx-1 px-1">
           <div className="bg-white rounded-full px-3 py-2 flex gap-1 items-center border border-gray-100 shadow-sm w-max">
-            {TABS.map((t) => (
+            {TABS.map((tabItem) => (
               <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
+                key={tabItem.id}
+                onClick={() => setTab(tabItem.id)}
                 className={`text-[12px] md:text-[13px] font-bold transition whitespace-nowrap px-3 py-1.5 rounded-full ${
-                  tab === t.id ? 'bg-[#1F4E79] text-white' : 'text-gray-400 hover:text-gray-700'
+                  tab === tabItem.id ? 'bg-[#1F4E79] text-white' : 'text-gray-400 hover:text-gray-700'
                 }`}
               >
-                {t.label}
+                {t(tabItem.labelKey)}
               </button>
             ))}
           </div>
@@ -1491,7 +1562,7 @@ export default function PerfilUsuario() {
               className="bg-[#1F4E79] text-white px-4 py-2 rounded-full text-[13px] font-bold shadow flex items-center gap-2 hover:opacity-90 transition"
             >
               <Plus size={14} />
-              Añadir {tab === 'habilidades' ? 'Habilidad' : 'Enlace'}
+              {tab === 'habilidades' ? t('profile.actions.add_skill') : t('profile.actions.add_link')}
             </button>
             <div className="relative">
               <select
@@ -1499,8 +1570,8 @@ export default function PerfilUsuario() {
                 onChange={(e) => setSortBy(e.target.value)}
                 className="bg-white border border-gray-200 rounded-full pl-4 pr-8 py-2 text-[12px] text-gray-500 font-semibold appearance-none outline-none shadow-sm cursor-pointer"
               >
-                <option>más recientes</option>
-                <option>más antiguas</option>
+                <option value="más recientes">{t('profile.sort.newest')}</option>
+                <option value="más antiguas">{t('profile.sort.oldest')}</option>
               </select>
               <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
@@ -1509,12 +1580,12 @@ export default function PerfilUsuario() {
 
         {tab === 'datosPersonales' && (
           <div className="flex flex-col items-center justify-center py-16 gap-4">
-            <p className="text-gray-500 text-[14px]">Edita tu foto de perfil y la descripción personal.</p>
+            <p className="text-gray-500 text-[14px]">{t('profile.personal_tab.description')}</p>
             <button
               onClick={() => setShowDatosModal(true)}
               className="flex items-center gap-2 bg-[#1F4E79] text-white px-6 py-2.5 rounded-full text-[13px] font-bold shadow hover:opacity-90 transition"
             >
-              <Camera size={15} /> Datos personales
+              <Camera size={15} /> {t('profile.personal_tab.button')}
             </button>
           </div>
         )}
@@ -1531,14 +1602,14 @@ export default function PerfilUsuario() {
                 className="bg-[#1F4E79] text-white px-4 py-2 rounded-full text-[13px] font-bold shadow flex items-center gap-2 hover:opacity-90 transition"
               >
                 <Plus size={14} />
-                Añadir Experiencia Académica
+                {t('profile.actions.add_academic_experience')}
               </button>
             </div>
 
             {loadingAcademicas ? (
-              <Loading label="experiencias académicas" />
+              <Loading label={t('profile.labels.academic_experiences')} />
             ) : academicas.length === 0 ? (
-              <Empty label="experiencias académicas" />
+              <Empty label={t('profile.labels.academic_experiences')} />
             ) : (
               <div className="grid grid-cols-1 gap-5">
                 {academicas.map((a) => (
@@ -1550,7 +1621,7 @@ export default function PerfilUsuario() {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 text-[#1F4E79] font-bold text-[13px] mb-2">
                           <FileText size={16} />
-                          Experiencia académica
+                          {t('profile.labels.academic_experience')}
                         </div>
 
                         <h3 className="text-[18px] font-bold text-gray-900 leading-tight">
@@ -1563,7 +1634,7 @@ export default function PerfilUsuario() {
 
                         <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[12px] font-bold text-blue-700">
                           <CalendarDays size={13} />
-                          {formatAcademicRange(a.fecha_ini, a.fecha_fin)}
+                          {formatAcademicRange(a.fecha_ini, a.fecha_fin, t('profile.common.current'))}
                         </div>
 
                         {a.descripcion && (
@@ -1583,7 +1654,7 @@ export default function PerfilUsuario() {
                         }}
                         className="px-4 py-2 rounded-full text-[13px] font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 transition"
                       >
-                        Editar
+                        {t('profile.common.edit')}
                       </button>
 
                       <button
@@ -1591,7 +1662,7 @@ export default function PerfilUsuario() {
                         onClick={() => setDelAcademica(a.id_experiencia_academica)}
                         className="px-4 py-2 rounded-full text-[13px] font-bold bg-red-50 text-red-700 hover:bg-red-100 transition"
                       >
-                        Eliminar
+                        {t('profile.common.delete')}
                       </button>
                     </div>
                   </div>
@@ -1613,7 +1684,7 @@ export default function PerfilUsuario() {
                 className="bg-[#1F4E79] text-white px-4 py-2 rounded-full text-[13px] font-bold shadow flex items-center gap-2 hover:opacity-90 transition"
               >
                 <Plus size={14} />
-                Añadir Experiencia Laboral
+                {t('profile.actions.add_work_experience')}
               </button>
             </div>
 
@@ -1685,18 +1756,18 @@ export default function PerfilUsuario() {
 
         {tab === 'habilidades' &&
           (loadingSkills ? (
-            <Loading label="habilidades" />
+            <Loading label={t('profile.labels.skills')} />
           ) : Object.keys(grouped).length === 0 ? (
-            <Empty label="habilidades" />
+            <Empty label={t('profile.labels.skills')} />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {Object.entries(grouped).map(([cat, list]) => (
                 <div key={cat} className="bg-white border border-gray-100 rounded-[16px] p-6 shadow-sm">
-                  <h3 className="text-[16px] font-bold text-gray-900 mb-5">{cat}</h3>
+                  <h3 className="text-[16px] font-bold text-gray-900 mb-5">{translateCategory(t, cat)}</h3>
                   {list.map((s) => (
                     <div key={s.id_habilidad} className="mb-5 relative group">
                       <div className="flex justify-between items-center text-[14px] mb-2 pr-8">
-                        <span className="font-bold text-gray-800">{s.nombre}</span>
+                        <span className="font-bold text-gray-800">{s.tipo === 'blanda' ? translateSoftSkill(t, s.nombre) : s.nombre}</span>
                         {s.tipo === 'tecnica' && <span className="font-medium text-gray-500">{s.nivel}%</span>}
                         <button
                           onClick={() => setDelSkill(s.id_habilidad)}
@@ -1713,7 +1784,7 @@ export default function PerfilUsuario() {
                           />
                         </div>
                       ) : (
-                        <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-md text-xs font-semibold">Blanda</span>
+                        <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-md text-xs font-semibold">{t('profile.skill_modal.soft_type_badge')}</span>
                       )}
                     </div>
                   ))}
@@ -1724,9 +1795,9 @@ export default function PerfilUsuario() {
 
         {tab === 'enlaces' &&
           (loadingLinks ? (
-            <Loading label="enlaces" />
+            <Loading label={t('profile.labels.links')} />
           ) : sortedLinks.length === 0 ? (
-            <Empty label="enlaces" />
+            <Empty label={t('profile.labels.links')} />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {sortedLinks.map((l) => (
@@ -1768,8 +1839,8 @@ export default function PerfilUsuario() {
 
       {showDatosSavedModal && (
         <SuccessModal
-          title="Cambios guardados"
-          msg="Tu información personal ha sido actualizada correctamente"
+          title={t('profile.modals.changes_saved_title')}
+          msg={t('profile.modals.changes_saved_msg')}
           onClose={() => setShowDatosSavedModal(false)}
         />
       )}
@@ -1797,14 +1868,14 @@ export default function PerfilUsuario() {
         />
       )}
 
-      {skillOk && <SuccessModal title="Habilidad añadida" msg="Tu habilidad se guardó con éxito." onClose={() => setSkillOk(false)} />}
-      {linkOk && <SuccessModal title="Enlace añadido" msg="Tu enlace se guardó con éxito." onClose={() => setLinkOk(false)} />}
+      {skillOk && <SuccessModal title={t('profile.modals.skill_added_title')} msg={t('profile.modals.skill_added_msg')} onClose={() => setSkillOk(false)} />}
+      {linkOk && <SuccessModal title={t('profile.modals.link_added_title')} msg={t('profile.modals.link_added_msg')} onClose={() => setLinkOk(false)} />}
 
-      {delSkill && <ConfirmModal title="Eliminar Habilidad" msg="¿Estás seguro que quieres eliminar esta habilidad?" onOk={handleDelSkill} onCancel={() => setDelSkill(null)} loading={deleting} />}
-      {delLink && <ConfirmModal title="Eliminar Enlace" msg="¿Estás seguro que quieres eliminar este enlace?" onOk={handleDelLink} onCancel={() => setDelLink(null)} loading={deleting} />}
+      {delSkill && <ConfirmModal title={t('profile.modals.delete_skill_title')} msg={t('profile.modals.delete_skill_msg')} onOk={handleDelSkill} onCancel={() => setDelSkill(null)} loading={deleting} />}
+      {delLink && <ConfirmModal title={t('profile.modals.delete_link_title')} msg={t('profile.modals.delete_link_msg')} onOk={handleDelLink} onCancel={() => setDelLink(null)} loading={deleting} />}
 
-      {delSkillOk && <DeleteSuccessModal title="Habilidad Eliminada" msg="Tu habilidad se eliminó con éxito." onClose={() => setDelSkillOk(false)} />}
-      {delLinkOk && <DeleteSuccessModal title="Enlace Eliminado" msg="Tu enlace se eliminó con éxito." onClose={() => setDelLinkOk(false)} />}
+      {delSkillOk && <DeleteSuccessModal title={t('profile.modals.skill_deleted_title')} msg={t('profile.modals.skill_deleted_msg')} onClose={() => setDelSkillOk(false)} />}
+      {delLinkOk && <DeleteSuccessModal title={t('profile.modals.link_deleted_title')} msg={t('profile.modals.link_deleted_msg')} onClose={() => setDelLinkOk(false)} />}
 
       {showExpLaboralModal && (
         <ExperienciaLaboralModal
@@ -1852,8 +1923,8 @@ export default function PerfilUsuario() {
 
       {delAcademica && (
         <ConfirmModal
-          title="Eliminar Experiencia Académica"
-          msg="¿Estás seguro que quieres eliminar esta experiencia académica?"
+          title={t('profile.modals.delete_academic_title')}
+          msg={t('profile.modals.delete_academic_msg')}
           onOk={handleEliminarAcademica}
           onCancel={() => setDelAcademica(null)}
           loading={deleting}
@@ -1862,8 +1933,8 @@ export default function PerfilUsuario() {
 
       {delAcademicaOk && (
         <DeleteSuccessModal
-          title="Experiencia Académica Eliminada"
-          msg="Tu experiencia académica se eliminó con éxito."
+          title={t('profile.modals.academic_deleted_title')}
+          msg={t('profile.modals.academic_deleted_msg')}
           onClose={() => setDelAcademicaOk(false)}
         />
       )}

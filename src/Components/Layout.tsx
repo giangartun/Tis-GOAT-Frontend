@@ -1,6 +1,6 @@
-import i18n from "../locales/i18n";
 import { useEffect, useRef, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Home,
   Settings,
@@ -24,14 +24,15 @@ type CodigoIdioma = "ES" | "FR" | "EN";
 
 interface Idioma {
   codigo: CodigoIdioma;
-  nombre: string;
+  nombreKey: string;
   bandera: string;
+  i18nCode: string;
 }
 
 const idiomas: Idioma[] = [
-  { codigo: "ES", nombre: "Español", bandera: "🇪🇸" },
-  { codigo: "FR", nombre: "Francés", bandera: "🇫🇷" },
-  { codigo: "EN", nombre: "Inglés", bandera: "🇺🇸" },
+  { codigo: "ES", nombreKey: "layout.languages.spanish", bandera: "🇪🇸", i18nCode: "es" },
+  { codigo: "FR", nombreKey: "layout.languages.french", bandera: "🇫🇷", i18nCode: "fr" },
+  { codigo: "EN", nombreKey: "layout.languages.english", bandera: "🇺🇸", i18nCode: "en" },
 ];
 
 const obtenerUsuario = (): Usuario | null => {
@@ -40,14 +41,25 @@ const obtenerUsuario = (): Usuario | null => {
 };
 
 const obtenerIdiomaInicial = (): Idioma => {
-  const idiomaGuardado = localStorage.getItem("idioma") as CodigoIdioma | null;
-  return idiomas.find((idioma) => idioma.codigo === idiomaGuardado) || idiomas[0];
+  const langGuardado = localStorage.getItem("lang") || "es";
+  return idiomas.find((idioma) => idioma.i18nCode === langGuardado) || idiomas[0];
 };
 
 function SelectorIdioma() {
+  const { t, i18n } = useTranslation();
+
   const [abierto, setAbierto] = useState(false);
   const [idiomaActual, setIdiomaActual] = useState<Idioma>(obtenerIdiomaInicial);
   const selectorRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const idiomaGuardado = localStorage.getItem("lang") || "es";
+    const idiomaEncontrado =
+      idiomas.find((idioma) => idioma.i18nCode === idiomaGuardado) || idiomas[0];
+
+    setIdiomaActual(idiomaEncontrado);
+    i18n.changeLanguage(idiomaGuardado);
+  }, [i18n]);
 
   useEffect(() => {
     const cerrarDropdown = (event: MouseEvent) => {
@@ -66,7 +78,8 @@ function SelectorIdioma() {
   const cambiarIdioma = (idioma: Idioma) => {
     setIdiomaActual(idioma);
     localStorage.setItem("idioma", idioma.codigo);
-    i18n.changeLanguage(idioma.codigo);
+    localStorage.setItem("lang", idioma.i18nCode);
+    i18n.changeLanguage(idioma.i18nCode);
     setAbierto(false);
   };
 
@@ -98,7 +111,7 @@ function SelectorIdioma() {
             >
               <div className="flex items-center gap-3">
                 <span className="text-lg">{idioma.bandera}</span>
-                <span>{idioma.nombre}</span>
+                <span>{t(idioma.nombreKey)}</span>
               </div>
 
               {idiomaActual.codigo === idioma.codigo && (
@@ -113,6 +126,7 @@ function SelectorIdioma() {
 }
 
 function Layout() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -164,15 +178,15 @@ function Layout() {
   const enlacesUsuario = (
     <>
       <Link to="/perfil" className="transition hover:text-white/80">
-        Mi perfil
+        {t("layout.nav.my_profile")}
       </Link>
 
       <Link to="/mis-proyectos" className="transition hover:text-white/80">
-        Mis proyectos
+        {t("layout.nav.my_projects")}
       </Link>
 
       <Link to="/portafolio" className="transition hover:text-white/80">
-        Portafolio
+        {t("layout.nav.portfolio")}
       </Link>
     </>
   );
@@ -188,7 +202,7 @@ function Layout() {
             </div>
 
             <p className="text-sm tracking-wide text-white">
-              Cerrando sesión...
+              {t("layout.logout.loading")}
             </p>
           </div>
         </div>
@@ -201,7 +215,7 @@ function Layout() {
           </div>
 
           <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">
-            Sistema de Portafolios Digitales
+            {t("layout.system_name")}
           </h1>
         </div>
 
@@ -221,7 +235,7 @@ function Layout() {
               className="flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium hover:bg-white/20"
             >
               <LogOut size={18} />
-              Cerrar Sesión
+              {t("layout.auth.logout")}
             </button>
           ) : (
             <>
@@ -229,7 +243,7 @@ function Layout() {
                 onClick={() => navigate("/login")}
                 className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
               >
-                Iniciar Sesión
+                {t("layout.auth.login")}
               </button>
 
               <button
@@ -237,7 +251,7 @@ function Layout() {
                 className="flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium hover:bg-white/20"
               >
                 <UserRound size={18} />
-                Registrarse
+                {t("layout.auth.register")}
               </button>
             </>
           )}
@@ -248,7 +262,7 @@ function Layout() {
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-1 items-center justify-start gap-6 overflow-x-auto whitespace-nowrap text-sm font-medium">
             <Link to="/" className="transition hover:text-white/80">
-              Inicio
+              {t("layout.nav.home")}
             </Link>
 
             {haySesion && enlacesUsuario}
@@ -265,7 +279,7 @@ function Layout() {
         {menuAbierto && (
           <div className="mt-3 flex flex-col gap-2 rounded-xl border border-white/10 bg-white/10 p-3 text-sm lg:hidden">
             <Link to="/" className="transition hover:text-white/80">
-              Inicio
+              {t("layout.nav.home")}
             </Link>
 
             {haySesion && enlacesUsuario}
@@ -276,13 +290,13 @@ function Layout() {
       <nav className="border-b border-app-border bg-app-surface px-4 py-3 sm:px-6">
         <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap text-sm text-app-muted">
           <Link to="/" className="hover:text-app-text">
-            Inicio
+            {t("layout.nav.home")}
           </Link>
 
           <span>&gt;</span>
 
           <span className={esPerfil ? "font-semibold text-app-text" : "text-app-text"}>
-            {esPerfil ? "Mi perfil" : "Navegación"}
+            {esPerfil ? t("layout.nav.my_profile") : t("layout.nav.navigation")}
           </span>
         </div>
       </nav>
@@ -294,17 +308,25 @@ function Layout() {
       >
         {!esPerfil && (
           <aside className="hidden border-r border-app-border bg-app-sidebar py-6 text-white lg:flex lg:flex-col lg:items-center lg:gap-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15">
+            <button
+              onClick={() => navigate("/perfil")}
+              title={t("layout.nav.my_profile")}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15 transition hover:bg-white/25"
+            >
               <UserRound size={22} />
-            </div>
+            </button>
 
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
+            <button
+              onClick={() => navigate("/")}
+              title={t("layout.nav.home")}
+              className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 transition hover:bg-white/25"
+            >
               <Home size={22} />
-            </div>
+            </button>
 
             <Link
               to="/privacidad"
-              title="Configuración de privacidad"
+              title={t("layout.sidebar.privacy_settings")}
               className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 transition hover:bg-white/25"
             >
               <Settings size={22} />
@@ -312,7 +334,7 @@ function Layout() {
 
             <button
               type="button"
-              title="Personalización del portafolio"
+              title={t("layout.sidebar.portfolio_customization")}
               onClick={() => navigate("/personalizacion-portafolio")}
               className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 transition hover:bg-white/25"
             >
@@ -329,22 +351,23 @@ function Layout() {
           <aside className="hidden border-l border-app-border bg-app-surface px-5 py-6 lg:block">
             <div className="rounded-2xl border border-app-border bg-white p-4">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="font-semibold">Artículos y notificaciones</h3>
+                <h3 className="font-semibold">
+                  {t("layout.notifications.title")}
+                </h3>
 
                 <a href="#" className="text-xs text-app-muted hover:text-app-text">
-                  Ver todos
+                  {t("layout.notifications.view_all")}
                 </a>
               </div>
 
               <div className="h-40 rounded-xl bg-app-card" />
 
               <h4 className="mt-4 text-base font-semibold">
-                Mejores prácticas de desarrollo web
+                {t("layout.notifications.article_title")}
               </h4>
 
               <p className="mt-2 text-sm text-app-muted">
-                Descubre técnicas y conceptos para mejorar tus habilidades de
-                desarrollo web.
+                {t("layout.notifications.article_description")}
               </p>
             </div>
           </aside>
@@ -354,20 +377,20 @@ function Layout() {
       <footer className="border-t border-app-border bg-app-header px-4 py-4 text-center text-white sm:px-6">
         <div className="flex flex-col items-center justify-center gap-1 text-sm">
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <span>© 2026 Generation Of Advanced Technology</span>
+            <span>{t("layout.footer.copyright")}</span>
             <span className="text-white/40">|</span>
 
             <a href="#" className="hover:text-white/80">
-              Términos de uso
+              {t("layout.footer.terms")}
             </a>
 
             <a href="#" className="hover:text-white/80">
-              Política de privacidad
+              {t("layout.footer.privacy")}
             </a>
           </div>
 
           <p className="text-xs text-white/70">
-            Cochabamba, Bolivia | Universidad Mayor de San Simón
+            {t("layout.footer.location")}
           </p>
         </div>
       </footer>

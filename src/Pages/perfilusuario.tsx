@@ -92,6 +92,17 @@ interface LinkItem {
   created_at?: string;
 }
 
+interface EvidenciaItem {
+  id_evidencia: string;
+  tipo: string;
+  url_evidencia: string;
+  nombre_archivo: string;
+  foto_url?: string | null;
+  tamano_bytes?: number;
+  fecha_subida?: string;
+  preview_url?: string | null;
+}
+
 interface ExperienciaAcademicaItem {
   id_experiencia_academica: string;
   id_portafolio?: string;
@@ -102,6 +113,20 @@ interface ExperienciaAcademicaItem {
   fecha_fin: string | null;
   visible?: boolean;
   created_at?: string;
+  evidencias?: EvidenciaItem[];
+}
+
+interface ExperienciaLaboralItem {
+  id_experiencia: string;
+  id_portafolio?: string;
+  empresa: string;
+  cargo: string;
+  descripcion: string;
+  fecha_ini: string;
+  fecha_fin: string | null;
+  visible?: boolean;
+  created_at?: string;
+  evidencias?: EvidenciaItem[];
 }
 
 // ── Utils ────────────────────────────────────────────────────────────────────
@@ -166,6 +191,42 @@ const normalizeAcademica = (item: any): ExperienciaAcademicaItem => ({
   fecha_fin: item?.fecha_fin ?? null,
   visible: item?.visible === true || item?.visible === 1,
   created_at: item?.created_at ?? undefined,
+  evidencias: Array.isArray(item?.evidencias)
+    ? item.evidencias.map((e: any) => ({
+        id_evidencia: String(e?.id_evidencia ?? ''),
+        tipo: String(e?.tipo ?? ''),
+        url_evidencia: String(e?.url_evidencia ?? ''),
+        nombre_archivo: String(e?.nombre_archivo ?? ''),
+        foto_url: e?.foto_url ?? null,
+        tamano_bytes: e?.tamano_bytes ?? undefined,
+        fecha_subida: e?.fecha_subida ?? undefined,
+        preview_url: e?.preview_url ?? null,
+      }))
+    : [],
+});
+
+const normalizeLaboral = (item: any): ExperienciaLaboralItem => ({
+  id_experiencia: String(item?.id_experiencia ?? ''),
+  id_portafolio: item?.id_portafolio ? String(item.id_portafolio) : undefined,
+  empresa: String(item?.empresa ?? ''),
+  cargo: String(item?.cargo ?? ''),
+  descripcion: String(item?.descripcion ?? ''),
+  fecha_ini: String(item?.fecha_ini ?? ''),
+  fecha_fin: item?.fecha_fin ?? null,
+  visible: item?.visible === true || item?.visible === 1,
+  created_at: item?.created_at ?? undefined,
+  evidencias: Array.isArray(item?.evidencias)
+    ? item.evidencias.map((e: any) => ({
+        id_evidencia: String(e?.id_evidencia ?? ''),
+        tipo: String(e?.tipo ?? ''),
+        url_evidencia: String(e?.url_evidencia ?? ''),
+        nombre_archivo: String(e?.nombre_archivo ?? ''),
+        foto_url: e?.foto_url ?? null,
+        tamano_bytes: e?.tamano_bytes ?? undefined,
+        fecha_subida: e?.fecha_subida ?? undefined,
+        preview_url: e?.preview_url ?? null,
+      }))
+    : [],
 });
 
 const formatAcademicDate = (dateStr?: string | null) => {
@@ -181,6 +242,21 @@ const formatAcademicDate = (dateStr?: string | null) => {
 
 const formatAcademicRange = (inicio: string, fin: string | null) => {
   return `${formatAcademicDate(inicio)} - ${fin ? formatAcademicDate(fin) : 'Actualidad'}`;
+};
+
+const formatLaboralDate = (dateStr?: string | null) => {
+  if (!dateStr) return 'Actualidad';
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString('es-BO', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+};
+
+const formatLaboralRange = (inicio: string, fin: string | null) => {
+  return `${formatLaboralDate(inicio)} - ${fin ? formatLaboralDate(fin) : 'Actualidad'}`;
 };
 
 // ── Reusable UI ──────────────────────────────────────────────────────────────
@@ -636,9 +712,11 @@ function useProfileData(uid: string, idPortafolio: string) {
   });
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [academicas, setAcademicas] = useState<ExperienciaAcademicaItem[]>([]);
+  const [laborales, setLaborales] = useState<ExperienciaLaboralItem[]>([]);
   const [loadingSkills, setLoadingSkills] = useState(skills.length === 0);
   const [loadingLinks, setLoadingLinks] = useState(true);
   const [loadingAcademicas, setLoadingAcademicas] = useState(true);
+  const [loadingLaborales, setLoadingLaborales] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -676,6 +754,7 @@ function useProfileData(uid: string, idPortafolio: string) {
 
     if (!idPortafolio) {
       setLoadingAcademicas(false);
+      setLoadingLaborales(false);
       return;
     }
 
@@ -689,6 +768,19 @@ function useProfileData(uid: string, idPortafolio: string) {
         console.error(e);
       } finally {
         setLoadingAcademicas(false);
+      }
+    })();
+
+    (async () => {
+      try {
+        const res = await fetch(`${API}/api/experiencia-laboral/${idPortafolio}`, { headers });
+        const data = await res.json().catch(() => null);
+        const list = Array.isArray(data) ? data.map(normalizeLaboral) : [];
+        setLaborales(list);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingLaborales(false);
       }
     })();
   }, [uid, idPortafolio]);
@@ -744,19 +836,43 @@ function useProfileData(uid: string, idPortafolio: string) {
     return res.ok;
   };
 
+  const addLaboral = (l: ExperienciaLaboralItem) => {
+    setLaborales((prev) => [
+      l,
+      ...prev.filter((x) => x.id_experiencia !== l.id_experiencia),
+    ]);
+  };
+
+  const removeLaboral = async (id: string) => {
+    const res = await fetch(`${API}/api/experiencia-laboral/${id}`, {
+      method: 'DELETE',
+      headers,
+    });
+
+    if (res.ok) {
+      setLaborales((prev) => prev.filter((l) => l.id_experiencia !== id));
+    }
+
+    return res.ok;
+  };
+
   return {
     skills,
     links,
     academicas,
+    laborales,
     loadingSkills,
     loadingLinks,
     loadingAcademicas,
+    loadingLaborales,
     addSkill,
     removeSkill,
     addLink,
     removeLink,
     addAcademica,
     removeAcademica,
+    addLaboral,
+    removeLaboral,
   };
 }
 
@@ -940,11 +1056,6 @@ const Empty = ({ label }: { label: string }) => (
 const Loading = ({ label }: { label: string }) => (
   <div className="text-center py-20 text-gray-400 font-medium">Cargando {label}...</div>
 );
-const Soon = ({ label }: { label: string }) => (
-  <div className="py-20 text-center rounded-3xl border-2 border-dashed border-gray-200 text-gray-400 font-bold uppercase tracking-widest text-sm">
-    Próximamente — {label}
-  </div>
-);
 
 // ── Main Component ───────────────────────────────────────────────────────────
 export default function PerfilUsuario() {
@@ -1026,15 +1137,19 @@ export default function PerfilUsuario() {
     skills,
     links,
     academicas,
+    laborales,
     loadingSkills,
     loadingLinks,
     loadingAcademicas,
+    loadingLaborales,
     addSkill,
     removeSkill,
     addLink,
     removeLink,
     addAcademica,
     removeAcademica,
+    addLaboral,
+    removeLaboral,
   } = useProfileData(uid, idPortafolio);
 
   const [showDatosModal, setShowDatosModal] = useState(false);
@@ -1054,8 +1169,11 @@ export default function PerfilUsuario() {
   const [showExpLaboralModal, setShowExpLaboralModal] = useState(false);
 
   const [editAcademica, setEditAcademica] = useState<ExperienciaAcademicaItem | null>(null);
+  const [editLaboral, setEditLaboral] = useState<ExperienciaLaboralItem | null>(null);
   const [delAcademica, setDelAcademica] = useState<string | null>(null);
   const [delAcademicaOk, setDelAcademicaOk] = useState(false);
+  const [delLaboral, setDelLaboral] = useState<string | null>(null);
+  const [delLaboralOk, setDelLaboralOk] = useState(false);
 
   const handleSaveDatos = (newPhoto: string | null, newBio: string) => {
     const updatedUser = { ...user, foto: newPhoto ?? user.foto, biografia: newBio };
@@ -1107,34 +1225,78 @@ export default function PerfilUsuario() {
   }) => {
     try {
       const token = localStorage.getItem('token') || '';
+      const isEdit = !!editLaboral;
 
-      const formData = new FormData();
-      formData.append('empresa', data.empresa);
-      formData.append('cargo', data.cargo);
-      formData.append('descripcion', data.descripcion);
-      formData.append('fecha_ini', data.fecha_ini);
-      formData.append('fecha_fin', data.fecha_fin || '');
-      formData.append('visible', '1');
+      const portafolioId = String(idPortafolio || '').trim();
 
-      data.archivos?.forEach((file) => {
-        formData.append('archivos[]', file);
-      });
+      if (!isEdit && !portafolioId) {
+        throw new Error('No se encontró el portafolio del usuario.');
+      }
 
-      const response = await fetch(`${API}/api/experiencia-laboral`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-        },
-        body: formData,
-      });
+      const response = await fetch(
+        isEdit
+          ? `${API}/api/experiencia-laboral/${editLaboral!.id_experiencia}`
+          : `${API}/api/experiencia-laboral`,
+        {
+          method: isEdit ? 'PUT' : 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            ...(isEdit ? {} : { id_portafolio: portafolioId }),
+            empresa: data.empresa,
+            cargo: data.cargo,
+            descripcion: data.descripcion,
+            fecha_ini: data.fecha_ini,
+            fecha_fin: data.fecha_fin,
+            visible: 1,
+          }),
+        }
+      );
 
       const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(result?.message || 'No se pudo guardar la experiencia laboral.');
+        throw new Error(
+          result?.message ||
+            (result?.errors
+              ? Object.values(result.errors).flat().join(', ')
+              : 'No se pudo guardar la experiencia laboral.')
+        );
       }
 
+      const saved = normalizeLaboral(result?.data ?? result);
+      addLaboral(saved);
+
+      if (data.archivos?.length) {
+        for (const file of data.archivos) {
+          const formData = new FormData();
+          formData.append('archivo', file);
+          formData.append('id_laboral', saved.id_experiencia);
+
+          const uploadResponse = await fetch(`${API}/api/proyecto/evidencias/subir`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: 'application/json',
+            },
+            body: formData,
+          });
+
+          const uploadResult = await uploadResponse.json().catch(() => ({}));
+
+          if (!uploadResponse.ok) {
+            throw new Error(
+              uploadResult?.message ||
+                'La experiencia se guardó, pero falló la subida de un archivo.'
+            );
+          }
+        }
+      }
+
+      setEditLaboral(null);
       setShowExpLaboralModal(false);
     } catch (error: any) {
       console.error(error);
@@ -1240,6 +1402,18 @@ export default function PerfilUsuario() {
     setDelAcademica(null);
 
     if (ok) setDelAcademicaOk(true);
+    else alert('Error al eliminar.');
+  };
+
+  const handleEliminarLaboral = async () => {
+    if (!delLaboral) return;
+
+    setDeleting(true);
+    const ok = await removeLaboral(delLaboral);
+    setDeleting(false);
+    setDelLaboral(null);
+
+    if (ok) setDelLaboralOk(true);
     else alert('Error al eliminar.');
   };
 
@@ -1432,7 +1606,10 @@ export default function PerfilUsuario() {
             <div className="flex justify-end">
               <button
                 type="button"
-                onClick={() => setShowExpLaboralModal(true)}
+                onClick={() => {
+                  setEditLaboral(null);
+                  setShowExpLaboralModal(true);
+                }}
                 className="bg-[#1F4E79] text-white px-4 py-2 rounded-full text-[13px] font-bold shadow flex items-center gap-2 hover:opacity-90 transition"
               >
                 <Plus size={14} />
@@ -1440,7 +1617,69 @@ export default function PerfilUsuario() {
               </button>
             </div>
 
-            <Soon label="Experiencia Laboral" />
+            {loadingLaborales ? (
+              <Loading label="experiencias laborales" />
+            ) : laborales.length === 0 ? (
+              <Empty label="experiencias laborales" />
+            ) : (
+              <div className="grid grid-cols-1 gap-5">
+                {laborales.map((l) => (
+                  <div
+                    key={l.id_experiencia}
+                    className="bg-white border border-gray-100 rounded-[18px] p-6 shadow-sm hover:shadow-md transition"
+                  >
+                    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 text-[#1F4E79] font-bold text-[13px] mb-2">
+                          <FileText size={16} />
+                          Experiencia laboral
+                        </div>
+
+                        <h3 className="text-[18px] font-bold text-gray-900 leading-tight">
+                          {l.cargo}
+                        </h3>
+
+                        <p className="text-[14px] font-semibold text-gray-600 mt-1">
+                          {l.empresa}
+                        </p>
+
+                        <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[12px] font-bold text-blue-700">
+                          <CalendarDays size={13} />
+                          {formatLaboralRange(l.fecha_ini, l.fecha_fin)}
+                        </div>
+
+                        {l.descripcion && (
+                          <p className="mt-4 text-[14px] text-gray-600 leading-relaxed">
+                            {l.descripcion}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-5 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditLaboral(l);
+                          setShowExpLaboralModal(true);
+                        }}
+                        className="px-4 py-2 rounded-full text-[13px] font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 transition"
+                      >
+                        Editar
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setDelLaboral(l.id_experiencia)}
+                        className="px-4 py-2 rounded-full text-[13px] font-bold bg-red-50 text-red-700 hover:bg-red-100 transition"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -1570,8 +1809,22 @@ export default function PerfilUsuario() {
       {showExpLaboralModal && (
         <ExperienciaLaboralModal
           abierto={showExpLaboralModal}
-          onCerrar={() => setShowExpLaboralModal(false)}
+          onCerrar={() => {
+            setShowExpLaboralModal(false);
+            setEditLaboral(null);
+          }}
           onGuardar={handleGuardarExperienciaLaboral}
+          initialData={
+            editLaboral
+              ? {
+                  empresa: editLaboral.empresa,
+                  cargo: editLaboral.cargo,
+                  descripcion: editLaboral.descripcion,
+                  fecha_ini: editLaboral.fecha_ini,
+                  fecha_fin: editLaboral.fecha_fin,
+                }
+              : null
+          }
         />
       )}
 
@@ -1612,6 +1865,24 @@ export default function PerfilUsuario() {
           title="Experiencia Académica Eliminada"
           msg="Tu experiencia académica se eliminó con éxito."
           onClose={() => setDelAcademicaOk(false)}
+        />
+      )}
+
+      {delLaboral && (
+        <ConfirmModal
+          title="Eliminar Experiencia Laboral"
+          msg="¿Estás seguro que quieres eliminar esta experiencia laboral?"
+          onOk={handleEliminarLaboral}
+          onCancel={() => setDelLaboral(null)}
+          loading={deleting}
+        />
+      )}
+
+      {delLaboralOk && (
+        <DeleteSuccessModal
+          title="Experiencia Laboral Eliminada"
+          msg="Tu experiencia laboral se eliminó con éxito."
+          onClose={() => setDelLaboralOk(false)}
         />
       )}
     </div>

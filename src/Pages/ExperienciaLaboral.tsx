@@ -10,21 +10,34 @@ export interface ExperienciaLaboralModalSubmit {
   archivos: File[];
 }
 
+export interface ExperienciaLaboralModalInitialData {
+  empresa: string;
+  cargo: string;
+  descripcion: string;
+  fecha_ini: string;
+  fecha_fin: string | null;
+}
+
 interface ExperienciaLaboralModalProps {
   abierto: boolean;
   onCerrar: () => void;
   onGuardar?: (data: ExperienciaLaboralModalSubmit) => Promise<void> | void;
+  initialData?: ExperienciaLaboralModalInitialData | null;
 }
 
 const MAX_FILE_SIZE_MB = 5;
 const ALLOWED_MIME_TYPES = ["application/pdf", "image/jpeg", "image/png"];
+const MAX_DESC = 1000;
 
 function ExperienciaLaboralModal({
   abierto,
   onCerrar,
   onGuardar,
+  initialData,
 }: ExperienciaLaboralModalProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,6 +73,30 @@ function ExperienciaLaboralModal({
       });
     }
   }, [abierto]);
+
+  useEffect(() => {
+    if (!abierto) return;
+
+    setError(null);
+    setArchivos([]);
+    setForm({
+      empresa: initialData?.empresa ?? "",
+      cargo: initialData?.cargo ?? "",
+      descripcion: initialData?.descripcion ?? "",
+      fecha_ini: initialData?.fecha_ini ?? "",
+      fecha_fin: initialData?.fecha_fin ?? "",
+    });
+    setSigueActivo(initialData ? !initialData.fecha_fin : false);
+  }, [abierto, initialData]);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCerrar();
+    };
+
+    if (abierto) window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [abierto, onCerrar]);
 
   if (!abierto) return null;
 
@@ -101,16 +138,33 @@ function ExperienciaLaboralModal({
   };
 
   const validar = () => {
-    if (!form.empresa.trim()) return setError("La empresa es obligatoria."), false;
-    if (!form.cargo.trim()) return setError("El cargo es obligatorio."), false;
-    if (!form.descripcion.trim()) return setError("La descripción es obligatoria."), false;
-    if (form.descripcion.trim().length > 1000) {
-      setError("La descripción no debe superar los 1000 caracteres.");
+    if (!form.empresa.trim()) {
+      setError("La empresa es obligatoria.");
       return false;
     }
-    if (!form.fecha_ini) return setError("La fecha de inicio es obligatoria."), false;
+
+    if (!form.cargo.trim()) {
+      setError("El cargo es obligatorio.");
+      return false;
+    }
+
+    if (!form.descripcion.trim()) {
+      setError("La descripción es obligatoria.");
+      return false;
+    }
+
+    if (form.descripcion.trim().length > MAX_DESC) {
+      setError(`La descripción no debe superar los ${MAX_DESC} caracteres.`);
+      return false;
+    }
+
+    if (!form.fecha_ini) {
+      setError("La fecha de inicio es obligatoria.");
+      return false;
+    }
+
     if (!sigueActivo && !form.fecha_fin) {
-      setError("La fecha fin es obligatoria o puedes dejarla vacía si sigue activo.");
+      setError("La fecha fin es obligatoria o puedes marcar que sigue activo.");
       return false;
     }
 
@@ -149,14 +203,29 @@ function ExperienciaLaboralModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-3 py-3 backdrop-blur-sm">
-      <div className="w-full max-w-[820px] overflow-hidden rounded-[18px] bg-white shadow-2xl">
-        <div className="flex items-center justify-between bg-[#203A63] px-4 py-3.5 sm:px-5">
+    <div
+      className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto bg-black/55 px-3 py-3 backdrop-blur-sm"
+      onClick={onCerrar}
+    >
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="experiencia-laboral-title"
+        className="my-auto w-full max-w-[820px] overflow-hidden rounded-[18px] bg-white shadow-2xl max-h-[calc(100vh-1.5rem)]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="sticky top-0 z-10 flex items-center justify-between bg-[#203A63] px-4 py-3.5 sm:px-5">
           <div className="flex items-center gap-3 text-white">
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10">
               <FileText size={17} />
             </span>
-            <h3 className="text-[17px] font-bold sm:text-[18px]">Registrar experiencia laboral</h3>
+            <h3
+              id="experiencia-laboral-title"
+              className="text-[17px] font-bold sm:text-[18px]"
+            >
+              Registrar experiencia laboral
+            </h3>
           </div>
 
           <button
@@ -169,7 +238,10 @@ function ExperienciaLaboralModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-4 py-4 sm:px-5 sm:py-5">
+        <form
+          onSubmit={handleSubmit}
+          className="max-h-[calc(100vh-6rem)] overflow-y-auto px-4 py-4 sm:px-5 sm:py-5"
+        >
           <div className="mb-3 flex items-center gap-3">
             <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
               Empresa
@@ -214,9 +286,13 @@ function ExperienciaLaboralModal({
               value={form.descripcion}
               onChange={handleChange}
               rows={2}
+              maxLength={MAX_DESC}
               placeholder="Describe tus responsabilidades, tecnologías usadas o logros..."
               className="w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 py-2.5 text-[15px] text-white outline-none placeholder:text-white/70 focus:border-slate-900"
             />
+            <p className="mt-1 text-right text-[11px] text-slate-400">
+              {form.descripcion.length}/{MAX_DESC} caracteres
+            </p>
           </div>
 
           <div className="mt-4 mb-3 flex items-center gap-3">
@@ -264,7 +340,29 @@ function ExperienciaLaboralModal({
                   size={15}
                 />
               </div>
-              <p className="mt-1 text-[11px] text-slate-400">Dejar vacío si sigue activo</p>
+
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  id="sigueActivo"
+                  type="checkbox"
+                  checked={sigueActivo}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setSigueActivo(checked);
+                    if (checked) {
+                      setForm((prev) => ({ ...prev, fecha_fin: "" }));
+                    }
+                  }}
+                  className="h-4 w-4"
+                />
+                <label htmlFor="sigueActivo" className="text-[13px] text-slate-600">
+                  Sigo activo
+                </label>
+              </div>
+
+              <p className="mt-1 text-[11px] text-slate-400">
+                Dejar vacío si sigue activo
+              </p>
             </div>
           </div>
 
@@ -366,7 +464,7 @@ function ExperienciaLaboralModal({
             <button
               type="button"
               onClick={onCerrar}
-              className="rounded-xl border border-slate-200 px-5 py-2 text-[13px] font-semibold text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
+              className="rounded-xl border border-slate-200 px-5 py-2 text-[13px] font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-700"
             >
               Cancelar
             </button>

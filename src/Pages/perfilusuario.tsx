@@ -78,10 +78,10 @@ const SOFT_LABEL_KEYS: Record<string, string> = {
   'Orientación a resultados': 'profile.soft.results_oriented',
 };
 
-const translateCategory = (t: (key: string, fallback?: string) => string, value: string) =>
+const translateCategory = (t: TFunction, value: string) =>
   CAT_LABEL_KEYS[value] ? t(CAT_LABEL_KEYS[value], value) : value;
 
-const translateSoftSkill = (t: (key: string, fallback?: string) => string, value: string) =>
+const translateSoftSkill = (t: TFunction, value: string) =>
   SOFT_LABEL_KEYS[value] ? t(SOFT_LABEL_KEYS[value], value) : value;
 
 const PLATFORMS: Record<string, string> = {
@@ -283,8 +283,8 @@ const formatAcademicDate = (dateStr?: string | null) => {
   });
 };
 
-const formatAcademicRange = (inicio: string, fin: string | null) => {
-  return `${formatAcademicDate(inicio)} - ${fin ? formatAcademicDate(fin) : 'Actualidad'}`;
+const formatAcademicRange = (inicio: string, fin: string | null, currentLabel = 'Actualidad') => {
+  return `${formatAcademicDate(inicio)} - ${fin ? formatAcademicDate(fin) : currentLabel}`;
 };
 
 const formatLaboralDate = (dateStr?: string | null) => {
@@ -1118,15 +1118,6 @@ const Loading = ({ label }: { label: string }) => {
   );
 };
 
-const Soon = ({ label }: { label: string }) => {
-  const { t } = useTranslation();
-  return (
-    <div className="py-20 text-center rounded-3xl border-2 border-dashed border-gray-200 text-gray-400 font-bold uppercase tracking-widest text-sm">
-      {t('profile.soon', { label })}
-    </div>
-  );
-};
-
 // ── Main Component ───────────────────────────────────────────────────────────
 export default function PerfilUsuario() {
   const { t } = useTranslation();
@@ -1941,8 +1932,8 @@ export default function PerfilUsuario() {
 
       {delLaboral && (
         <ConfirmModal
-          title="Eliminar Experiencia Laboral"
-          msg="¿Estás seguro que quieres eliminar esta experiencia laboral?"
+          title={t('profile.modals.delete_laboral_title')}
+          msg={t('profile.modals.delete_laboral_msg')}
           onOk={handleEliminarLaboral}
           onCancel={() => setDelLaboral(null)}
           loading={deleting}
@@ -1951,8 +1942,8 @@ export default function PerfilUsuario() {
 
       {delLaboralOk && (
         <DeleteSuccessModal
-          title="Experiencia Laboral Eliminada"
-          msg="Tu experiencia laboral se eliminó con éxito."
+          title={t('profile.modals.laboral_deleted_title')}
+          msg={t('profile.modals.laboral_deleted_msg')}
           onClose={() => setDelLaboralOk(false)}
         />
       )}

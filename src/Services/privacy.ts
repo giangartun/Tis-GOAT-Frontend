@@ -37,6 +37,7 @@ export interface NombresItems {
   redes_profesionales: Record<string, string>;
 }
 
+// 🔥 FORMATO ORIGINAL: objeto clave-valor
 export interface PayloadActualizar {
   portafolio: boolean;
   proyectos?: Record<string, boolean>;
@@ -117,6 +118,7 @@ export const extraerTodosLosNombres = (raw: PrivacidadResponse): NombresItems =>
 export const calcularTodos = (items: Record<string, boolean>): boolean =>
   Object.keys(items).length > 0 && Object.values(items).some(Boolean);
 
+// 🔥 FUNCIÓN ORIGINAL: devuelve objeto clave-valor
 export const calcularCambios = (
   original: EstadoFrontend,
   actual: EstadoFrontend
@@ -139,7 +141,7 @@ export const calcularCambios = (
 };
 
 // MOCK DATA (para pruebas sin backend) 
-const USE_MOCK = false; // Cambiar a false cuando el backend esté listo
+const USE_MOCK = true; // Cambiar a true para pruebas sin backend
 
 const MOCK_DATA: PrivacidadResponse = {
   portafolio: true,
@@ -177,13 +179,11 @@ const MOCK_DATA: PrivacidadResponse = {
 // ── Servicios ────────────────────────────────────────────────────────────────
 
 export const getPrivacidad = async (): Promise<PrivacidadResponse> => {
-  //  Usar mock para pruebas sin backend
   if (USE_MOCK) {
-    console.log(' Usando MOCK_DATA (sin backend)');
+    console.log('📦 Usando MOCK_DATA (sin backend)');
     return MOCK_DATA;
   }
   
-  //  Llamada real al backend (comentada mientras se usa mock)
   const { data } = await api.get('/privacidad');
   return data;
 };
@@ -191,9 +191,8 @@ export const getPrivacidad = async (): Promise<PrivacidadResponse> => {
 export const actualizarPrivacidad = async (
   payload: PayloadActualizar
 ): Promise<{ message: string }> => {
-  //  Simular respuesta exitosa para mock
   if (USE_MOCK) {
-    console.log(' Mock: Guardando cambios', payload);
+    console.log('📦 Mock: Guardando cambios', payload);
     return { message: 'Configuración guardada correctamente (mock)' };
   }
   
@@ -202,9 +201,8 @@ export const actualizarPrivacidad = async (
 };
 
 export const restablecerPrivacidad = async (): Promise<{ message: string }> => {
-  //  Simular respuesta exitosa para mock
   if (USE_MOCK) {
-    console.log(' Mock: Restableciendo todo a público');
+    console.log('📦 Mock: Restableciendo todo a público');
     return { message: 'Privacidad restablecida (mock)' };
   }
   

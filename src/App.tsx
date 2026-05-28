@@ -12,6 +12,7 @@ import AnadirEnlaces from "./Pages/AnadirEnlaces";
 import PerfilUsuario from "./Pages/perfilusuario";
 import PrivacidadPortafolio from "./Pages/PrivacidadPortafolio";
 import PerfilPublico from "./Pages/PerfilPublico";
+import AdminUsuarios from "./Pages/AdminUsuarios";
 import { ResetPassword } from "./Pages/RestablecerContraseña";
 
 function App() {
@@ -42,6 +43,9 @@ function App() {
         {/* Rutas extra sin layout */}
         <Route path="/habilidades" element={<AnadirHabilidades />} />
         <Route path="/enlaces" element={<AnadirEnlaces />} />
+
+        {/* Panel admin — sin layout general */}
+        <Route path="/admin/usuarios" element={<AdminUsuarios />} />
       </Routes>
     </BrowserRouter>
   );

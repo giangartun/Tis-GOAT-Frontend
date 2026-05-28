@@ -61,7 +61,6 @@ export const Login: React.FC<LoginProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setError('');
     setErrors({});
     setLoading(true);
@@ -79,7 +78,7 @@ export const Login: React.FC<LoginProps> = ({
             'Content-Type': 'application/json',
             Accept: 'application/json'
           },
-          body: JSON.stringify(credentials)
+          body: JSON.stringify(credentials),
         }
       );
 
@@ -97,11 +96,24 @@ export const Login: React.FC<LoginProps> = ({
         }
 
         onLoginSuccess?.();
-        navigate('/', { replace: true });
+
+        // Redirección según rol (admin/usuario)
+        const tipoUsuario = data.tipo_usuario ?? data.usuario?.tipo_usuario ?? null;
+        if (tipoUsuario === 'admin') {
+          navigate('/admin/usuarios', { replace: true });
+        } else {
+          navigate('/', { replace: true });
+        }
         return;
       }
 
-      if (data.errors) {
+      if (response.status === 403) {
+        // Cuenta suspendida
+        setError(
+          data.message ||
+          'Tu cuenta ha sido suspendida. Contacta al administrador.'
+        );
+      } else if (data.errors) {
         setErrors(data.errors);
       } else {
         setError(data.message || t('login.errors.invalid'));
@@ -230,7 +242,6 @@ export const Login: React.FC<LoginProps> = ({
                   className="w-full px-4 py-2 pr-10 rounded-md border border-gray-300 bg-[#E5E5E5] text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
-
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}

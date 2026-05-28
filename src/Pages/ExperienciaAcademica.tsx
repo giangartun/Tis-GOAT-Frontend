@@ -3,40 +3,40 @@ import type { ChangeEvent, FormEvent } from "react";
 import { X, Upload, FileText, CalendarDays, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-export interface ExperienciaLaboralModalSubmit {
-  empresa: string;
-  cargo: string;
+export interface ExperienciaAcademicaModalSubmit {
+  institucion: string;
+  titulo: string;
   descripcion: string;
   fecha_ini: string;
   fecha_fin: string | null;
   archivos: File[];
 }
 
-export interface ExperienciaLaboralModalInitialData {
-  empresa: string;
-  cargo: string;
+export interface ExperienciaAcademicaModalInitialData {
+  institucion: string;
+  titulo: string;
   descripcion: string;
   fecha_ini: string;
   fecha_fin: string | null;
 }
 
-interface ExperienciaLaboralModalProps {
+interface ExperienciaAcademicaModalProps {
   abierto: boolean;
   onCerrar: () => void;
-  onGuardar?: (data: ExperienciaLaboralModalSubmit) => Promise<void> | void;
-  initialData?: ExperienciaLaboralModalInitialData | null;
+  onGuardar?: (data: ExperienciaAcademicaModalSubmit) => Promise<void> | void;
+  initialData?: ExperienciaAcademicaModalInitialData | null;
 }
 
 const MAX_FILE_SIZE_MB = 5;
 const ALLOWED_MIME_TYPES = ["application/pdf", "image/jpeg", "image/png"];
-const MAX_DESC = 1000;
+const MAX_DESC = 500;
 
-function ExperienciaLaboralModal({
+function ExperienciaAcademicaModal({
   abierto,
   onCerrar,
   onGuardar,
   initialData,
-}: ExperienciaLaboralModalProps) {
+}: ExperienciaAcademicaModalProps) {
   const { t } = useTranslation();
 
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -45,11 +45,11 @@ function ExperienciaLaboralModal({
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sigueActivo, setSigueActivo] = useState(false);
+  const [sigueCursando, setSigueCursando] = useState(false);
   const [archivos, setArchivos] = useState<File[]>([]);
   const [form, setForm] = useState({
-    empresa: "",
-    cargo: "",
+    institucion: "",
+    titulo: "",
     descripcion: "",
     fecha_ini: "",
     fecha_fin: "",
@@ -58,7 +58,9 @@ function ExperienciaLaboralModal({
   const maxBytes = useMemo(() => MAX_FILE_SIZE_MB * 1024 * 1024, []);
 
   useEffect(() => {
-    if (abierto) setError(null);
+    if (abierto) {
+      setError(null);
+    }
   }, [abierto]);
 
   useEffect(() => {
@@ -66,11 +68,11 @@ function ExperienciaLaboralModal({
       setLoading(false);
       setDragActive(false);
       setError(null);
-      setSigueActivo(false);
+      setSigueCursando(false);
       setArchivos([]);
       setForm({
-        empresa: "",
-        cargo: "",
+        institucion: "",
+        titulo: "",
         descripcion: "",
         fecha_ini: "",
         fecha_fin: "",
@@ -84,22 +86,29 @@ function ExperienciaLaboralModal({
     setError(null);
     setArchivos([]);
     setForm({
-      empresa: initialData?.empresa ?? "",
-      cargo: initialData?.cargo ?? "",
+      institucion: initialData?.institucion ?? "",
+      titulo: initialData?.titulo ?? "",
       descripcion: initialData?.descripcion ?? "",
       fecha_ini: initialData?.fecha_ini ?? "",
       fecha_fin: initialData?.fecha_fin ?? "",
     });
-    setSigueActivo(initialData ? !initialData.fecha_fin : false);
+    setSigueCursando(initialData ? !initialData.fecha_fin : false);
   }, [abierto, initialData]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCerrar();
+      if (e.key === "Escape") {
+        onCerrar();
+      }
     };
 
-    if (abierto) window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    if (abierto) {
+      window.addEventListener("keydown", onKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
   }, [abierto, onCerrar]);
 
   if (!abierto) return null;
@@ -113,13 +122,13 @@ function ExperienciaLaboralModal({
 
   const validarArchivo = (file: File) => {
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      return t("workExperience.errors.invalid_file", {
+      return t("academicExperience.errors.invalid_file", {
         fileName: file.name,
       });
     }
 
     if (file.size > maxBytes) {
-      return t("workExperience.errors.file_too_large", {
+      return t("academicExperience.errors.file_too_large", {
         fileName: file.name,
         size: MAX_FILE_SIZE_MB,
       });
@@ -149,16 +158,37 @@ function ExperienciaLaboralModal({
   };
 
   const validar = () => {
-    if (!form.empresa.trim()) return setError("La empresa es obligatoria."), false;
-    if (!form.cargo.trim()) return setError("El cargo es obligatorio."), false;
-    if (!form.descripcion.trim()) return setError("La descripción es obligatoria."), false;
-    if (form.descripcion.trim().length > 1000) {
-      setError("La descripción no debe superar los 1000 caracteres.");
+    if (!form.institucion.trim()) {
+      setError(t("academicExperience.errors.institution_required"));
       return false;
     }
 
-    if (!sigueActivo && !form.fecha_fin) {
-      setError("La fecha fin es obligatoria o puedes dejarla vacía si sigue activo.");
+    if (!form.titulo.trim()) {
+      setError(t("academicExperience.errors.title_required"));
+      return false;
+    }
+
+    if (!form.descripcion.trim()) {
+      setError(t("academicExperience.errors.description_required"));
+      return false;
+    }
+
+    if (form.descripcion.trim().length > MAX_DESC) {
+      setError(
+        t("academicExperience.errors.description_max", {
+          max: MAX_DESC,
+        })
+      );
+      return false;
+    }
+
+    if (!form.fecha_ini) {
+      setError(t("academicExperience.errors.start_date_required"));
+      return false;
+    }
+
+    if (!sigueCursando && !form.fecha_fin) {
+      setError(t("academicExperience.errors.end_date_required"));
       return false;
     }
 
@@ -175,18 +205,18 @@ function ExperienciaLaboralModal({
       setLoading(true);
 
       await onGuardar?.({
-        empresa: form.empresa.trim(),
-        cargo: form.cargo.trim(),
+        institucion: form.institucion.trim(),
+        titulo: form.titulo.trim(),
         descripcion: form.descripcion.trim(),
         fecha_ini: form.fecha_ini,
-        fecha_fin: sigueActivo ? null : form.fecha_fin,
+        fecha_fin: sigueCursando ? null : form.fecha_fin,
         archivos,
       });
 
       onCerrar();
     } catch (err) {
       console.error(err);
-      setError(t("workExperience.errors.save_failed"));
+      setError(t("academicExperience.errors.save_failed"));
     } finally {
       setLoading(false);
     }
@@ -205,7 +235,7 @@ function ExperienciaLaboralModal({
         ref={modalRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="experiencia-laboral-title"
+        aria-labelledby="experiencia-academica-title"
         className="my-auto w-full max-w-[820px] overflow-hidden rounded-[18px] bg-white shadow-2xl max-h-[calc(100vh-1.5rem)]"
         onClick={(e) => e.stopPropagation()}
       >
@@ -214,14 +244,20 @@ function ExperienciaLaboralModal({
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10">
               <FileText size={17} />
             </span>
-            <h3 className="text-[17px] font-bold sm:text-[18px]">Registrar experiencia laboral</h3>
+
+            <h3
+              id="experiencia-academica-title"
+              className="text-[17px] font-bold sm:text-[18px]"
+            >
+              {t("academicExperience.title")}
+            </h3>
           </div>
 
           <button
             type="button"
             onClick={onCerrar}
             className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
-            aria-label={t("workExperience.actions.close_modal")}
+            aria-label={t("academicExperience.actions.close_modal")}
           >
             <X size={18} />
           </button>
@@ -233,7 +269,7 @@ function ExperienciaLaboralModal({
         >
           <div className="mb-3 flex items-center gap-3">
             <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
-              {t("workExperience.sections.company")}
+              {t("academicExperience.sections.institution")}
             </span>
 
             <div className="h-px flex-1 bg-slate-200" />
@@ -242,28 +278,28 @@ function ExperienciaLaboralModal({
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
               <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-                {t("workExperience.fields.company")}
+                {t("academicExperience.fields.institution")}
               </label>
 
               <input
-                name="empresa"
-                value={form.empresa}
+                name="institucion"
+                value={form.institucion}
                 onChange={handleChange}
-                placeholder={t("workExperience.placeholders.company")}
+                placeholder={t("academicExperience.placeholders.institution")}
                 className="h-10 w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 text-[15px] text-white outline-none placeholder:text-white/70 focus:border-slate-900"
               />
             </div>
 
             <div>
               <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-                {t("workExperience.fields.position")}
+                {t("academicExperience.fields.title")}
               </label>
 
               <input
-                name="cargo"
-                value={form.cargo}
+                name="titulo"
+                value={form.titulo}
                 onChange={handleChange}
-                placeholder={t("workExperience.placeholders.position")}
+                placeholder={t("academicExperience.placeholders.title")}
                 className="h-10 w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 text-[15px] text-white outline-none placeholder:text-white/70 focus:border-slate-900"
               />
             </div>
@@ -271,25 +307,28 @@ function ExperienciaLaboralModal({
 
           <div className="mt-4">
             <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-              {t("workExperience.fields.description")}
+              {t("academicExperience.fields.description")}
             </label>
 
             <textarea
               name="descripcion"
               value={form.descripcion}
               onChange={handleChange}
-              rows={2}
-              placeholder="Describe tus responsabilidades, tecnologías usadas o logros..."
+              rows={3}
+              maxLength={MAX_DESC}
+              placeholder={t("academicExperience.placeholders.description")}
               className="w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 py-2.5 text-[15px] text-white outline-none placeholder:text-white/70 focus:border-slate-900"
             />
+
             <p className="mt-1 text-right text-[11px] text-slate-400">
-              {form.descripcion.length}/{MAX_DESC} caracteres
+              {form.descripcion.length}/{MAX_DESC}{" "}
+              {t("academicExperience.helpers.characters")}
             </p>
           </div>
 
           <div className="mt-4 mb-3 flex items-center gap-3">
             <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
-              {t("workExperience.sections.period")}
+              {t("academicExperience.sections.period")}
             </span>
 
             <div className="h-px flex-1 bg-slate-200" />
@@ -298,7 +337,7 @@ function ExperienciaLaboralModal({
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
               <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-                {t("workExperience.fields.start_date")}
+                {t("academicExperience.fields.start_date")}
               </label>
 
               <div className="relative">
@@ -319,7 +358,7 @@ function ExperienciaLaboralModal({
 
             <div>
               <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-                {t("workExperience.fields.end_date")}
+                {t("academicExperience.fields.end_date")}
               </label>
 
               <div className="relative">
@@ -328,7 +367,7 @@ function ExperienciaLaboralModal({
                   name="fecha_fin"
                   value={form.fecha_fin}
                   onChange={handleChange}
-                  disabled={sigueActivo}
+                  disabled={sigueCursando}
                   className="h-10 w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 pr-10 text-[15px] text-white outline-none disabled:opacity-60 focus:border-slate-900"
                 />
 
@@ -337,13 +376,40 @@ function ExperienciaLaboralModal({
                   size={15}
                 />
               </div>
-              <p className="mt-1 text-[11px] text-slate-400">Dejar vacío si sigue activo</p>
+
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  id="sigueCursando"
+                  type="checkbox"
+                  checked={sigueCursando}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setSigueCursando(checked);
+
+                    if (checked) {
+                      setForm((prev) => ({ ...prev, fecha_fin: "" }));
+                    }
+                  }}
+                  className="h-4 w-4"
+                />
+
+                <label
+                  htmlFor="sigueCursando"
+                  className="text-[13px] text-slate-600"
+                >
+                  {t("academicExperience.fields.currently_studying")}
+                </label>
+              </div>
+
+              <p className="mt-1 text-[11px] text-slate-400">
+                {t("academicExperience.helpers.empty_if_current")}
+              </p>
             </div>
           </div>
 
           <div className="mt-4 mb-3 flex items-center gap-3">
             <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
-              {t("workExperience.sections.documents")}
+              {t("academicExperience.sections.documents")}
             </span>
 
             <div className="h-px flex-1 bg-slate-200" />
@@ -373,11 +439,11 @@ function ExperienciaLaboralModal({
               </div>
 
               <p className="text-[14px] font-extrabold text-[#1E5AA8]">
-                {t("workExperience.upload.title")}
+                {t("academicExperience.upload.title")}
               </p>
 
               <p className="mt-1 text-[11px] text-slate-500">
-                {t("workExperience.upload.subtitle", {
+                {t("academicExperience.upload.subtitle", {
                   size: MAX_FILE_SIZE_MB,
                 })}
               </p>
@@ -400,7 +466,7 @@ function ExperienciaLaboralModal({
                 className="mt-2.5 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-500 shadow-sm transition hover:border-slate-300 hover:text-slate-700"
               >
                 <Plus size={15} />
-                {t("workExperience.actions.browse_files")}
+                {t("academicExperience.actions.browse_files")}
               </button>
 
               {archivos.length > 0 && (
@@ -424,7 +490,7 @@ function ExperienciaLaboralModal({
                         type="button"
                         onClick={() => eliminarArchivo(index)}
                         className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                        aria-label={t("workExperience.actions.delete_file", {
+                        aria-label={t("academicExperience.actions.delete_file", {
                           fileName: file.name,
                         })}
                       >
@@ -449,7 +515,7 @@ function ExperienciaLaboralModal({
               onClick={onCerrar}
               className="rounded-xl border border-slate-200 px-5 py-2 text-[13px] font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-700"
             >
-              {t("workExperience.actions.cancel")}
+              {t("academicExperience.actions.cancel")}
             </button>
 
             <button
@@ -459,8 +525,8 @@ function ExperienciaLaboralModal({
             >
               <Plus size={15} />
               {loading
-                ? t("workExperience.actions.saving")
-                : t("workExperience.actions.save")}
+                ? t("academicExperience.actions.saving")
+                : t("academicExperience.actions.save")}
             </button>
           </div>
         </form>
@@ -469,4 +535,4 @@ function ExperienciaLaboralModal({
   );
 }
 
-export default ExperienciaLaboralModal;
+export default ExperienciaAcademicaModal;

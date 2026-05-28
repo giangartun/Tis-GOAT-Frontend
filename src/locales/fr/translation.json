@@ -1,0 +1,785 @@
+{
+  "login": {
+    "left": {
+      "title": "Votre portfolio professionnel en un seul endroit",
+      "subtitle": "Gérez facilement vos informations, projets, compétences et expériences."
+    },
+    "title": "Connexion",
+    "subtitle": "Entrez vos informations pour accéder à votre compte",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "button": "Se connecter",
+    "loading": "Connexion...",
+    "register_link": "Vous n’avez pas de compte ? Inscrivez-vous",
+    "forgot_password": "Mot de passe oublié ?",
+    "placeholders": {
+      "email": "Entrez votre adresse e-mail",
+      "password": "Entrez votre mot de passe"
+    },
+    "recovery": {
+      "title": "Récupérer le mot de passe",
+      "description": "Entrez votre e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+      "placeholder": "Entrez votre e-mail",
+      "send": "Envoyer le lien",
+      "sending": "Envoi...",
+      "cancel": "Annuler",
+      "success": "Le lien de récupération a été envoyé à votre e-mail.",
+      "error": "Le lien n’a pas pu être envoyé."
+    },
+    "errors": {
+      "invalid": "Identifiants incorrects.",
+      "connection": "Erreur de connexion avec le serveur."
+    }
+  }, 
+  "register": {
+    "left": {
+      "title": "Système Générateur de Portfolios Numériques",
+      "subtitle": "Créez votre portfolio professionnel facilement et rapidement. Connectez-vous à des opportunités d’emploi et montrez vos compétences."
+    },
+    "title": "Créez votre compte",
+    "subtitle": "Inscrivez-vous pour commencer",
+    "redirecting": "Redirection vers la connexion dans 7 secondes...",
+    "loading": "Inscription...",
+    "button": "S’inscrire",
+    "login_link": "Vous avez déjà un compte ? Connectez-vous",
+    "fields": {
+      "name": "Prénom",
+      "last_name": "Nom paternel",
+      "second_last_name": "Nom maternel",
+      "email": "E-mail",
+      "password": "Mot de passe",
+      "confirm_password": "Confirmer le mot de passe"
+    },
+    "placeholders": {
+      "name": "Entrez votre prénom (lettres uniquement)",
+      "last_name": "Entrez votre nom paternel (lettres uniquement)",
+      "second_last_name": "Entrez votre nom maternel (lettres uniquement)",
+      "email": "Entrez votre adresse e-mail",
+      "password": "Entrez votre mot de passe",
+      "confirm_password": "Confirmez votre mot de passe"
+    },
+    "success": {
+      "check_email": "Consultez votre e-mail pour terminer l’inscription. Le lien expire dans 5 minutes.",
+      "login_message": "✅ Inscription réussie. Consultez votre e-mail pour vérifier votre compte avant de vous connecter."
+    },
+    "errors": {
+      "required": "Tous les champs sont obligatoires",
+      "name_letters": "Le prénom ne doit contenir que des lettres",
+      "last_name_letters": "Le nom paternel ne doit contenir que des lettres",
+      "second_last_name_letters": "Le nom maternel ne doit contenir que des lettres",
+      "password_match": "Les mots de passe ne correspondent pas",
+      "password_length": "Le mot de passe doit contenir au moins 6 caractères",
+      "email_invalid": "Entrez une adresse e-mail valide",
+      "register_failed": "Erreur lors de l’inscription",
+      "connection": "Erreur de connexion avec le serveur."
+    }
+  },
+  "resetPassword": {
+    "left": {
+      "title": "Système Générateur de Portfolios Numériques",
+      "subtitle": "Accédez à votre compte et gérez votre portfolio professionnel."
+    },
+    "title": "Réinitialiser le mot de passe",
+    "subtitle": "Entrez votre nouveau mot de passe",
+    "fields": {
+      "email": "E-mail",
+      "new_password": "Nouveau mot de passe",
+      "confirm_password": "Confirmer le mot de passe"
+    },
+    "placeholders": {
+      "email": "Entrez votre adresse e-mail",
+      "new_password": "Entrez votre nouveau mot de passe",
+      "confirm_password": "Confirmez votre nouveau mot de passe"
+    },
+    "password_hint": "Votre mot de passe doit contenir au moins 8 caractères et inclure des lettres et des chiffres.",
+    "loading": "Mise à jour...",
+    "button": "Mettre à jour le mot de passe",
+    "back_login": "Retour à la connexion",
+    "success": {
+      "updated": "Mot de passe mis à jour correctement.",
+      "login_message": "Mot de passe mis à jour correctement. Vous pouvez maintenant vous connecter."
+    },
+    "errors": {
+      "failed": "Le mot de passe n’a pas pu être réinitialisé.",
+      "connection": "Erreur de connexion avec le serveur."
+    }
+  },
+  "verifyEmail": {
+  "system_name": "Système de Portfolios Numériques",
+  "loading": {
+    "title": "Vérification de votre adresse e-mail...",
+    "subtitle": "Veuillez patienter un instant"
+  },
+  "success": {
+    "title": "Vérification réussie !",
+    "message": "✅ E-mail vérifié avec succès !",
+    "button": "Aller à la connexion",
+    "login_message": "✅ Compte vérifié avec succès. Vous pouvez maintenant vous connecter."
+  },
+  "error": {
+    "title": "Erreur de vérification",
+    "button": "Retour à la connexion"
+  },
+  "errors": {
+    "invalid_token": "Token de vérification non valide",
+    "verify_failed": "❌ Erreur lors de la vérification de l’e-mail. Le lien a peut-être expiré.",
+    "connection": "Erreur de connexion avec le serveur. Assurez-vous que le backend est en cours d’exécution.",
+    "register_again": "⚠️ Veuillez vous inscrire à nouveau."
+  }
+},
+"home": {
+  "loading": "Chargement des profils...",
+  "search_placeholder": "Rechercher par nom, profession ou compétence...",
+  "title": "Bon retour ! Explorez de nouveaux profils et élargissez vos connexions",
+  "subtitle": "Découvrez d’autres profils de développeurs et connectez-vous avec des collègues du secteur technologique.",
+  "empty": "Aucun profil disponible avec les filtres sélectionnés.",
+  "show_more": "Voir plus de profils",
+  "filters": {
+    "professional_area": "Domaine professionnel",
+    "clear": "Effacer le filtre"
+  },
+  "card": {
+    "default_user": "Utilisateur",
+    "no_profession": "Sans profession",
+    "view_profile": "Voir le profil"
+  },
+  "errors": {
+    "load_profiles": "Erreur lors du chargement des profils"
+  },
+  "areas": {
+    "Frontend": "Frontend",
+    "Backend": "Backend",
+    "Full Stack": "Full Stack",
+    "Mobile": "Mobile",
+    "UX/UI": "UX/UI",
+    "Data Science": "Science des données",
+    "Ciberseguridad": "Cybersécurité",
+    "DevOps": "DevOps",
+    "QA Testing": "Tests QA",
+    "Bases de Datos": "Bases de données"
+  }
+},
+"layout": {
+  "system_name": "Système de Portfolios Numériques",
+  "languages": {
+    "spanish": "Espagnol",
+    "french": "Français",
+    "english": "Anglais"
+  },
+  "auth": {
+    "login": "Se connecter",
+    "register": "S’inscrire",
+    "logout": "Se déconnecter"
+  },
+  "logout": {
+    "loading": "Déconnexion..."
+  },
+  "nav": {
+    "home": "Accueil",
+    "my_profile": "Mon profil",
+    "my_projects": "Mes projets",
+    "portfolio": "Portfolio",
+    "navigation": "Navigation"
+  },
+  "sidebar": {
+    "privacy_settings": "Paramètres de confidentialité",
+    "portfolio_customization": "Personnalisation du portfolio"
+  },
+  "notifications": {
+    "title": "Articles et notifications",
+    "view_all": "Voir tout",
+    "article_title": "Meilleures pratiques de développement web",
+    "article_description": "Découvrez des techniques et des concepts pour améliorer vos compétences en développement web."
+  },
+  "footer": {
+    "copyright": "© 2026 Generation Of Advanced Technology",
+    "terms": "Conditions d’utilisation",
+    "privacy": "Politique de confidentialité",
+    "location": "Cochabamba, Bolivie | Université Majeure de San Simón"
+  }
+},
+"profileUser": {
+  "loading": "Chargement du profil public...",
+  "sections": {
+    "about_me": "À propos de moi",
+    "experience": "Expérience",
+    "skills": "Compétences",
+    "soft_skills": "Compétences comportementales développées",
+    "projects": "Projets"
+  },
+  "defaults": {
+    "professional": "Professionnel",
+    "no_biography": "Aucune biographie disponible.",
+    "unspecified_position": "Poste non spécifié",
+    "no_description": "Aucune description.",
+    "project": "Projet"
+  },
+  "empty": {
+    "no_experience": "Aucune expérience enregistrée.",
+    "no_technical_skills": "Aucune compétence technique ajoutée.",
+    "no_soft_skills": "Aucune compétence comportementale ajoutée.",
+    "no_projects": "Aucun projet enregistré."
+  },
+  "errors": {
+    "load_public_profile": "Impossible de charger le profil public",
+    "load_profile": "Erreur lors du chargement du profil",
+    "profile_not_found": "Profil introuvable"
+  }
+},
+  "profile": {
+    "common": {
+      "accept": "Accepter",
+      "cancel": "Annuler",
+      "saving": "Enregistrement...",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "current": "Actuellement",
+      "select_option": "Sélectionnez une option"
+    },
+    "tabs": {
+      "personal_data": "Données personnelles",
+      "skills": "Compétences",
+      "professional_links": "Liens professionnels",
+      "academic_experience": "Exp. académique",
+      "work_experience": "Exp. professionnelle"
+    },
+    "categories": {
+      "programming_languages": "Langages de programmation",
+      "frontend": "Développement Web Frontend",
+      "backend": "Développement Web Backend",
+      "mobile": "Développement mobile",
+      "databases": "Bases de données",
+      "frameworks": "Frameworks et bibliothèques",
+      "devops": "DevOps / Infrastructure",
+      "cloud": "Cloud Computing",
+      "security": "Cybersécurité",
+      "ai": "Intelligence Artificielle / Data Science",
+      "testing": "Tests / QA",
+      "design": "Outils de design",
+      "soft_skills": "Compétences comportementales",
+      "technical_skills": "Compétences techniques"
+    },
+    "soft": {
+      "work_team": "Travail en équipe",
+      "leadership": "Leadership",
+      "communication": "Communication",
+      "problem_solving": "Résolution de problèmes",
+      "adaptability": "Adaptabilité",
+      "critical_thinking": "Pensée critique",
+      "time_management": "Gestion du temps",
+      "creativity": "Créativité",
+      "emotional_intelligence": "Intelligence émotionnelle",
+      "proactivity": "Proactivité",
+      "empathy": "Empathie",
+      "negotiation": "Négociation",
+      "decision_making": "Prise de décision",
+      "stress_management": "Gestion du stress",
+      "results_oriented": "Orientation résultats"
+    },
+    "alerts": {
+      "select_name": "Sélectionnez un nom.",
+      "select_category": "Sélectionnez une catégorie.",
+      "save_error": "Erreur lors de l’enregistrement.",
+      "select_platform": "Sélectionnez une plateforme.",
+      "enter_username": "Entrez votre nom d’utilisateur.",
+      "upload_photo_error": "Erreur lors du téléversement de la photo",
+      "delete_error": "Erreur lors de la suppression.",
+      "work_experience_save_error": "Impossible d’enregistrer l’expérience professionnelle.",
+      "work_experience_save_generic": "Erreur lors de l’enregistrement de l’expérience professionnelle",
+      "portfolio_not_found": "Le portfolio de l’utilisateur est introuvable.",
+      "academic_experience_save_error": "Impossible d’enregistrer l’expérience académique.",
+      "academic_experience_save_generic": "Erreur lors de l’enregistrement de l’expérience académique"
+    },
+    "skill_modal": {
+      "title": "Ajouter une compétence",
+      "skill_type": "Type de compétence",
+      "hard_skill": "Compétence technique",
+      "soft_skill": "Compétence comportementale",
+      "category": "Catégorie",
+      "select_category": "Sélectionnez une catégorie",
+      "hard_skill_name": "Nom de la compétence technique",
+      "soft_skill_name": "Nom de la compétence comportementale",
+      "level": "Niveau",
+      "visible": "Visible",
+      "show_in_profile": "Afficher sur le profil",
+      "save": "Enregistrer la compétence",
+      "soft_type_badge": "Comportementale"
+    },
+    "link_modal": {
+      "title": "Ajouter un lien",
+      "platform": "Plateforme",
+      "username_placeholder": "votrenomutilisateur",
+      "username_help": "Écrivez uniquement votre nom d’utilisateur.",
+      "save": "Enregistrer le lien"
+    },
+    "personal_modal": {
+      "title": "Données personnelles",
+      "profile_photo": "Photo de profil",
+      "preview_alt": "Aperçu",
+      "photo": "Photo",
+      "change_photo": "Changer la photo",
+      "about_me": "À propos de moi",
+      "bio_placeholder": "Parlez-nous un peu de vous…",
+      "characters": "caractères",
+      "image_selected": "Image sélectionnée avec succès",
+      "save_changes": "Enregistrer les changements"
+    },
+    "empty": {
+      "no_added_yet": "Aucun(e) {{label}} ajouté(e) pour le moment."
+    },
+    "loading": {
+      "label": "Chargement de {{label}}..."
+    },
+    "soon": "Bientôt disponible — {{label}}",
+    "defaults": {
+      "profession": "Ingénieure logicielle",
+      "biography": "Passionnée par la création d’applications web et la conception d’expériences utilisateur exceptionnelles, avec de l’expérience en travail d’équipe.",
+      "city": "Cochabamba",
+      "institution": "UMSS"
+    },
+    "sidebar": {
+      "home": "Accueil",
+      "settings": "Paramètres"
+    },
+    "actions": {
+      "add_skill": "Ajouter une compétence",
+      "add_link": "Ajouter un lien",
+      "add_academic_experience": "Ajouter une expérience académique",
+      "add_work_experience": "Ajouter une expérience professionnelle"
+    },
+    "sort": {
+      "newest": "plus récentes",
+      "oldest": "plus anciennes"
+    },
+    "personal_tab": {
+      "description": "Modifiez votre photo de profil et votre description personnelle.",
+      "button": "Données personnelles"
+    },
+    "labels": {
+      "academic_experiences": "expériences académiques",
+      "academic_experience": "Expérience académique",
+      "work_experience": "Expérience professionnelle",
+      "skills": "compétences",
+      "links": "liens"
+    },
+    "modals": {
+      "changes_saved_title": "Modifications enregistrées",
+      "changes_saved_msg": "Vos informations personnelles ont été mises à jour correctement",
+      "skill_added_title": "Compétence ajoutée",
+      "skill_added_msg": "Votre compétence a été enregistrée avec succès.",
+      "link_added_title": "Lien ajouté",
+      "link_added_msg": "Votre lien a été enregistré avec succès.",
+      "delete_skill_title": "Supprimer la compétence",
+      "delete_skill_msg": "Voulez-vous vraiment supprimer cette compétence ?",
+      "delete_link_title": "Supprimer le lien",
+      "delete_link_msg": "Voulez-vous vraiment supprimer ce lien ?",
+      "skill_deleted_title": "Compétence supprimée",
+      "skill_deleted_msg": "Votre compétence a été supprimée avec succès.",
+      "link_deleted_title": "Lien supprimé",
+      "link_deleted_msg": "Votre lien a été supprimé avec succès.",
+      "delete_academic_title": "Supprimer l’expérience académique",
+      "delete_academic_msg": "Voulez-vous vraiment supprimer cette expérience académique ?",
+      "academic_deleted_title": "Expérience académique supprimée",
+      "academic_deleted_msg": "Votre expérience académique a été supprimée avec succès."
+    }
+  },
+  "projects": {
+  "title": "Mes Projets",
+  "subtitle": "Gérez et organisez vos projets logiciels",
+  "search": "Rechercher ...",
+  "new_project": "+ Nouveau Projet",
+  "empty": "Vous n’avez pas encore de projets.",
+  "actions": {
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "cancel": "Annuler",
+    "deleting": "Suppression..."
+  },
+  "labels": {
+    "technology": "Technologie",
+    "start_date": "Date de début",
+    "end_date": "Date de fin",
+    "attached_pdf": "PDF joint"
+  },
+  "links": {
+    "github": "Lien GitHub",
+    "demo": "Lien Démo",
+    "view_pdf": "Voir le PDF"
+  },
+  "card": {
+    "cover_placeholder": "Capture ou couverture du projet",
+    "no_description": "Aucune description"
+  },
+  "delete_modal": {
+    "title": "Supprimer le projet",
+    "description_before": "Voulez-vous vraiment supprimer",
+    "description_after": " ? Cette action est irréversible."
+  },
+  "messages": {
+    "deleted_success": "Projet supprimé correctement.",
+    "delete_error": "Le projet n’a pas pu être supprimé.",
+    "no_portfolio": "Le portfolio de la session actuelle est introuvable.",
+    "pdf_upload_error": "Le projet a été enregistré, mais le PDF n’a pas pu être téléversé.",
+    "updated_success": "Projet mis à jour correctement.",
+    "saved_success": "Projet enregistré correctement.",
+    "save_error": "Le projet n’a pas pu être enregistré. Vérifiez les données."
+  }
+},
+"projectModal": {
+  "title_new": "Nouveau Projet",
+  "title_edit": "Modifier le projet",
+  "fields": {
+    "name": "Nom du projet :",
+    "description": "Description :",
+    "github": "Lien GitHub :",
+    "demo": "URL de la démo :",
+    "start_date": "Date de début :",
+    "end_date": "Date de fin :",
+    "technologies": "Technologies :",
+    "image_url": "URL de l’image :",
+    "pdf": "Téléverser un fichier PDF :"
+  },
+  "placeholders": {
+    "name": "nomduprojet",
+    "description": "Maximum 200 caractères"
+  },
+  "helpers": {
+    "characters": "caractères",
+    "github_title": "Entrez un lien GitHub valide, par exemple : https://github.com/utilisateur/projet",
+    "github_required": "Ce doit être un lien GitHub.",
+    "optional": "Champ optionnel.",
+    "pdf": "Ce fichier sera téléversé comme preuve lors de l’enregistrement du projet.",
+    "selected_file": "Fichier sélectionné"
+  },
+  "categories": {
+    "programming_languages": "Langages de programmation",
+    "frameworks": "Frameworks et bibliothèques",
+    "databases": "Base de données",
+    "tools": "Outils et technologies",
+    "others": "Autres"
+  },
+  "errors": {
+    "github_invalid": "Le lien GitHub doit commencer par https://github.com/"
+  },
+  "actions": {
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "update": "Mettre à jour"
+  }
+},
+"portfolioCustomization": {
+  "loading": "Chargement de la personnalisation...",
+  "title": "Personnalisation du Portfolio",
+  "subtitle": "Choisissez le modèle que vous préférez pour votre portfolio.",
+  "available_templates": "Modèles disponibles",
+  "apply_changes": "Appliquer les changements",
+  "success": {
+    "title": "Changements appliqués avec succès",
+    "description": "Le modèle du portfolio a été enregistré avec succès."
+  },
+  "actions": {
+    "stay": "Rester ici",
+    "view_portfolio": "Voir mon portfolio"
+  },
+  "errors": {
+    "save": "Impossible d’enregistrer la configuration du portfolio."
+  }
+},
+"academicExperience": {
+  "title": "Enregistrer une expérience académique",
+  "sections": {
+    "institution": "Institution",
+    "period": "Période",
+    "documents": "Documents"
+  },
+  "fields": {
+    "institution": "Institution",
+    "title": "Diplôme obtenu",
+    "description": "Description",
+    "start_date": "Date de début",
+    "end_date": "Date de fin",
+    "currently_studying": "Je suis encore en formation"
+  },
+  "placeholders": {
+    "institution": "Ex. UMSS, UMSA...",
+    "title": "Ex. Ingénierie des systèmes",
+    "description": "Décrivez brièvement vos réussites, mentions ou activités..."
+  },
+  "helpers": {
+    "characters": "caractères",
+    "empty_if_current": "Laissez vide si c’est toujours en cours"
+  },
+  "upload": {
+    "title": "Glissez ou sélectionnez des fichiers",
+    "subtitle": "PDF, JPG, PNG - Max. {{size}} Mo par fichier"
+  },
+  "actions": {
+    "close_modal": "Fermer la fenêtre",
+    "browse_files": "Parcourir les fichiers",
+    "delete_file": "Supprimer {{fileName}}",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "saving": "Enregistrement..."
+  },
+  "errors": {
+    "invalid_file": "Le fichier {{fileName}} n’est pas valide. Seulement PDF, JPG ou PNG.",
+    "file_too_large": "Le fichier {{fileName}} dépasse la limite de {{size}} Mo.",
+    "institution_required": "L’institution est obligatoire.",
+    "title_required": "Le diplôme est obligatoire.",
+    "description_required": "La description est obligatoire.",
+    "description_max": "La description ne doit pas dépasser {{max}} caractères.",
+    "start_date_required": "La date de début est obligatoire.",
+    "end_date_required": "La date de fin est obligatoire, ou vous pouvez indiquer que vous êtes encore en formation.",
+    "save_failed": "L’expérience académique n’a pas pu être enregistrée."
+  }
+},
+"workExperience": {
+  "title": "Enregistrer une expérience professionnelle",
+  "sections": {
+    "company": "Entreprise",
+    "period": "Période",
+    "documents": "Documents"
+  },
+  "fields": {
+    "company": "Entreprise",
+    "position": "Poste",
+    "description": "Description",
+    "start_date": "Date de début",
+    "end_date": "Date de fin"
+  },
+  "placeholders": {
+    "company": "Ex. Google, Startup XYZ...",
+    "position": "Ex. Développeuse Backend",
+    "description": "Décrivez vos responsabilités, les technologies utilisées ou vos réussites..."
+  },
+  "helpers": {
+    "empty_if_active": "Laissez vide si le poste est toujours actif"
+  },
+  "upload": {
+    "title": "Glissez ou sélectionnez des fichiers",
+    "subtitle": "PDF, JPG, PNG - Max. {{size}} Mo par fichier"
+  },
+  "actions": {
+    "close_modal": "Fermer la fenêtre",
+    "browse_files": "Parcourir les fichiers",
+    "delete_file": "Supprimer {{fileName}}",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "saving": "Enregistrement..."
+  },
+  "errors": {
+    "invalid_file": "Le fichier {{fileName}} n’est pas valide. Seulement PDF, JPG ou PNG.",
+    "file_too_large": "Le fichier {{fileName}} dépasse la limite de {{size}} Mo.",
+    "company_required": "L’entreprise est obligatoire.",
+    "position_required": "Le poste est obligatoire.",
+    "description_required": "La description est obligatoire.",
+    "description_max": "La description ne doit pas dépasser 1000 caractères.",
+    "start_date_required": "La date de début est obligatoire.",
+    "end_date_required": "La date de fin est obligatoire, ou vous pouvez la laisser vide si le poste est toujours actif.",
+    "save_failed": "L’expérience professionnelle n’a pas pu être enregistrée."
+  }
+},
+"privacyPortfolio": {
+  "title": "Confidentialité du portfolio",
+  "subtitle": "Contrôlez quelles informations sont visibles publiquement",
+  "general_visibility": "Visibilité générale",
+  "general_description": "Permet à toute personne d’accéder à votre portfolio via une URL",
+  "section_visibility": "Visibilité par section",
+  "sections": {
+    "projects": "Projets",
+    "skills": "Compétences",
+    "academic_experience": "Expérience académique",
+    "work_experience": "Expérience professionnelle",
+    "professional_networks": "Réseaux professionnels"
+  },
+  "status": {
+    "unsaved_changes": "Modifications non enregistrées",
+    "unsaved_description": "Appuyez sur « Enregistrer les modifications » pour appliquer la configuration.",
+    "all_saved": "Tout est enregistré",
+    "public_profile": "Profil public",
+    "private_profile": "Profil privé",
+    "public_description": "Votre portfolio est visible par tout visiteur via une URL publique.",
+    "private_description": "Votre portfolio n’est pas accessible via une URL publique. Vous seul pouvez le voir."
+  },
+  "visibility": {
+    "visible": "Visible",
+    "hidden": "Masqué"
+  },
+  "preview": {
+    "title": "Aperçu public",
+    "hidden_section": "{{section}} masqué",
+    "private_message": "Ce profil est privé. Il n’est pas visible publiquement.",
+    "portfolio_link": "Lien du portfolio"
+  },
+  "current_status": {
+    "title": "État actuel",
+    "visibility": "Visibilité",
+    "public": "Public",
+    "private": "Privé",
+    "visible_items": "Éléments visibles",
+    "active_sections": "Sections actives",
+    "public_access": "Accès public",
+    "active": "Actif",
+    "blocked": "Bloqué",
+    "of": "sur"
+  },
+  "actions": {
+    "save_changes": "Enregistrer les modifications",
+    "revert": "Annuler",
+    "copy": "Copier",
+    "cancel": "Annuler",
+    "reset_all_public": "Tout rétablir en public",
+    "reset_all": "Tout rétablir"
+  },
+  "modals": {
+    "save": {
+      "title": "Confirmer les modifications",
+      "message": "Les changements de visibilité seront appliqués immédiatement. Les éléments désactivés ne seront plus visibles dans votre portfolio public."
+    },
+    "reset": {
+      "title": "Réinitialiser la confidentialité",
+      "message": "La visibilité de tous les éléments sera rétablie en public. Cette action affecte tous les projets, compétences, expériences et réseaux."
+    }
+  },
+  "messages": {
+    "load_error": "Erreur lors du chargement de la configuration de confidentialité",
+    "saved": "Configuration enregistrée avec succès",
+    "save_error": "Erreur lors de l’enregistrement des modifications. Veuillez réessayer.",
+    "reset_success": "Confidentialité réinitialisée. Tout est à nouveau visible.",
+    "reset_error": "Erreur lors de la réinitialisation. Veuillez réessayer."
+  }
+},
+"portfolioPdf": {
+  "title": "Portfolio",
+  "current": "Actuel",
+  "labels": {
+    "role": "Développeur Full Stack",
+    "email": "E-mail",
+    "web_portfolio": "Portfolio web"
+  },
+  "sections": {
+    "skills": "Compétences",
+    "information": "Informations",
+    "work_experience": "Expérience professionnelle",
+    "academic_experience": "Expérience académique",
+    "projects": "Projets",
+    "featured_projects": "Projets en vedette",
+    "projects_continuation": "Projets (suite)"
+  },
+  "empty": {
+    "no_skills": "Aucune compétence enregistrée",
+    "no_work_experience": "Aucune expérience professionnelle enregistrée.",
+    "no_academic_experience": "Aucune expérience académique enregistrée."
+  },
+  "footer": {
+    "generated_from": "Généré depuis le Système de Portfolios Numériques"
+  },
+  "actions": {
+    "close": "Fermer",
+    "save_pdf": "Enregistrer le PDF",
+    "page": "page",
+    "pages": "pages"
+  },
+  "errors": {
+    "popup_blocked": "Le navigateur a bloqué la fenêtre contextuelle.\nAutorisez-la pour ce site dans la barre d’adresse et réessayez."
+  }
+},
+"confirmModal": {
+  "confirm": "Confirmer",
+  "cancel": "Annuler",
+  "processing": "Traitement..."
+},
+"profileHeader": {
+  "loading": "Chargement...",
+  "defaults": {
+    "profession": "Ingénieure logiciel",
+    "email": "email@exemple.com",
+    "city": "Cochabamba",
+    "country": "BO",
+    "institution": "Universidad Mayor de San Simon"
+  },
+  "actions": {
+    "edit": "Modifier"
+  },
+  "tabs": {
+    "projects": "Projets",
+    "skills": "Compétences",
+    "links": "Liens"
+  }
+},
+"privacySection": {
+  "empty_section": "Il n’y a aucun élément dans cette section",
+  "visible_count": "{{visible}} sur {{total}} visibles",
+  "no_items": "Aucun élément",
+  "visible": "Visible",
+  "hidden": "Masqué",
+  "toggle_general": "Basculer la section {{title}}",
+  "toggle_item": "Basculer {{name}}",
+  "default_item": "Élément {{number}}"
+},
+"portfolio": {
+  "loading": "Chargement du portfolio...",
+  "errors": {
+    "no_token": "Aucun token enregistré. Veuillez vous reconnecter.",
+    "session_expired": "Votre session a expiré ou le token n’est pas valide. Veuillez vous reconnecter.",
+    "unknown": "Erreur inconnue",
+    "load_title": "Le portfolio n’a pas pu être chargé.",
+    "pdf_failed": "Le PDF n’a pas pu être généré. Veuillez réessayer."
+  },
+  "defaults": {
+    "my_portfolio": "Mon portfolio",
+    "role": "Développeur Full Stack",
+    "hero_bio": "Je développe des solutions web modernes et évolutives, axées sur le backend, les APIs et les architectures de microservices robustes.",
+    "about_me": "Développeur axé sur le backend et les architectures évolutives avec de l’expérience en APIs et microservices. Je suis passionné par la création de systèmes robustes, efficaces et bien documentés."
+  },
+  "actions": {
+    "public_links": "Liens publics",
+    "close": "Fermer",
+    "view_project": "Voir le projet",
+    "view": "Voir",
+    "generating_pdf": "Génération du PDF..."
+  },
+  "labels": {
+    "public_portfolio_link": "Lien public du portfolio",
+    "featured": "En vedette",
+    "preview": "Aperçu",
+    "current": "Actuel"
+  },
+  "sections": {
+    "featured_projects": "Projets en vedette",
+    "experience": "Expérience",
+    "projects": "Projets",
+    "skills": "Compétences",
+    "stack": "Stack",
+    "in_numbers": "En chiffres",
+    "about_me": "À propos de moi",
+    "experience_stack": "Expérience & stack",
+    "education": "Formation"
+  },
+  "stats": {
+    "projects": "Projets",
+    "skills": "Compétences",
+    "experience_short": "Expérience"
+  },
+  "empty": {
+    "no_public_links": "Aucun lien public enregistré.",
+    "no_projects_yet": "Aucun projet pour le moment",
+    "no_experience": "Aucune expérience enregistrée",
+    "no_visible_projects": "Aucun projet visible",
+    "projects_linear": "Les projets publiés apparaîtront ici dans une vue linéaire.",
+    "no_academic_experience": "Aucune expérience académique enregistrée",
+    "academic_description": "Vos études et certifications apparaîtront ici.",
+    "no_work_experience": "Aucune expérience professionnelle enregistrée",
+    "work_experience_description": "Lorsque vous ajouterez une expérience depuis le panneau de gestion, elle apparaîtra ici.",
+    "no_skills": "Aucune compétence enregistrée",
+    "skills_description": "Vos compétences seront affichées ici avec des barres de niveau.",
+    "empty_view": "Vue vide",
+    "real_data_description": "Lorsque des données réelles existeront, elles seront affichées ici avec une composition plus professionnelle."
+  },
+  "cta": {
+    "title": "Contactez-moi",
+    "subtitle": "Je suis disponible pour des projets et des collaborations.",
+    "secondary": "CV"
+  }
+}
+}

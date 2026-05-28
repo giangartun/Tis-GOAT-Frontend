@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ArrowRight,
   ExternalLink,
   Mail,
   SquareDashedBottom,
 } from "lucide-react";
+import { descargarPortafolioPDF } from "./PortafolioPdf";
 
 const API_URL = "http://localhost:8000";
 
@@ -150,8 +152,9 @@ const theme: Theme = {
   button:
     "inline-flex items-center justify-center rounded-full bg-blue-500 px-5 py-3 font-medium text-white transition hover:bg-blue-600",
   buttonGhost:
-    "inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 font-medium text-slate-700 transition hover:bg-slate-50",
-  badge: "inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-700",
+    "inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed",
+  badge:
+    "inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-700",
 };
 
 const PLANTILLA_ID_MAP: Record<string, TemplateName> = {
@@ -161,22 +164,45 @@ const PLANTILLA_ID_MAP: Record<string, TemplateName> = {
 };
 
 function Portafolio() {
+  const { t } = useTranslation();
+
   const [data, setData] = useState<PortafolioData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mostrarModalEnlaces, setMostrarModalEnlaces] = useState(false);
+  const [generandoPDF, setGenerandoPDF] = useState(false);
 
   useEffect(() => {
     const fetchPortafolio = async () => {
       try {
-        const token = localStorage.getItem("token");
+        setLoading(true);
+        setError(null);
+
+        const token =
+          localStorage.getItem("token") ||
+          localStorage.getItem("accessToken") ||
+          localStorage.getItem("access_token");
+
+        if (!token) {
+          throw new Error("No hay token guardado. Inicia sesión nuevamente.");
+        }
 
         const response = await fetch(`${API_URL}/api/portafolio/completo`, {
+          method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
             Accept: "application/json",
+            Authorization: `Bearer ${token}`,
           },
         });
+
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("access_token");
+          throw new Error(
+            "Tu sesión expiró o el token no es válido. Inicia sesión nuevamente."
+          );
+        }
 
         if (!response.ok) {
           const text = await response.text();
@@ -187,6 +213,7 @@ function Portafolio() {
         setData(result);
       } catch (err) {
         console.error("Error al cargar el portafolio:", err);
+        setData(null);
         setError(err instanceof Error ? err.message : "Error desconocido");
       } finally {
         setLoading(false);
@@ -194,7 +221,7 @@ function Portafolio() {
     };
 
     fetchPortafolio();
-  }, []);
+  }, [t]);
 
   const usuario = data?.usuario;
   const portafolio = data?.portafolio;
@@ -226,12 +253,18 @@ function Portafolio() {
   }, [usuario]);
 
   const experienciaVisible = useMemo(
-    () => (data?.experiencias_laborales ?? []).filter((exp) => exp.visible !== false),
+    () =>
+      (data?.experiencias_laborales ?? []).filter(
+        (exp) => exp.visible !== false
+      ),
     [data?.experiencias_laborales]
   );
 
   const academicaVisible = useMemo(
-    () => (data?.experiencias_academicas ?? []).filter((edu) => edu.visible !== false),
+    () =>
+      (data?.experiencias_academicas ?? []).filter(
+        (edu) => edu.visible !== false
+      ),
     [data?.experiencias_academicas]
   );
 
@@ -270,6 +303,19 @@ function Portafolio() {
   const abrirModalEnlaces = () => setMostrarModalEnlaces(true);
   const cerrarModalEnlaces = () => setMostrarModalEnlaces(false);
 
+  const handleDescargarPDF = () => {
+    if (!data) return;
+    try {
+      setGenerandoPDF(true);
+      descargarPortafolioPDF(data, nombreCompleto);
+    } catch (error) {
+      console.error("Error al generar el PDF:", error);
+      alert("No se pudo generar el PDF. Intenta nuevamente.");
+    } finally {
+      setGenerandoPDF(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] text-slate-700">
@@ -280,8 +326,15 @@ function Portafolio() {
 
   if (error || !data) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] text-slate-700">
-        No se pudo cargar el portafolio.
+      <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] px-4 text-slate-700">
+        <div className="max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-lg font-semibold text-slate-900">
+            No se pudo cargar el portafolio.
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            {error ?? "Error desconocido"}
+          </p>
+        </div>
       </div>
     );
   }
@@ -300,6 +353,8 @@ function Portafolio() {
           experienciaVisible={experienciaVisible}
           habilidadesVisibles={habilidadesVisibles}
           onOpenEnlaces={abrirModalEnlaces}
+          onDescargarPDF={handleDescargarPDF}
+          generandoPDF={generandoPDF}
         />
       );
       break;
@@ -315,6 +370,8 @@ function Portafolio() {
           habilidadesVisibles={habilidadesVisibles}
           academicaVisible={academicaVisible}
           onOpenEnlaces={abrirModalEnlaces}
+          onDescargarPDF={handleDescargarPDF}
+          generandoPDF={generandoPDF}
         />
       );
       break;
@@ -330,6 +387,8 @@ function Portafolio() {
           experienciaVisible={experienciaVisible}
           habilidadesVisibles={habilidadesVisibles}
           onOpenEnlaces={abrirModalEnlaces}
+          onDescargarPDF={handleDescargarPDF}
+          generandoPDF={generandoPDF}
         />
       );
       break;
@@ -343,7 +402,9 @@ function Portafolio() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
             <div className="flex items-center justify-between gap-4">
-              <h3 className="text-2xl font-bold text-slate-900">Enlaces públicos</h3>
+              <h3 className="text-2xl font-bold text-slate-900">
+                Enlaces públicos
+              </h3>
               <button
                 type="button"
                 onClick={cerrarModalEnlaces}
@@ -364,7 +425,9 @@ function Portafolio() {
                     className="block rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-800 transition hover:bg-slate-100"
                   >
                     <p className="font-medium text-blue-700">{enlace.label}</p>
-                    <p className="mt-1 break-all text-sm text-slate-600">{enlace.url}</p>
+                    <p className="mt-1 break-all text-sm text-slate-600">
+                      {enlace.url}
+                    </p>
                   </a>
                 ))
               ) : (
@@ -389,6 +452,8 @@ function PortafolioBento({
   experienciaVisible,
   habilidadesVisibles,
   onOpenEnlaces,
+  onDescargarPDF,
+  generandoPDF,
 }: {
   data: PortafolioData;
   theme: Theme;
@@ -398,6 +463,8 @@ function PortafolioBento({
   experienciaVisible: ExperienciaLaboral[];
   habilidadesVisibles: Habilidad[];
   onOpenEnlaces: () => void;
+  onDescargarPDF: () => void;
+  generandoPDF: boolean;
 }) {
   return (
     <div className={theme.page}>
@@ -412,7 +479,11 @@ function PortafolioBento({
         />
 
         <section className="mt-8">
-          <SectionHeading title="Proyectos destacados" actionLabel="Destacados" theme={theme} />
+          <SectionHeading
+            title="Proyectos destacados"
+            actionLabel="Destacados"
+            theme={theme}
+          />
           <div className="mt-4 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {proyectosVisibles.slice(0, 3).map((proyecto, index) => (
               <BentoProjectCard
@@ -438,7 +509,14 @@ function PortafolioBento({
           </div>
         </section>
 
-        <FooterCTA theme={theme} title="Contáctame" subtitle="Estoy disponible para proyectos y colaboraciones." secondaryLabel="CV" />
+        <FooterCTA
+          theme={theme}
+          title="Contáctame"
+          subtitle="Estoy disponible para proyectos y colaboraciones."
+          secondaryLabel="CV"
+          onDescargarPDF={onDescargarPDF}
+          generandoPDF={generandoPDF}
+        />
       </div>
     </div>
   );
@@ -453,6 +531,8 @@ function PortafolioSidebar({
   experienciaVisible,
   habilidadesVisibles,
   onOpenEnlaces,
+  onDescargarPDF,
+  generandoPDF,
 }: {
   data: PortafolioData;
   theme: Theme;
@@ -462,6 +542,8 @@ function PortafolioSidebar({
   experienciaVisible: ExperienciaLaboral[];
   habilidadesVisibles: Habilidad[];
   onOpenEnlaces: () => void;
+  onDescargarPDF: () => void;
+  generandoPDF: boolean;
 }) {
   const stats = [
     { label: "Proyectos", value: proyectosVisibles.length },
@@ -511,9 +593,7 @@ function PortafolioSidebar({
               {stats.map((stat) => (
                 <div key={stat.label} className={theme.statCard}>
                   <p className="text-2xl font-bold text-blue-600">{stat.value}</p>
-                  <p className={`mt-1 text-xs uppercase tracking-[0.18em] ${theme.sub}`}>
-                    {stat.label}
-                  </p>
+                  <p className={`mt-1 text-xs uppercase tracking-[0.18em] ${theme.sub}`}>{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -546,12 +626,7 @@ function PortafolioSidebar({
             <SectionHeading title="Proyectos" theme={theme} />
             <div className="mt-4 grid gap-6 sm:grid-cols-2">
               {proyectosVisibles.slice(0, 4).map((proyecto, index) => (
-                <SidebarProjectCard
-                  key={proyecto.id_proyecto}
-                  proyecto={proyecto}
-                  index={index + 1}
-                  theme={theme}
-                />
+                <SidebarProjectCard key={proyecto.id_proyecto} proyecto={proyecto} index={index + 1} theme={theme} />
               ))}
               {proyectosVisibles.length === 0 && (
                 <EmptyCard theme={theme} title="Sin proyectos visibles" />
@@ -566,7 +641,14 @@ function PortafolioSidebar({
             </div>
           </section>
 
-          <FooterCTA theme={theme} title="Contáctame" subtitle="Estoy disponible para proyectos y colaboraciones." secondaryLabel="CV" />
+          <FooterCTA
+            theme={theme}
+            title="Contáctame"
+            subtitle="Estoy disponible para proyectos y colaboraciones."
+            secondaryLabel="CV"
+            onDescargarPDF={onDescargarPDF}
+            generandoPDF={generandoPDF}
+          />
         </main>
       </div>
     </div>
@@ -583,6 +665,8 @@ function PortafolioEditorial({
   habilidadesVisibles,
   academicaVisible,
   onOpenEnlaces,
+  onDescargarPDF,
+  generandoPDF,
 }: {
   data: PortafolioData;
   theme: Theme;
@@ -593,6 +677,8 @@ function PortafolioEditorial({
   habilidadesVisibles: Habilidad[];
   academicaVisible: ExperienciaAcademica[];
   onOpenEnlaces: () => void;
+  onDescargarPDF: () => void;
+  generandoPDF: boolean;
 }) {
   return (
     <div className={theme.page}>
@@ -666,15 +752,11 @@ function PortafolioEditorial({
           <SectionHeading title="Experiencia & stack" theme={theme} />
           <div className="mt-4 grid gap-8 lg:grid-cols-2">
             <div className={theme.card}>
-              <div className="space-y-4">
-                {experienceTimeline(experienciaVisible, theme)}
-              </div>
+              <div className="space-y-4">{experienceTimeline(experienciaVisible, theme)}</div>
             </div>
 
             <div className={theme.card}>
-              <div className="space-y-3">
-                {skillsEditorial(habilidadesVisibles, theme)}
-              </div>
+              <div className="space-y-3">{skillsEditorial(habilidadesVisibles, theme)}</div>
             </div>
           </div>
         </section>
@@ -683,12 +765,7 @@ function PortafolioEditorial({
           <SectionHeading title="Proyectos" theme={theme} />
           <div className="mt-4 space-y-4">
             {proyectosVisibles.slice(0, 4).map((proyecto, index) => (
-              <EditorialProjectRow
-                key={proyecto.id_proyecto}
-                proyecto={proyecto}
-                index={index + 1}
-                theme={theme}
-              />
+              <EditorialProjectRow key={proyecto.id_proyecto} proyecto={proyecto} index={index + 1} theme={theme} />
             ))}
             {proyectosVisibles.length === 0 && (
               <div className={theme.card}>
@@ -706,14 +783,10 @@ function PortafolioEditorial({
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             {academicaVisible.map((edu) => (
               <article key={edu.id_experiencia_academica} className={theme.card}>
-                <p className={`text-sm ${theme.accent}`}>
-                  {formatPeriod(edu.fecha_ini, edu.fecha_fin)}
-                </p>
+                <p className={`text-sm ${theme.accent}`}>{formatPeriod(edu.fecha_ini, edu.fecha_fin)}</p>
                 <h3 className="mt-2 text-xl font-bold text-slate-900">{edu.titulo}</h3>
                 <p className="text-slate-600">{edu.institucion}</p>
-                <p className={`mt-3 text-sm leading-6 ${theme.body}`}>
-                  {edu.descripcion}
-                </p>
+                <p className={`mt-3 text-sm leading-6 ${theme.body}`}>{edu.descripcion}</p>
               </article>
             ))}
             {academicaVisible.length === 0 && (
@@ -727,7 +800,14 @@ function PortafolioEditorial({
           </div>
         </section>
 
-        <FooterCTA theme={theme} title="Contáctame" subtitle="Estoy disponible para proyectos y colaboraciones." secondaryLabel="CV" />
+        <FooterCTA
+          theme={theme}
+          title="Contáctame"
+          subtitle="Estoy disponible para proyectos y colaboraciones."
+          secondaryLabel="CV"
+          onDescargarPDF={onDescargarPDF}
+          generandoPDF={generandoPDF}
+        />
       </div>
     </div>
   );
@@ -793,11 +873,7 @@ function BentoHero({
           </span>
         )}
 
-        <button
-          type="button"
-          onClick={onOpenEnlaces}
-          className={theme.linkChip}
-        >
+        <button type="button" onClick={onOpenEnlaces} className={theme.linkChip}>
           Enlaces públicos
         </button>
       </div>
@@ -849,12 +925,20 @@ function SectionHeading({
       <span className="h-3 w-3 rounded-full bg-blue-500" />
       <h2 className={theme.titleSmall}>{title}</h2>
       <div className={theme.sectionLine} />
-      {actionLabel && <span className={`text-sm font-medium ${theme.accent}`}>{actionLabel} →</span>}
+      {actionLabel && (
+        <span className={`text-sm font-medium ${theme.accent}`}>{actionLabel} →</span>
+      )}
     </div>
   );
 }
 
-function SidebarSectionTitle({ title, theme }: { title: string; theme: Theme }) {
+function SidebarSectionTitle({
+  title,
+  theme,
+}: {
+  title: string;
+  theme: Theme;
+}) {
   return (
     <div className="flex items-center gap-3">
       <span className={theme.sectionLine} />
@@ -947,13 +1031,20 @@ function SidebarProjectCard({
         </div>
 
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-lg font-bold text-slate-900">{proyecto.nombre}</h3>
-          <p className="mt-1 text-sm text-slate-600 line-clamp-3">{proyecto.descripcion}</p>
+          <h3 className="truncate text-lg font-bold text-slate-900">
+            {proyecto.nombre}
+          </h3>
+          <p className="mt-1 text-sm text-slate-600 line-clamp-3">
+            {proyecto.descripcion}
+          </p>
 
           {tags.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">
               {tags.map((tag) => (
-                <span key={tag} className="rounded-full bg-blue-50 px-2 py-1 text-xs text-blue-700">
+                <span
+                  key={tag}
+                  className="rounded-full bg-blue-50 px-2 py-1 text-xs text-blue-700"
+                >
                   {tag}
                 </span>
               ))}
@@ -990,12 +1081,18 @@ function EditorialProjectRow({
   return (
     <article className={`${theme.card} overflow-hidden`}>
       <div className="grid gap-5 lg:grid-cols-[auto_1fr_auto] lg:items-center">
-        <div className="text-sm font-semibold text-blue-600">{String(index).padStart(2, "0")}</div>
+        <div className="text-sm font-semibold text-blue-600">
+          {String(index).padStart(2, "0")}
+        </div>
 
         <div className="flex items-center gap-4">
           <div className="h-14 w-20 overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-200">
             {proyecto.imagen_url ? (
-              <img src={proyecto.imagen_url} alt={proyecto.nombre} className="h-full w-full object-cover" />
+              <img
+                src={proyecto.imagen_url}
+                alt={proyecto.nombre}
+                className="h-full w-full object-cover"
+              />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">
                 Preview
@@ -1004,12 +1101,19 @@ function EditorialProjectRow({
           </div>
 
           <div>
-            <h3 className="text-xl font-bold text-slate-900">{proyecto.nombre}</h3>
-            <p className={`mt-1 text-sm leading-6 ${theme.body}`}>{proyecto.descripcion}</p>
+            <h3 className="text-xl font-bold text-slate-900">
+              {proyecto.nombre}
+            </h3>
+            <p className={`mt-1 text-sm leading-6 ${theme.body}`}>
+              {proyecto.descripcion}
+            </p>
             {tags.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {tags.map((tag) => (
-                  <span key={tag} className="rounded-full bg-blue-50 px-3 py-1 text-xs text-blue-700">
+                  <span
+                    key={tag}
+                    className="rounded-full bg-blue-50 px-3 py-1 text-xs text-blue-700"
+                  >
                     {tag}
                   </span>
                 ))}
@@ -1038,7 +1142,9 @@ function EditorialProjectRow({
 function experienceCards(experiencias: ExperienciaLaboral[], theme: Theme) {
   return experiencias.slice(0, 2).map((exp) => (
     <article key={exp.id_experiencia} className={theme.card}>
-      <p className={`text-sm ${theme.accent}`}>{formatPeriod(exp.fecha_ini, exp.fecha_fin)}</p>
+      <p className={`text-sm ${theme.accent}`}>
+        {formatPeriod(exp.fecha_ini, exp.fecha_fin)}
+      </p>
       <h3 className="mt-2 text-xl font-bold text-slate-900">{exp.cargo}</h3>
       <p className="text-slate-600">{exp.empresa}</p>
       <p className={`mt-3 text-sm leading-6 ${theme.body}`}>{exp.descripcion}</p>
@@ -1050,7 +1156,9 @@ function experienceTimeline(experiencias: ExperienciaLaboral[], theme: Theme) {
   if (experiencias.length === 0) {
     return (
       <div className={theme.emptyCard}>
-        <p className="font-semibold text-slate-900">Sin experiencia laboral registrada</p>
+        <p className="font-semibold text-slate-900">
+          Sin experiencia laboral registrada
+        </p>
         <p className={`mt-2 leading-6 ${theme.body}`}>
           Cuando agregues experiencia desde el panel de gestión, aparecerá aquí.
         </p>
@@ -1059,25 +1167,40 @@ function experienceTimeline(experiencias: ExperienciaLaboral[], theme: Theme) {
   }
 
   return experiencias.slice(0, 2).map((exp) => (
-    <article key={exp.id_experiencia} className="rounded-2xl border border-slate-200 bg-white p-5">
+    <article
+      key={exp.id_experiencia}
+      className="rounded-2xl border border-slate-200 bg-white p-5"
+    >
       <div className="flex items-start gap-3">
         <span className="mt-2 h-2.5 w-2.5 rounded-full bg-blue-500" />
         <div>
-          <p className={`text-sm ${theme.accent}`}>{formatPeriod(exp.fecha_ini, exp.fecha_fin)}</p>
+          <p className={`text-sm ${theme.accent}`}>
+            {formatPeriod(exp.fecha_ini, exp.fecha_fin)}
+          </p>
           <h3 className="mt-1 text-lg font-bold text-slate-900">{exp.cargo}</h3>
           <p className="text-slate-600">{exp.empresa}</p>
-          <p className={`mt-2 text-sm leading-6 ${theme.body}`}>{exp.descripcion}</p>
+          <p className={`mt-2 text-sm leading-6 ${theme.body}`}>
+            {exp.descripcion}
+          </p>
         </div>
       </div>
     </article>
   ));
 }
 
-function SkillBars({ habilidades, theme }: { habilidades: Habilidad[]; theme: Theme }) {
+function SkillBars({
+  habilidades,
+  theme,
+}: {
+  habilidades: Habilidad[];
+  theme: Theme;
+}) {
   if (habilidades.length === 0) {
     return (
       <div className={theme.emptyCard}>
-        <p className="font-semibold text-slate-900">Sin habilidades registradas</p>
+        <p className="font-semibold text-slate-900">
+          Sin habilidades registradas
+        </p>
         <p className={`mt-2 leading-6 ${theme.body}`}>
           Aquí se mostrarán tus habilidades con barras de nivel.
         </p>
@@ -1109,7 +1232,9 @@ function skillsEditorial(habilidades: Habilidad[], theme: Theme) {
   if (habilidades.length === 0) {
     return (
       <div className={theme.emptyCard}>
-        <p className="font-semibold text-slate-900">Sin habilidades registradas</p>
+        <p className="font-semibold text-slate-900">
+          Sin habilidades registradas
+        </p>
         <p className={`mt-2 leading-6 ${theme.body}`}>
           Aquí se mostrarán tus habilidades con barras de nivel.
         </p>
@@ -1139,7 +1264,10 @@ function ChipCloud({ items }: { items: string[]; theme: Theme }) {
   return (
     <div className="flex flex-wrap gap-2">
       {items.map((item) => (
-        <span key={item} className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700">
+        <span
+          key={item}
+          className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700"
+        >
           {item}
         </span>
       ))}
@@ -1167,11 +1295,15 @@ function FooterCTA({
   title,
   subtitle,
   secondaryLabel,
+  onDescargarPDF,
+  generandoPDF,
 }: {
   theme: Theme;
   title: string;
   subtitle: string;
   secondaryLabel: string;
+  onDescargarPDF?: () => void;
+  generandoPDF?: boolean;
 }) {
   return (
     <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -1184,9 +1316,14 @@ function FooterCTA({
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <a href="#" className={theme.buttonGhost}>
-            {secondaryLabel}
-          </a>
+          <button
+            type="button"
+            onClick={onDescargarPDF}
+            disabled={generandoPDF}
+            className={theme.buttonGhost}
+          >
+            {generandoPDF ? "Generando PDF..." : secondaryLabel}
+          </button>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Search } from "lucide-react";
 import NuevoProyectoModal from "../Components/NuevoProyectoModal";
 import {
@@ -38,6 +39,8 @@ type Proyecto = {
 };
 
 function MisProyectos() {
+  const { t, i18n } = useTranslation();
+
   const [isOpen, setIsOpen] = useState(false);
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [proyectoEditando, setProyectoEditando] = useState<Proyecto | null>(null);
@@ -57,9 +60,12 @@ function MisProyectos() {
 
   const formatFecha = (fecha?: string | null) => {
     if (!fecha) return "-";
+
     const d = new Date(fecha);
+
     if (isNaN(d.getTime())) return fecha;
-    return new Intl.DateTimeFormat("es-BO", {
+
+    return new Intl.DateTimeFormat(i18n.language === "en" ? "en-US" : i18n.language === "fr" ? "fr-FR" : "es-BO", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -111,6 +117,7 @@ function MisProyectos() {
       const cargar = async () => {
         try {
           const idActual = sincronizarIdPortafolio();
+
           if (!idActual) {
             setProyectos([]);
             return;
@@ -175,13 +182,13 @@ function MisProyectos() {
       await recargarProyectos(idActual, buscar);
 
       setProyectoAEliminar(null);
-      setSuccessMessage("Proyecto eliminado correctamente.");
+      setSuccessMessage(t("projects.messages.deleted_success"));
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error: any) {
       console.error("Error eliminando proyecto:", error?.response?.data || error);
 
       setErrorMessage(
-        error?.response?.data?.message || "No se pudo eliminar el proyecto."
+        error?.response?.data?.message || t("projects.messages.delete_error")
       );
 
       setTimeout(() => setErrorMessage(""), 4000);
@@ -198,7 +205,7 @@ function MisProyectos() {
       const idPortafolioActual = sincronizarIdPortafolio();
 
       if (!idPortafolioActual) {
-        setErrorMessage("No se encontró el portafolio de la sesión actual.");
+        setErrorMessage(t("projects.messages.no_portfolio"));
         return;
       }
 
@@ -244,9 +251,7 @@ function MisProyectos() {
           await subirEvidencia(idProyectoGuardado, form.archivoPdf);
         } catch (error: any) {
           console.error("Error subiendo PDF:", error?.response?.data || error);
-          setErrorMessage(
-            "El proyecto se guardó, pero el PDF no se pudo subir."
-          );
+          setErrorMessage(t("projects.messages.pdf_upload_error"));
           setTimeout(() => setErrorMessage(""), 4000);
         }
       }
@@ -256,8 +261,8 @@ function MisProyectos() {
 
       setSuccessMessage(
         proyectoEditando
-          ? "Proyecto actualizado correctamente."
-          : "Proyecto guardado correctamente."
+          ? t("projects.messages.updated_success")
+          : t("projects.messages.saved_success")
       );
 
       setTimeout(() => setSuccessMessage(""), 3000);
@@ -265,8 +270,7 @@ function MisProyectos() {
       console.error("Error guardando proyecto:", error?.response?.data || error);
 
       setErrorMessage(
-        error?.response?.data?.message ||
-          "No se pudo guardar el proyecto. Revisa los datos."
+        error?.response?.data?.message || t("projects.messages.save_error")
       );
 
       setTimeout(() => setErrorMessage(""), 4000);
@@ -278,10 +282,11 @@ function MisProyectos() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold text-app-text sm:text-4xl">
-            Mis Proyectos
+            {t("projects.title")}
           </h1>
+
           <p className="mt-1 text-sm text-app-muted sm:text-base">
-            Gestiona y organiza tus proyectos de software
+            {t("projects.subtitle")}
           </p>
         </div>
 
@@ -292,7 +297,7 @@ function MisProyectos() {
           }}
           className="rounded-full bg-app-topbar px-6 py-2 text-sm font-semibold text-white hover:opacity-90"
         >
-          + Nuevo Proyecto
+          {t("projects.new_project")}
         </button>
       </div>
 
@@ -302,9 +307,10 @@ function MisProyectos() {
             type="text"
             value={buscar}
             onChange={(e) => setBuscar(e.target.value)}
-            placeholder="Buscar ..."
+            placeholder={t("projects.search")}
             className="w-full bg-transparent text-sm outline-none placeholder:text-app-muted"
           />
+
           <Search size={22} className="text-app-text" />
         </div>
       </div>
@@ -323,13 +329,12 @@ function MisProyectos() {
 
       <div className="mt-8 space-y-4">
         {proyectos.length === 0 ? (
-          <p className="text-gray-500">No tienes proyectos aún.</p>
+          <p className="text-gray-500">{t("projects.empty")}</p>
         ) : (
           proyectos.map((proyecto) => {
-            const tecnologiasParaMostrar =
-              proyecto.tecnologias?.length
-                ? proyecto.tecnologias.map((tec) => tec.nombre || "Tecnología")
-                : [];
+            const tecnologiasParaMostrar = proyecto.tecnologias?.length
+              ? proyecto.tecnologias.map((tec) => tec.nombre || t("projects.labels.technology"))
+              : [];
 
             const evidenciasPdf =
               proyecto.evidencias?.filter((ev) => ev.tipo === "pdf") ?? [];
@@ -348,7 +353,7 @@ function MisProyectos() {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <span>Captura o portada del proyecto</span>
+                      <span>{t("projects.card.cover_placeholder")}</span>
                     )}
                   </div>
 
@@ -358,7 +363,7 @@ function MisProyectos() {
                     </h3>
 
                     <p className="mt-2 text-sm leading-6 text-gray-500">
-                      {proyecto.descripcion || "Sin descripción"}
+                      {proyecto.descripcion || t("projects.card.no_description")}
                     </p>
 
                     <div className="mt-3 space-y-1 text-sm">
@@ -369,7 +374,7 @@ function MisProyectos() {
                           rel="noreferrer"
                           className="block font-medium text-blue-600 hover:underline"
                         >
-                          Link GitHub
+                          {t("projects.links.github")}
                         </a>
                       )}
 
@@ -380,16 +385,21 @@ function MisProyectos() {
                           rel="noreferrer"
                           className="block font-medium text-blue-600 hover:underline"
                         >
-                          Link Demo
+                          {t("projects.links.demo")}
                         </a>
                       )}
                     </div>
 
                     <div className="mt-3 flex flex-wrap gap-6 text-xs text-gray-400">
                       <span>
-                        Fecha de inicio: {formatFecha(proyecto.fecha_ini)}
+                        {t("projects.labels.start_date")}:{" "}
+                        {formatFecha(proyecto.fecha_ini)}
                       </span>
-                      <span>Fecha de fin: {formatFecha(proyecto.fecha_fin)}</span>
+
+                      <span>
+                        {t("projects.labels.end_date")}:{" "}
+                        {formatFecha(proyecto.fecha_fin)}
+                      </span>
                     </div>
 
                     {tecnologiasParaMostrar.length > 0 && (
@@ -408,7 +418,7 @@ function MisProyectos() {
                     {evidenciasPdf.length > 0 && (
                       <div className="mt-4">
                         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                          PDF adjunto
+                          {t("projects.labels.attached_pdf")}
                         </p>
 
                         <div className="flex flex-wrap gap-2">
@@ -420,7 +430,7 @@ function MisProyectos() {
                               rel="noreferrer"
                               className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-200"
                             >
-                              {ev.nombre_archivo || "Ver PDF"}
+                              {ev.nombre_archivo || t("projects.links.view_pdf")}
                             </a>
                           ))}
                         </div>
@@ -433,14 +443,14 @@ function MisProyectos() {
                       onClick={() => handleEditar(proyecto)}
                       className="rounded-full bg-blue-400 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500"
                     >
-                      Editar
+                      {t("projects.actions.edit")}
                     </button>
 
                     <button
                       onClick={() => solicitarEliminar(proyecto)}
                       className="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700"
                     >
-                      Eliminar
+                      {t("projects.actions.delete")}
                     </button>
                   </div>
                 </div>
@@ -481,12 +491,13 @@ function MisProyectos() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
             <h2 className="text-xl font-bold text-gray-900">
-              Eliminar proyecto
+              {t("projects.delete_modal.title")}
             </h2>
+
             <p className="mt-3 text-sm text-gray-600">
-              ¿Seguro que deseas eliminar{" "}
-              <span className="font-semibold">{proyectoAEliminar.nombre}</span>?{" "}
-              Esta acción no se puede deshacer.
+              {t("projects.delete_modal.description_before")}{" "}
+              <span className="font-semibold">{proyectoAEliminar.nombre}</span>
+              {t("projects.delete_modal.description_after")}
             </p>
 
             <div className="mt-6 flex items-center justify-end gap-3">
@@ -495,7 +506,7 @@ function MisProyectos() {
                 disabled={eliminando}
                 className="rounded-full bg-red-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Cancelar
+                {t("projects.actions.cancel")}
               </button>
 
               <button
@@ -503,7 +514,9 @@ function MisProyectos() {
                 disabled={eliminando}
                 className="rounded-full bg-gray-200 px-5 py-2 text-sm font-semibold text-gray-800 transition hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {eliminando ? "Eliminando..." : "Eliminar"}
+                {eliminando
+                  ? t("projects.actions.deleting")
+                  : t("projects.actions.delete")}
               </button>
             </div>
           </div>

@@ -718,7 +718,7 @@ const AdminUsuarios: React.FC = () => {
                   className="rounded-xl border border-app-border bg-white px-4 py-2 text-sm hover:bg-gray-50 transition"
                   onClick={() => cargarBitacora(1)}
                 >
-                  🔄 Aplicar
+                   Aplicar
                 </button>
               </div>
 

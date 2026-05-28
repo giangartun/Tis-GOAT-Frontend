@@ -13,6 +13,7 @@ import PerfilUsuario from "./Pages/perfilusuario";
 import PrivacidadPortafolio from "./Pages/PrivacidadPortafolio";
 import PerfilPublico from "./Pages/PerfilPublico";
 import AdminUsuarios from "./Pages/AdminUsuarios";
+import { ResetPassword } from "./Pages/RestablecerContraseña";
 
 function App() {
   return (
@@ -22,10 +23,12 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verificar-email/:token" element={<VerificarEmail />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Rutas con layout */}
         <Route element={<Layout />}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/home" element={<HomePage />} />
           <Route path="/mis-proyectos" element={<MisProyectosPage />} />
           <Route path="/perfil" element={<PerfilUsuario />} />
           <Route path="/privacidad" element={<PrivacidadPortafolio />} />

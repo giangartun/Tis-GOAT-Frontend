@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { calcularTodos } from '../Services/privacy';
 
 interface SeccionPrivacidadProps {
@@ -20,6 +21,8 @@ const SeccionPrivacidad: React.FC<SeccionPrivacidadProps> = ({
   onToggleSeccion,
   onToggleItem,
 }) => {
+  const { t } = useTranslation();
+
   const ids           = Object.keys(items);
   const sinItems      = ids.length === 0;
   const todosActivo   = sinItems ? false : calcularTodos(items);
@@ -60,8 +63,11 @@ const SeccionPrivacidad: React.FC<SeccionPrivacidadProps> = ({
             <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1923' }}>{titulo}</span>
             <span style={{ fontSize: '11.5px', color: '#8a96a3' }}>
               {sinItems
-                ? 'No hay elementos en esta sección'
-                : `${visiblesCount} de ${ids.length} visible${ids.length !== 1 ? 's' : ''}`}
+                ? t('privacySection.empty_section')
+                : t('privacySection.visible_count', {
+                    visible: visiblesCount,
+                    total: ids.length,
+                  })}
             </span>
           </div>
         </div>
@@ -73,7 +79,7 @@ const SeccionPrivacidad: React.FC<SeccionPrivacidadProps> = ({
               fontSize: '11px', padding: '3px 9px', borderRadius: '20px',
               fontWeight: 500, background: '#f1f3f6', color: '#8a96a3',
             }}>
-              Sin elementos
+              {t('privacySection.no_items')}
             </span>
           ) : (
             <>
@@ -82,13 +88,13 @@ const SeccionPrivacidad: React.FC<SeccionPrivacidadProps> = ({
                 background: todosActivo ? '#eaf3de' : '#f1f3f6',
                 color: todosActivo ? '#27500a' : '#8a96a3',
               }}>
-                {todosActivo ? 'Visible' : 'Oculto'}
+                {todosActivo ? t('privacySection.visible') : t('privacySection.hidden')}
               </span>
               <button
                 onClick={() => onToggleSeccion(!todosActivo)}
                 role="switch"
                 aria-checked={todosActivo}
-                aria-label={`Toggle general ${titulo}`}
+                aria-label={t('privacySection.toggle_general', { title: titulo })}
                 style={{
                   width: '40px', height: '22px', borderRadius: '11px', border: 'none',
                   cursor: 'pointer', position: 'relative', flexShrink: 0,
@@ -114,7 +120,7 @@ const SeccionPrivacidad: React.FC<SeccionPrivacidadProps> = ({
         <div style={{ borderTop: '0.5px solid #dde1e7' }}>
           {ids.map((id, i) => {
             const isOn   = items[id];
-            const nombre = nombres[id] ?? `Elemento ${i + 1}`;
+            const nombre = nombres[id] ?? t('privacySection.default_item', { number: i + 1 });
             return (
               <div
                 key={id}
@@ -147,13 +153,13 @@ const SeccionPrivacidad: React.FC<SeccionPrivacidadProps> = ({
                     background: isOn ? '#eaf3de' : '#f1f3f6',
                     color: isOn ? '#27500a' : '#8a96a3',
                   }}>
-                    {isOn ? 'Visible' : 'Oculto'}
+                    {isOn ? t('privacySection.visible') : t('privacySection.hidden')}
                   </span>
                   <button
                     onClick={() => onToggleItem(id, !isOn)}
                     role="switch"
                     aria-checked={isOn}
-                    aria-label={`Toggle ${nombre}`}
+                    aria-label={t('privacySection.toggle_item', { name: nombre })}
                     style={{
                       width: '34px', height: '18px', borderRadius: '9px', border: 'none',
                       cursor: 'pointer', position: 'relative', flexShrink: 0,

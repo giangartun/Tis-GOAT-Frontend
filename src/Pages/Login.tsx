@@ -97,7 +97,6 @@ export const Login: React.FC<LoginProps> = ({
 
         onLoginSuccess?.();
 
-        // Redirección según rol (admin/usuario)
         const tipoUsuario = data.tipo_usuario ?? data.usuario?.tipo_usuario ?? null;
         if (tipoUsuario === 'admin') {
           navigate('/admin/usuarios', { replace: true });
@@ -108,7 +107,6 @@ export const Login: React.FC<LoginProps> = ({
       }
 
       if (response.status === 403) {
-        // Cuenta suspendida
         setError(
           data.message ||
           'Tu cuenta ha sido suspendida. Contacta al administrador.'
@@ -169,44 +167,46 @@ export const Login: React.FC<LoginProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex">
-      <div className="w-1/2 bg-[#2E3A4D] flex flex-col justify-center items-center text-center text-white p-8">
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Panel izquierdo - ocupa toda la pantalla en móvil, 1/2 en desktop */}
+      <div className="w-full md:w-1/2 bg-[#2E3A4D] flex flex-col justify-center items-center text-center text-white p-6 sm:p-8">
         <div className="max-w-sm">
-          <h1 className="text-4xl font-bold mb-4">GOAT</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4">GOAT</h1>
 
-          <p className="text-xl mb-4">{t('login.left.title')}</p>
+          <p className="text-lg sm:text-xl mb-3 sm:mb-4">{t('login.left.title')}</p>
 
-          <div className="w-16 h-1 bg-white mx-auto mb-4" />
+          <div className="w-16 h-1 bg-white mx-auto mb-3 sm:mb-4" />
 
-          <p className="text-blue-100">{t('login.left.subtitle')}</p>
+          <p className="text-sm sm:text-base text-blue-100">{t('login.left.subtitle')}</p>
         </div>
       </div>
 
-      <div className="w-1/2 flex flex-col justify-center p-8 bg-gray-50">
+      {/* Panel derecho - ocupa toda la pantalla en móvil, 1/2 en desktop */}
+      <div className="w-full md:w-1/2 flex flex-col justify-center p-4 sm:p-8 bg-gray-50">
         <div className="max-w-md mx-auto w-full">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-800">
+          <div className="text-center mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
               {t('login.title')}
             </h2>
 
-            <p className="text-gray-500 text-sm mt-1">
+            <p className="text-gray-500 text-xs sm:text-sm mt-1">
               {t('login.subtitle')}
             </p>
           </div>
 
           {infoMessage && (
-            <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4 text-sm">
+            <div className="bg-blue-100 border border-blue-400 text-blue-700 px-3 sm:px-4 py-2 sm:py-3 rounded mb-3 sm:mb-4 text-xs sm:text-sm">
               {infoMessage}
             </div>
           )}
 
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded mb-3 sm:mb-4 text-xs sm:text-sm">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             <div>
               <label className="block text-sm text-gray-700 mb-1">
                 {t('login.email')}
@@ -218,7 +218,7 @@ export const Login: React.FC<LoginProps> = ({
                 value={credentials.email}
                 onChange={handleChange}
                 placeholder={t('login.placeholders.email')}
-                className="w-full px-4 py-2 rounded-md border border-gray-300 bg-[#E5E5E5] text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 sm:px-4 py-2 rounded-md border border-gray-300 bg-[#E5E5E5] text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 required
               />
 
@@ -239,13 +239,13 @@ export const Login: React.FC<LoginProps> = ({
                   value={credentials.contrasena}
                   onChange={handleChange}
                   placeholder={t('login.placeholders.password')}
-                  className="w-full px-4 py-2 pr-10 rounded-md border border-gray-300 bg-[#E5E5E5] text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 sm:px-4 py-2 pr-8 sm:pr-10 rounded-md border border-gray-300 bg-[#E5E5E5] text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3 top-2.5"
+                  className="absolute right-2 sm:right-3 top-2.5 text-gray-500"
                 >
                   👁
                 </button>
@@ -262,15 +262,15 @@ export const Login: React.FC<LoginProps> = ({
               <button
                 type="button"
                 onClick={() => setShowRecovery((prev) => !prev)}
-                className="text-sm text-blue-600 hover:underline"
+                className="text-xs sm:text-sm text-blue-600 hover:underline"
               >
                 {t('login.forgot_password')}
               </button>
             </div>
 
             {showRecovery && (
-              <div className="border border-gray-300 rounded-md p-4 bg-white space-y-3">
-                <h3 className="text-sm font-semibold text-gray-700">
+              <div className="border border-gray-300 rounded-md p-3 sm:p-4 bg-white space-y-3">
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-700">
                   {t('login.recovery.title')}
                 </h3>
 
@@ -279,13 +279,13 @@ export const Login: React.FC<LoginProps> = ({
                 </p>
 
                 {recoveryMessage && (
-                  <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded text-sm">
+                  <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded text-xs sm:text-sm">
                     {recoveryMessage}
                   </div>
                 )}
 
                 {recoveryError && (
-                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-sm">
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-xs sm:text-sm">
                     {recoveryError}
                   </div>
                 )}
@@ -295,16 +295,16 @@ export const Login: React.FC<LoginProps> = ({
                   value={recoveryEmail}
                   onChange={(e) => setRecoveryEmail(e.target.value)}
                   placeholder={t('login.recovery.placeholder')}
-                  className="w-full px-4 py-2 rounded-md border border-gray-300 bg-[#E5E5E5] text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 sm:px-4 py-2 rounded-md border border-gray-300 bg-[#E5E5E5] text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                   required
                 />
 
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <button
                     type="button"
                     onClick={handleRecoverySubmit}
                     disabled={recoveryLoading}
-                    className="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition font-medium disabled:opacity-50"
+                    className="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition font-medium disabled:opacity-50 text-sm"
                   >
                     {recoveryLoading
                       ? t('login.recovery.sending')
@@ -314,7 +314,7 @@ export const Login: React.FC<LoginProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowRecovery(false)}
-                    className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-md hover:bg-gray-300 transition font-medium"
+                    className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-md hover:bg-gray-300 transition font-medium text-sm"
                   >
                     {t('login.recovery.cancel')}
                   </button>
@@ -325,16 +325,16 @@ export const Login: React.FC<LoginProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition font-medium disabled:opacity-50"
+              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition font-medium disabled:opacity-50 text-sm sm:text-base"
             >
               {loading ? t('login.loading') : t('login.button')}
             </button>
           </form>
 
-          <div className="text-center mt-6">
+          <div className="text-center mt-4 sm:mt-6">
             <button
               onClick={handleSwitchToRegister}
-              className="text-sm text-blue-600 hover:underline"
+              className="text-xs sm:text-sm text-blue-600 hover:underline"
             >
               {t('login.register_link')}
             </button>

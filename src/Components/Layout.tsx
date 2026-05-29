@@ -13,6 +13,8 @@ import {
   ChevronDown,
   Check,
 } from "lucide-react";
+import { getAnuncios } from "../Services/admin";
+import type { Anuncio } from "../Services/admin";
 
 interface Usuario {
   nombre?: string;
@@ -130,14 +132,33 @@ function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const esHome = location.pathname === "/" || location.pathname === "/home";
   const esPerfil = location.pathname === "/perfil";
 
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loadingLogout, setLoadingLogout] = useState(false);
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const [anuncios, setAnuncios] = useState<Anuncio[]>([]);
+  const [loadingAnuncios, setLoadingAnuncios] = useState(false);
 
   useEffect(() => {
     setUsuario(obtenerUsuario());
+  }, []);
+
+  const cargarAnuncios = async () => {
+    setLoadingAnuncios(true);
+    try {
+      const res = await getAnuncios();
+      setAnuncios(res.anuncios);
+    } catch (error) {
+      console.error("Error al cargar anuncios:", error);
+    } finally {
+      setLoadingAnuncios(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarAnuncios();
   }, []);
 
   const nombreCompleto = usuario
@@ -301,11 +322,17 @@ function Layout() {
         </div>
       </nav>
 
+      {/* MAIN - Grid dinámico según la página */}
       <main
         className={`min-h-[calc(100vh-180px)] ${
-          esPerfil ? "flex flex-col" : "lg:grid lg:grid-cols-[88px_1fr_360px]"
+          esPerfil 
+            ? "flex flex-col" 
+            : esHome 
+              ? "lg:grid lg:grid-cols-[88px_1fr_360px]"  // Home: 3 columnas
+              : "lg:grid lg:grid-cols-[88px_1fr]"        // Otras páginas: 2 columnas
         }`}
       >
+        {/* Sidebar izquierdo - se muestra en todas las páginas excepto /perfil */}
         {!esPerfil && (
           <aside className="hidden border-r border-app-border bg-app-sidebar py-6 text-white lg:flex lg:flex-col lg:items-center lg:gap-6">
             <button
@@ -347,7 +374,8 @@ function Layout() {
           <Outlet />
         </section>
 
-        {!esPerfil && (
+        {/* Sección de anuncios - SOLO en el Home */}
+        {esHome && (
           <aside className="hidden border-l border-app-border bg-app-surface px-5 py-6 lg:block">
             <div className="rounded-2xl border border-app-border bg-white p-4">
               <div className="mb-4 flex items-center justify-between">
@@ -355,20 +383,57 @@ function Layout() {
                   {t("layout.notifications.title")}
                 </h3>
 
-                <a href="#" className="text-xs text-app-muted hover:text-app-text">
-                  {t("layout.notifications.view_all")}
-                </a>
+                {anuncios.length > 0 && (
+                  <Link to="/anuncios" className="text-xs text-app-muted hover:text-app-text">
+                    {t("layout.notifications.view_all")}
+                  </Link>
+                )}
               </div>
 
-              <div className="h-40 rounded-xl bg-app-card" />
-
-              <h4 className="mt-4 text-base font-semibold">
-                {t("layout.notifications.article_title")}
-              </h4>
-
-              <p className="mt-2 text-sm text-app-muted">
-                {t("layout.notifications.article_description")}
-              </p>
+              {loadingAnuncios ? (
+                <div className="space-y-3">
+                  <div className="h-32 rounded-xl bg-gray-100 animate-pulse" />
+                  <div className="h-4 bg-gray-100 rounded w-3/4 animate-pulse" />
+                  <div className="h-3 bg-gray-100 rounded w-full animate-pulse" />
+                </div>
+              ) : anuncios.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-sm text-gray-400">No hay anuncios disponibles</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {anuncios.slice(0, 3).map((anuncio) => (
+                    <a
+                      key={anuncio.id_anuncio}
+                      href={anuncio.url_redireccion}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block group"
+                    >
+                      {anuncio.foto_url && (
+                        <div className="h-32 rounded-xl overflow-hidden mb-2">
+                          <img
+                            src={anuncio.foto_url}
+                            alt={anuncio.titulo}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                      )}
+                      <h4 className="font-semibold text-app-text group-hover:text-blue-600 transition">
+                        {anuncio.titulo}
+                      </h4>
+                      {anuncio.descripcion && (
+                        <p className="mt-1 text-sm text-app-muted line-clamp-2">
+                          {anuncio.descripcion}
+                        </p>
+                      )}
+                      <span className="inline-block mt-2 text-xs text-blue-500 group-hover:underline">
+                        {t("layout.notifications.read_more")}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           </aside>
         )}

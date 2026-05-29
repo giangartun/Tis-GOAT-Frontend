@@ -186,222 +186,214 @@ export const Register: React.FC<RegisterProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="w-full h-screen flex">
-        <div className="w-1/2 bg-[#2E3A4D] p-8 flex flex-col justify-center items-center text-center text-white">
-          <div className="max-w-sm">
-            <h1 className="text-4xl font-bold mb-4">GOAT</h1>
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Panel izquierdo - ocupa toda la pantalla en móvil, 1/2 en desktop */}
+      <div className="w-full md:w-1/2 bg-[#2E3A4D] p-6 sm:p-8 flex flex-col justify-center items-center text-center text-white">
+        <div className="max-w-sm">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4">GOAT</h1>
 
-            <p className="text-xl mb-4">{t('register.left.title')}</p>
+          <p className="text-lg sm:text-xl mb-3 sm:mb-4">{t('register.left.title')}</p>
 
-            <div className="w-16 h-1 bg-white mx-auto mb-4"></div>
+          <div className="w-16 h-1 bg-white mx-auto mb-3 sm:mb-4"></div>
 
-            <p className="text-blue-100">{t('register.left.subtitle')}</p>
-          </div>
+          <p className="text-sm sm:text-base text-blue-100">{t('register.left.subtitle')}</p>
         </div>
+      </div>
 
-        <div className="w-1/2 flex flex-col justify-center overflow-y-auto py-6">
-          <div className="max-w-md mx-auto w-full px-6">
-            <div className="text-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-800">
-                {t('register.title')}
-              </h2>
+      {/* Panel derecho - ocupa toda la pantalla en móvil, 1/2 en desktop */}
+      <div className="w-full md:w-1/2 flex flex-col justify-center overflow-y-auto py-4 sm:py-6">
+        <div className="max-w-md mx-auto w-full px-4 sm:px-6">
+          <div className="text-center mb-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+              {t('register.title')}
+            </h2>
 
-              <p className="text-gray-500 text-sm mt-1">
-                {t('register.subtitle')}
-              </p>
+            <p className="text-gray-500 text-xs sm:text-sm mt-1">
+              {t('register.subtitle')}
+            </p>
+          </div>
+
+          {message && (
+            <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded mb-3 text-xs sm:text-sm">
+              {message}
+
+              <div className="text-xs mt-1 text-green-600">
+                {t('register.redirecting')}
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-3 text-xs sm:text-sm">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="text-left">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                {t('register.fields.name')} *
+              </label>
+
+              <input
+                type="text"
+                name="nombre"
+                value={formData.nombre}
+                onChange={handleChange}
+                placeholder={t('register.placeholders.name')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
+                required
+              />
+
+              {errors.nombre && (
+                <p className="text-red-500 text-xs mt-1">{errors.nombre}</p>
+              )}
             </div>
 
-            {message && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded mb-3 text-sm">
-                {message}
+            <div className="text-left">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                {t('register.fields.last_name')} *
+              </label>
 
-                <div className="text-xs mt-1 text-green-600">
-                  {t('register.redirecting')}
-                </div>
-              </div>
-            )}
+              <input
+                type="text"
+                name="apellido_paterno"
+                value={formData.apellido_paterno}
+                onChange={handleChange}
+                placeholder={t('register.placeholders.last_name')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
+                required
+              />
 
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-3 text-sm">
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('register.fields.name')} *
-                </label>
-
-                <input
-                  type="text"
-                  name="nombre"
-                  value={formData.nombre}
-                  onChange={handleChange}
-                  placeholder={t('register.placeholders.name')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
-                  required
-                />
-
-                {errors.nombre && (
-                  <p className="text-red-500 text-xs mt-1">{errors.nombre}</p>
-                )}
-              </div>
-
-              <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('register.fields.last_name')} *
-                </label>
-
-                <input
-                  type="text"
-                  name="apellido_paterno"
-                  value={formData.apellido_paterno}
-                  onChange={handleChange}
-                  placeholder={t('register.placeholders.last_name')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
-                  required
-                />
-
-                {errors.apellido_paterno && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.apellido_paterno}
-                  </p>
-                )}
-              </div>
-
-              <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('register.fields.second_last_name')} *
-                </label>
-
-                <input
-                  type="text"
-                  name="apellido_materno"
-                  value={formData.apellido_materno}
-                  onChange={handleChange}
-                  placeholder={t('register.placeholders.second_last_name')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
-                  required
-                />
-
-                {errors.apellido_materno && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.apellido_materno}
-                  </p>
-                )}
-              </div>
-
-              <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('register.fields.email')} *
-                </label>
-
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder={t('register.placeholders.email')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
-                  required
-                />
-
-                {errors.email && (
-                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                )}
-              </div>
-
-              <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('register.fields.password')} *
-                </label>
-
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="contrasena"
-                    value={formData.contrasena}
-                    onChange={handleChange}
-                    placeholder={t('register.placeholders.password')}
-                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
-                    required
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5"
-                  >
-                    👁
-                  </button>
-                </div>
-
-                {errors.contrasena && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.contrasena}
-                  </p>
-                )}
-              </div>
-
-              <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('register.fields.confirm_password')} *
-                </label>
-
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    name="contrasena_confirmation"
-                    value={formData.contrasena_confirmation}
-                    onChange={handleChange}
-                    placeholder={t('register.placeholders.confirm_password')}
-                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
-                    required
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowConfirmPassword(!showConfirmPassword)
-                    }
-                    className="absolute right-3 top-2.5"
-                  >
-                    👁
-                  </button>
-                </div>
-
-                {errors.contrasena_confirmation && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.contrasena_confirmation}
-                  </p>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition font-medium disabled:opacity-50"
-              >
-                {loading ? t('register.loading') : t('register.button')}
-              </button>
-            </form>
-
-            <div className="text-center mt-4">
-              <button
-                onClick={handleSwitchToLogin}
-                className="text-sm text-blue-600 hover:underline"
-              >
-                {t('register.login_link')}
-              </button>
+              {errors.apellido_paterno && (
+                <p className="text-red-500 text-xs mt-1">{errors.apellido_paterno}</p>
+              )}
             </div>
+
+            <div className="text-left">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                {t('register.fields.second_last_name')} *
+              </label>
+
+              <input
+                type="text"
+                name="apellido_materno"
+                value={formData.apellido_materno}
+                onChange={handleChange}
+                placeholder={t('register.placeholders.second_last_name')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
+                required
+              />
+
+              {errors.apellido_materno && (
+                <p className="text-red-500 text-xs mt-1">{errors.apellido_materno}</p>
+              )}
+            </div>
+
+            <div className="text-left">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                {t('register.fields.email')} *
+              </label>
+
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder={t('register.placeholders.email')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
+                required
+              />
+
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+              )}
+            </div>
+
+            <div className="text-left">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                {t('register.fields.password')} *
+              </label>
+
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="contrasena"
+                  value={formData.contrasena}
+                  onChange={handleChange}
+                  placeholder={t('register.placeholders.password')}
+                  className="w-full px-3 py-2 pr-8 sm:pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
+                  required
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 sm:right-3 top-2.5 text-gray-500"
+                >
+                  👁
+                </button>
+              </div>
+
+              {errors.contrasena && (
+                <p className="text-red-500 text-xs mt-1">{errors.contrasena}</p>
+              )}
+            </div>
+
+            <div className="text-left">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                {t('register.fields.confirm_password')} *
+              </label>
+
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="contrasena_confirmation"
+                  value={formData.contrasena_confirmation}
+                  onChange={handleChange}
+                  placeholder={t('register.placeholders.confirm_password')}
+                  className="w-full px-3 py-2 pr-8 sm:pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  style={{ backgroundColor: '#D9D9D9', color: '#837B7B' }}
+                  required
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-2 sm:right-3 top-2.5 text-gray-500"
+                >
+                  👁
+                </button>
+              </div>
+
+              {errors.contrasena_confirmation && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.contrasena_confirmation}
+                </p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition font-medium disabled:opacity-50 text-sm sm:text-base"
+            >
+              {loading ? t('register.loading') : t('register.button')}
+            </button>
+          </form>
+
+          <div className="text-center mt-4">
+            <button
+              onClick={handleSwitchToLogin}
+              className="text-xs sm:text-sm text-blue-600 hover:underline"
+            >
+              {t('register.login_link')}
+            </button>
           </div>
         </div>
       </div>

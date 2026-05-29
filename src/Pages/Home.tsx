@@ -54,6 +54,10 @@ const PALABRAS_CLAVE_POR_AREA: Record<AreaProfesional, string[]> = {
   "Bases de Datos": ["bases de datos", "base de datos", "database", "sql", "mysql", "postgresql", "postgres", "mongodb", "oracle", "sqlite", "sql server"],
 };
 
+const API_BASE =
+  (import.meta as any)?.env?.VITE_API_URL?.replace(/\/$/, "") ||
+  "http://127.0.0.1:8000";
+
 const normalizarTexto = (texto: string | number | null | undefined) => {
   return String(texto ?? "")
     .normalize("NFD")
@@ -109,7 +113,7 @@ function Home() {
   const [cantidadVisible, setCantidadVisible] = useState(5);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/portafolios/publicos", {
+    fetch(`${API_BASE}/api/portafolios/publicos`, {
       headers: {
         Accept: "application/json",
       },

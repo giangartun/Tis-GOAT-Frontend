@@ -4,7 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 
-const API_URL = "http://localhost:8000";
+const API_URL =
+  (import.meta as any)?.env?.VITE_API_URL?.replace(/\/$/, "") ||
+  "http://127.0.0.1:8000";
 
 interface Plantilla {
   id_plantilla: string;

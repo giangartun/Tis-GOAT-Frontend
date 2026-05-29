@@ -56,6 +56,13 @@ function ExperienciaLaboralModal({
   });
 
   const maxBytes = useMemo(() => MAX_FILE_SIZE_MB * 1024 * 1024, []);
+  const today = useMemo(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }, []);
 
   useEffect(() => {
     if (abierto) setError(null);
@@ -152,11 +159,11 @@ function ExperienciaLaboralModal({
     if (!form.empresa.trim()) return setError("La empresa es obligatoria."), false;
     if (!form.cargo.trim()) return setError("El cargo es obligatorio."), false;
     if (!form.descripcion.trim()) return setError("La descripción es obligatoria."), false;
-    if (form.descripcion.trim().length > 1000) {
+    if (form.descripcion.trim().length > MAX_DESC) {
       setError("La descripción no debe superar los 1000 caracteres.");
       return false;
     }
-
+    if (!form.fecha_ini) return setError("La fecha de inicio es obligatoria."), false;
     if (!sigueActivo && !form.fecha_fin) {
       setError("La fecha fin es obligatoria o puedes dejarla vacía si sigue activo.");
       return false;
@@ -198,7 +205,7 @@ function ExperienciaLaboralModal({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto bg-black/55 px-3 py-3 backdrop-blur-sm"
+      className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto bg-black/55 px-2 py-2 backdrop-blur-sm sm:px-3 sm:py-3"
       onClick={onCerrar}
     >
       <div
@@ -206,33 +213,35 @@ function ExperienciaLaboralModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="experiencia-laboral-title"
-        className="my-auto w-full max-w-[820px] overflow-hidden rounded-[18px] bg-white shadow-2xl max-h-[calc(100vh-1.5rem)]"
+        className="my-auto w-full max-w-[96vw] overflow-hidden rounded-[16px] bg-white shadow-2xl max-h-[calc(100vh-1rem)] sm:max-w-[820px] sm:rounded-[18px]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between bg-[#203A63] px-4 py-3.5 sm:px-5">
-          <div className="flex items-center gap-3 text-white">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10">
-              <FileText size={17} />
+        <div className="sticky top-0 z-10 flex items-center justify-between bg-[#203A63] px-3 py-3 sm:px-4 sm:py-3.5">
+          <div className="flex items-center gap-2.5 text-white sm:gap-3">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/10 sm:h-9 sm:w-9">
+              <FileText size={16} />
             </span>
-            <h3 className="text-[17px] font-bold sm:text-[18px]">Registrar experiencia laboral</h3>
+            <h3 className="text-[15px] font-bold sm:text-[17px]">
+              {t("workExperience.title")}
+            </h3>
           </div>
 
           <button
             type="button"
             onClick={onCerrar}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white transition hover:bg-white/20 sm:h-10 sm:w-10"
             aria-label={t("workExperience.actions.close_modal")}
           >
-            <X size={18} />
+            <X size={17} />
           </button>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="max-h-[calc(100vh-6rem)] overflow-y-auto px-4 py-4 sm:px-5 sm:py-5"
+          className="max-h-[calc(100vh-5.5rem)] overflow-y-auto px-3 py-3 sm:px-4 sm:py-4"
         >
           <div className="mb-3 flex items-center gap-3">
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold tracking-[0.16em] text-slate-400 uppercase sm:px-3 sm:text-[11px]">
               {t("workExperience.sections.company")}
             </span>
 
@@ -241,7 +250,7 @@ function ExperienciaLaboralModal({
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
+              <label className="mb-1 block text-[11px] font-extrabold uppercase tracking-wide text-slate-600 sm:text-[12px]">
                 {t("workExperience.fields.company")}
               </label>
 
@@ -250,12 +259,12 @@ function ExperienciaLaboralModal({
                 value={form.empresa}
                 onChange={handleChange}
                 placeholder={t("workExperience.placeholders.company")}
-                className="h-10 w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 text-[15px] text-white outline-none placeholder:text-white/70 focus:border-slate-900"
+                className="h-9 w-full rounded-[12px] border border-slate-300 bg-slate-50 px-3 text-[13px] text-black outline-none placeholder:text-slate-400 focus:border-slate-400 sm:h-10 sm:text-[14px]"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
+              <label className="mb-1 block text-[11px] font-extrabold uppercase tracking-wide text-slate-600 sm:text-[12px]">
                 {t("workExperience.fields.position")}
               </label>
 
@@ -264,13 +273,13 @@ function ExperienciaLaboralModal({
                 value={form.cargo}
                 onChange={handleChange}
                 placeholder={t("workExperience.placeholders.position")}
-                className="h-10 w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 text-[15px] text-white outline-none placeholder:text-white/70 focus:border-slate-900"
+                className="h-9 w-full rounded-[12px] border border-slate-300 bg-slate-50 px-3 text-[13px] text-black outline-none placeholder:text-slate-400 focus:border-slate-400 sm:h-10 sm:text-[14px]"
               />
             </div>
           </div>
 
-          <div className="mt-4">
-            <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
+          <div className="mt-3 sm:mt-4">
+            <label className="mb-1 block text-[11px] font-extrabold uppercase tracking-wide text-slate-600 sm:text-[12px]">
               {t("workExperience.fields.description")}
             </label>
 
@@ -278,17 +287,17 @@ function ExperienciaLaboralModal({
               name="descripcion"
               value={form.descripcion}
               onChange={handleChange}
-              rows={2}
+              rows={3}
               placeholder="Describe tus responsabilidades, tecnologías usadas o logros..."
-              className="w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 py-2.5 text-[15px] text-white outline-none placeholder:text-white/70 focus:border-slate-900"
+              className="w-full rounded-[12px] border border-slate-300 bg-slate-50 px-3 py-2 text-[13px] text-black outline-none placeholder:text-slate-400 focus:border-slate-400 sm:text-[14px]"
             />
-            <p className="mt-1 text-right text-[11px] text-slate-400">
+            <p className="mt-1 text-right text-[10px] text-slate-400 sm:text-[11px]">
               {form.descripcion.length}/{MAX_DESC} caracteres
             </p>
           </div>
 
-          <div className="mt-4 mb-3 flex items-center gap-3">
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
+          <div className="mt-3 mb-3 flex items-center gap-3 sm:mt-4">
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold tracking-[0.16em] text-slate-400 uppercase sm:px-3 sm:text-[11px]">
               {t("workExperience.sections.period")}
             </span>
 
@@ -297,7 +306,7 @@ function ExperienciaLaboralModal({
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
+              <label className="mb-1 block text-[11px] font-extrabold uppercase tracking-wide text-slate-600 sm:text-[12px]">
                 {t("workExperience.fields.start_date")}
               </label>
 
@@ -307,18 +316,19 @@ function ExperienciaLaboralModal({
                   name="fecha_ini"
                   value={form.fecha_ini}
                   onChange={handleChange}
-                  className="h-10 w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 pr-10 text-[15px] text-white outline-none focus:border-slate-900"
+                  max={today}
+                  className="h-9 w-full rounded-[12px] border border-slate-300 bg-slate-50 px-3 pr-9 text-[13px] text-black outline-none focus:border-slate-400 sm:h-10 sm:text-[14px]"
                 />
 
                 <CalendarDays
-                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/80"
-                  size={15}
+                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"
+                  size={14}
                 />
               </div>
             </div>
 
             <div>
-              <label className="mb-1 block text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
+              <label className="mb-1 block text-[11px] font-extrabold uppercase tracking-wide text-slate-600 sm:text-[12px]">
                 {t("workExperience.fields.end_date")}
               </label>
 
@@ -329,20 +339,23 @@ function ExperienciaLaboralModal({
                   value={form.fecha_fin}
                   onChange={handleChange}
                   disabled={sigueActivo}
-                  className="h-10 w-full rounded-[12px] border border-slate-300 bg-slate-800 px-3.5 pr-10 text-[15px] text-white outline-none disabled:opacity-60 focus:border-slate-900"
+                  max={today}
+                  className="h-9 w-full rounded-[12px] border border-slate-300 bg-slate-50 px-3 pr-9 text-[13px] text-black outline-none disabled:opacity-60 focus:border-slate-400 sm:h-10 sm:text-[14px]"
                 />
 
                 <CalendarDays
-                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/80"
-                  size={15}
+                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"
+                  size={14}
                 />
               </div>
-              <p className="mt-1 text-[11px] text-slate-400">Dejar vacío si sigue activo</p>
+              <p className="mt-1 text-[10px] text-slate-400 sm:text-[11px]">
+                Dejar vacío si sigue activo
+              </p>
             </div>
           </div>
 
-          <div className="mt-4 mb-3 flex items-center gap-3">
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
+          <div className="mt-3 mb-3 flex items-center gap-3 sm:mt-4">
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold tracking-[0.16em] text-slate-400 uppercase sm:px-3 sm:text-[11px]">
               {t("workExperience.sections.documents")}
             </span>
 
@@ -363,20 +376,20 @@ function ExperienciaLaboralModal({
                 agregarArchivos(e.dataTransfer.files);
               }
             }}
-            className={`rounded-[14px] border-2 border-dashed bg-[#F8FBFF] px-4 py-4 text-center transition ${
+            className={`rounded-[14px] border-2 border-dashed bg-[#F8FBFF] px-3 py-4 text-center transition sm:px-4 ${
               dragActive ? "border-[#203A63] bg-blue-50" : "border-slate-300"
             }`}
           >
             <div className="mx-auto flex max-w-md flex-col items-center">
-              <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-500">
-                <Upload size={17} />
+              <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-500 sm:h-9 sm:w-9">
+                <Upload size={16} />
               </div>
 
-              <p className="text-[14px] font-extrabold text-[#1E5AA8]">
+              <p className="text-[13px] font-extrabold text-[#1E5AA8] sm:text-[14px]">
                 {t("workExperience.upload.title")}
               </p>
 
-              <p className="mt-1 text-[11px] text-slate-500">
+              <p className="mt-1 text-[10px] text-slate-500 sm:text-[11px]">
                 {t("workExperience.upload.subtitle", {
                   size: MAX_FILE_SIZE_MB,
                 })}
@@ -397,9 +410,9 @@ function ExperienciaLaboralModal({
               <button
                 type="button"
                 onClick={() => inputRef.current?.click()}
-                className="mt-2.5 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-500 shadow-sm transition hover:border-slate-300 hover:text-slate-700"
+                className="mt-2.5 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[12px] font-semibold text-slate-500 shadow-sm transition hover:border-slate-300 hover:text-slate-700 sm:px-4 sm:py-2.5 sm:text-[13px]"
               >
-                <Plus size={15} />
+                <Plus size={14} />
                 {t("workExperience.actions.browse_files")}
               </button>
 
@@ -411,11 +424,11 @@ function ExperienciaLaboralModal({
                       className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2"
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-[13px] font-semibold text-slate-700">
+                        <p className="truncate text-[12px] font-semibold text-slate-700 sm:text-[13px]">
                           {file.name}
                         </p>
 
-                        <p className="text-[11px] text-slate-400">
+                        <p className="text-[10px] text-slate-400 sm:text-[11px]">
                           {(file.size / 1024 / 1024).toFixed(2)} MB
                         </p>
                       </div>
@@ -428,7 +441,7 @@ function ExperienciaLaboralModal({
                           fileName: file.name,
                         })}
                       >
-                        <X size={14} />
+                        <X size={13} />
                       </button>
                     </div>
                   ))}
@@ -438,7 +451,7 @@ function ExperienciaLaboralModal({
           </div>
 
           {error && (
-            <div className="mt-3 rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-700">
+            <div className="mt-3 rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700 sm:text-[13px]">
               {error}
             </div>
           )}
@@ -447,7 +460,7 @@ function ExperienciaLaboralModal({
             <button
               type="button"
               onClick={onCerrar}
-              className="rounded-xl border border-slate-200 px-5 py-2 text-[13px] font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-700"
+              className="rounded-xl border border-slate-200 px-4 py-2 text-[12px] font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-700 sm:px-5 sm:text-[13px]"
             >
               {t("workExperience.actions.cancel")}
             </button>
@@ -455,9 +468,9 @@ function ExperienciaLaboralModal({
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#203A63] px-5 py-2 text-[13px] font-semibold text-white transition hover:bg-[#182d4b] disabled:cursor-not-allowed disabled:opacity-70"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#203A63] px-4 py-2 text-[12px] font-semibold text-white transition hover:bg-[#182d4b] disabled:cursor-not-allowed disabled:opacity-70 sm:px-5 sm:text-[13px]"
             >
-              <Plus size={15} />
+              <Plus size={14} />
               {loading
                 ? t("workExperience.actions.saving")
                 : t("workExperience.actions.save")}

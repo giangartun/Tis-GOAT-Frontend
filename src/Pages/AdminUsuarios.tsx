@@ -139,6 +139,7 @@ const AdminUsuarios: React.FC = () => {
   const [formAnuncio, setFormAnuncio] = useState({ titulo: '', descripcion: '', url_redireccion: '' });
   const [fotoAnuncio, setFotoAnuncio] = useState<File | null>(null);
   const [previewFoto, setPreviewFoto] = useState<string | null>(null);
+  const [fotoEliminada, setFotoEliminada] = useState(false);
 
   const showToast = (msg: string, type: 'success' | 'error') => {
     setToast({ msg, type });
@@ -342,6 +343,7 @@ const AdminUsuarios: React.FC = () => {
     setFormAnuncio({ titulo: '', descripcion: '', url_redireccion: '' });
     setFotoAnuncio(null);
     setPreviewFoto(null);
+    setFotoEliminada(false);
   };
 
   const abrirNuevoAnuncio = () => {
@@ -353,6 +355,7 @@ const AdminUsuarios: React.FC = () => {
     setFormAnuncio({ titulo: item.titulo, descripcion: item.descripcion ?? '', url_redireccion: item.url_redireccion });
     setPreviewFoto(item.foto_url);
     setFotoAnuncio(null);
+    setFotoEliminada(false);
     setModal({ tipo: 'editar-anuncio', item });
   };
 
@@ -370,9 +373,13 @@ const AdminUsuarios: React.FC = () => {
     try {
       const fd = new FormData();
       fd.append('titulo', formAnuncio.titulo);
-      if (formAnuncio.descripcion) fd.append('descripcion', formAnuncio.descripcion);
+      fd.append('descripcion', formAnuncio.descripcion ?? '');
       fd.append('url_redireccion', formAnuncio.url_redireccion);
-      if (fotoAnuncio) fd.append('foto', fotoAnuncio);
+      if (fotoAnuncio) {
+        fd.append('foto', fotoAnuncio);          // subir nueva foto
+      } else if (fotoEliminada) {
+        fd.append('eliminar_foto', '1');         // 👈 señal para borrar
+      }
       if (modal?.tipo === 'nuevo-anuncio') { await crearAnuncio(fd); showToast('Anuncio creado', 'success'); }
       else if (modal?.tipo === 'editar-anuncio') { await modificarAnuncio(modal.item.id_anuncio, fd); showToast('Anuncio actualizado', 'success'); }
       cargarAnuncios();
@@ -993,7 +1000,7 @@ const AdminUsuarios: React.FC = () => {
                 <div className="relative w-full h-28 rounded-xl overflow-hidden border border-gray-200 mb-2">
                   <img src={previewFoto} alt="preview" className="w-full h-full object-cover" />
                   <button className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/50 text-white text-xs flex items-center justify-center"
-                    onClick={() => { setFotoAnuncio(null); setPreviewFoto(null); }}>✕</button>
+                    onClick={() => { setFotoAnuncio(null); setPreviewFoto(null); setFotoEliminada(true); }}>✕</button>
                 </div>
               )}
               <div onClick={() => fotoInputRef.current?.click()}

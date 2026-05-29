@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
-import { getAnuncios } from '../Services/admin';
+import { getAnunciosPublicos } from '../Services/anunciosPublicos';
 import type { Anuncio } from '../Services/admin';
 
 const Anuncios: React.FC = () => {
@@ -16,7 +16,7 @@ const Anuncios: React.FC = () => {
     const cargarAnuncios = async () => {
       setLoading(true);
       try {
-        const res = await getAnuncios();
+        const res = await getAnunciosPublicos();
         setAnuncios(res.anuncios);
       } catch (err) {
         console.error(err);

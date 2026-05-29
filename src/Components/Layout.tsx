@@ -13,7 +13,7 @@ import {
   ChevronDown,
   Check,
 } from "lucide-react";
-import { getAnuncios } from "../Services/admin";
+import { getAnunciosPublicos } from "../Services/anunciosPublicos";
 import type { Anuncio } from "../Services/admin";
 
 interface Usuario {
@@ -146,15 +146,16 @@ function Layout() {
   }, []);
 
   const cargarAnuncios = async () => {
-    setLoadingAnuncios(true);
-    try {
-      const res = await getAnuncios();
-      setAnuncios(res.anuncios);
-    } catch (error) {
-      console.error("Error al cargar anuncios:", error);
-    } finally {
-      setLoadingAnuncios(false);
-    }
+  setLoadingAnuncios(true);
+  try {
+    const res = await getAnunciosPublicos();
+    setAnuncios(res.anuncios);
+  } catch (error) {
+    console.error("Error al cargar anuncios:", error);
+    setAnuncios([]);
+  } finally {
+    setLoadingAnuncios(false);
+  }
   };
 
   useEffect(() => {

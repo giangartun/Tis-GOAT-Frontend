@@ -9,7 +9,9 @@ import {
 } from "lucide-react";
 import { descargarPortafolioPDF } from "./PortafolioPdf";
 
-const API_URL = "http://localhost:8000";
+const API_URL =
+  (import.meta as any)?.env?.VITE_API_URL?.replace(/\/$/, "") ||
+  "http://127.0.0.1:8000";
 
 type TemplateName = "Bento" | "Sidebar" | "Editorial";
 

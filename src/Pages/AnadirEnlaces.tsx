@@ -163,7 +163,7 @@ export default function AnadirEnlaces() {
 
   const fetchLinks = async () => {
     if (!token) {
-      navigate('/signin');
+      navigate('/login');
       return;
     }
 
@@ -241,7 +241,7 @@ export default function AnadirEnlaces() {
     e.preventDefault();
 
     if (!token) {
-      navigate('/signin');
+      navigate('/login');
       return;
     }
 
@@ -320,7 +320,7 @@ export default function AnadirEnlaces() {
 
   const executeDelete = async () => {
     if (!showDeleteConfirm || !token) {
-      if (!token) navigate('/signin');
+      if (!token) navigate('/login');
       return;
     }
 

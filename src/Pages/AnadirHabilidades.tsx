@@ -338,7 +338,7 @@ export default function AnadirHabilidades() {
 
   const fetchSkills = async () => {
     if (!token) {
-      navigate('/signin');
+      navigate('/login');
       return;
     }
 
@@ -389,7 +389,7 @@ export default function AnadirHabilidades() {
     e.preventDefault();
 
     if (!token) {
-      navigate('/signin');
+      navigate('/login');
       return;
     }
 
@@ -461,7 +461,7 @@ export default function AnadirHabilidades() {
 
   const executeDelete = async () => {
     if (!showDeleteConfirm || !token) {
-      if (!token) navigate('/signin');
+      if (!token) navigate('/login');
       return;
     }
 

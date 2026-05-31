@@ -33,7 +33,8 @@ interface PortafolioResponse {
   proyectos?: any[];
 }
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = (import.meta as any)?.env?.VITE_API_URL?.replace(/\/$/, '') ||
+  'http://127.0.0.1:8000';
 
 const getFullName = (usuario: Usuario) =>
   [usuario.nombre, usuario.apellido_paterno, usuario.apellido_materno]

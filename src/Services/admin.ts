@@ -22,7 +22,6 @@ export interface ListaUsuariosResponse {
   data_usuarios: UsuarioAdmin[];
 }
 
-// 🔥 INTERFAZ BITACORA ACTUALIZADA - agrega el campo "contexto"
 export interface BitacoraItem {
   id_registro: string;
   id_usuario: string;

@@ -6,7 +6,7 @@ import { getAnunciosPublicos } from '../Services/anunciosPublicos';
 import type { Anuncio } from '../Services/admin';
 
 const Anuncios: React.FC = () => {
-  const { t } = useTranslation();
+  const { t: _t } = useTranslation();
   const navigate = useNavigate();
   const [anuncios, setAnuncios] = useState<Anuncio[]>([]);
   const [loading, setLoading] = useState(true);

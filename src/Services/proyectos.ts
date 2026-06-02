@@ -29,10 +29,9 @@ export type ProyectoApiPayload = {
 
 type ProyectosResponse = unknown;
 
-// Tecnologías - ahora usa el mismo endpoint que el admin
 export async function listarTecnologias(): Promise<Tecnologia[]> {
-  const response = await api.get("/admin/tecnologias");
-  return response.data.tecnologias || [];
+  const response = await api.get("/proyecto/gestion-proyectos/tecnologias/lista");
+  return Array.isArray(response.data) ? response.data : [];
 }
 
 export async function listarProyectos(

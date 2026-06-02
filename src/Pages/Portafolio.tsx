@@ -124,39 +124,39 @@ type Theme = {
 
 const theme: Theme = {
   page: "min-h-screen bg-[#f8fafc] text-slate-900",
-  shell: "mx-auto max-w-7xl px-6 py-10",
-  hero: "rounded-3xl border border-slate-200 bg-white p-8 shadow-xl",
-  card: "rounded-2xl border border-slate-200 bg-white p-6 shadow-sm",
-  cardSoft: "rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm",
-  title: "text-3xl font-bold text-blue-700",
-  titleSmall: "text-2xl font-semibold text-blue-700",
-  body: "text-slate-600",
+  shell: "mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10",
+  hero: "rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 lg:p-8 shadow-xl",
+  card: "rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 lg:p-6 shadow-sm",
+  cardSoft: "rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5 shadow-sm",
+  title: "text-2xl sm:text-3xl font-bold text-blue-700",
+  titleSmall: "text-xl sm:text-2xl font-semibold text-blue-700",
+  body: "text-slate-600 text-sm sm:text-base",
   sub: "text-slate-500",
   social:
-    "rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 transition hover:border-blue-300 hover:text-blue-700 hover:bg-blue-50",
-  chip: "rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-blue-700",
+    "rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs sm:text-sm font-medium text-slate-800 transition hover:border-blue-300 hover:text-blue-700 hover:bg-blue-50",
+  chip: "rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs sm:text-sm text-blue-700",
   linkChip:
-    "rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-blue-700 transition hover:border-blue-300 hover:bg-blue-100",
+    "rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs sm:text-sm text-blue-700 transition hover:border-blue-300 hover:bg-blue-100",
   projectCard:
     "overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg",
   projectPreview:
     "flex h-full items-center justify-center bg-slate-100 text-slate-500",
-  projectTitle: "text-xl font-bold text-blue-700",
+  projectTitle: "text-lg sm:text-xl font-bold text-blue-700",
   projectText: "mt-3 text-sm leading-6 text-slate-600",
   projectTag: "rounded-full bg-blue-50 px-3 py-1 text-xs text-blue-700",
   projectLink:
     "mt-5 inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700",
-  emptyCard: "rounded-2xl border border-slate-200 bg-white p-5 shadow-sm",
+  emptyCard: "rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm",
   barBg: "h-3 rounded-full bg-slate-200",
   accent: "text-blue-600",
-  statCard: "rounded-2xl border border-slate-200 bg-white p-5 shadow-sm",
+  statCard: "rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm",
   sectionLine: "h-px flex-1 bg-slate-200",
   button:
     "inline-flex items-center justify-center rounded-full bg-blue-500 px-5 py-3 font-medium text-white transition hover:bg-blue-600",
   buttonGhost:
-    "inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed",
+    "inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 sm:px-5 py-3 font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed",
   badge:
-    "inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-700",
+    "inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-blue-700",
 };
 
 const PLANTILLA_ID_MAP: Record<string, TemplateName> = {
@@ -320,7 +320,7 @@ function Portafolio() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] text-slate-700">
+      <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] px-4 text-center text-slate-700">
         Cargando portafolio...
       </div>
     );
@@ -328,8 +328,8 @@ function Portafolio() {
 
   if (error || !data) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] px-4 text-slate-700">
-        <div className="max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] px-4 text-center text-slate-700">
+        <div className="max-w-lg rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
           <p className="text-lg font-semibold text-slate-900">
             No se pudo cargar el portafolio.
           </p>
@@ -401,10 +401,10 @@ function Portafolio() {
       {layout}
 
       {mostrarModalEnlaces && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-4">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-5 sm:p-6 shadow-2xl">
             <div className="flex items-center justify-between gap-4">
-              <h3 className="text-2xl font-bold text-slate-900">
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-900">
                 Enlaces públicos
               </h3>
               <button
@@ -486,7 +486,7 @@ function PortafolioBento({
             actionLabel="Destacados"
             theme={theme}
           />
-          <div className="mt-4 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-4 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {proyectosVisibles.slice(0, 3).map((proyecto, index) => (
               <BentoProjectCard
                 key={proyecto.id_proyecto}
@@ -555,27 +555,31 @@ function PortafolioSidebar({
 
   return (
     <div className={theme.page}>
-      <div className="mx-auto max-w-7xl px-6 py-10 lg:grid lg:grid-cols-[320px_1fr] lg:gap-8">
+      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:grid-cols-[320px_1fr] lg:gap-8 lg:px-8 lg:py-10">
         <aside className={`self-start ${theme.hero} lg:sticky lg:top-6`}>
-          <div className="flex items-center gap-5">
-            {data.usuario.foto ? (
-              <img
-                src={data.usuario.foto}
-                alt={nombreCompleto}
-                className="h-20 w-20 rounded-full object-cover ring-4 ring-blue-100"
-              />
-            ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-500 text-3xl font-bold text-white ring-4 ring-blue-100">
-                {inicial}
-              </div>
-            )}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5 lg:block">
+            <div className="flex items-center gap-4 sm:gap-5">
+              {data.usuario.foto ? (
+                <img
+                  src={data.usuario.foto}
+                  alt={nombreCompleto}
+                  className="h-16 w-16 sm:h-20 sm:w-20 rounded-full object-cover ring-4 ring-blue-100"
+                />
+              ) : (
+                <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-blue-500 text-2xl sm:text-3xl font-bold text-white ring-4 ring-blue-100">
+                  {inicial}
+                </div>
+              )}
 
-            <div>
-              <h1 className="text-2xl font-bold text-blue-700">{nombreCompleto}</h1>
-              <p className={`mt-2 text-sm ${theme.body}`}>
-                {data.usuario.biografia ||
-                  "Profesional apasionado por crear soluciones innovadoras y escalables."}
-              </p>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-blue-700">
+                  {nombreCompleto}
+                </h1>
+                <p className={`mt-2 text-sm ${theme.body}`}>
+                  {data.usuario.biografia ||
+                    "Profesional apasionado por crear soluciones innovadoras y escalables."}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -591,11 +595,15 @@ function PortafolioSidebar({
 
           <div className="mt-6 space-y-4">
             <SidebarSectionTitle title="En números" theme={theme} />
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
               {stats.map((stat) => (
                 <div key={stat.label} className={theme.statCard}>
-                  <p className="text-2xl font-bold text-blue-600">{stat.value}</p>
-                  <p className={`mt-1 text-xs uppercase tracking-[0.18em] ${theme.sub}`}>{stat.label}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-blue-600">
+                    {stat.value}
+                  </p>
+                  <p className={`mt-1 text-[10px] sm:text-xs uppercase tracking-[0.18em] ${theme.sub}`}>
+                    {stat.label}
+                  </p>
                 </div>
               ))}
             </div>
@@ -604,8 +612,12 @@ function PortafolioSidebar({
           <div className="mt-6 space-y-3">
             {data.usuario.email && (
               <a href={`mailto:${data.usuario.email}`} className={theme.cardSoft}>
-                <p className={`text-xs uppercase tracking-[0.18em] ${theme.sub}`}>Email</p>
-                <p className="mt-1 text-sm font-medium text-slate-900">{data.usuario.email}</p>
+                <p className={`text-[10px] sm:text-xs uppercase tracking-[0.18em] ${theme.sub}`}>
+                  Email
+                </p>
+                <p className="mt-1 text-sm font-medium text-slate-900 break-all">
+                  {data.usuario.email}
+                </p>
               </a>
             )}
 
@@ -623,12 +635,17 @@ function PortafolioSidebar({
           </div>
         </aside>
 
-        <main className="mt-8 space-y-8 lg:mt-0">
+        <main className="space-y-8">
           <section>
             <SectionHeading title="Proyectos" theme={theme} />
             <div className="mt-4 grid gap-6 sm:grid-cols-2">
               {proyectosVisibles.slice(0, 4).map((proyecto, index) => (
-                <SidebarProjectCard key={proyecto.id_proyecto} proyecto={proyecto} index={index + 1} theme={theme} />
+                <SidebarProjectCard
+                  key={proyecto.id_proyecto}
+                  proyecto={proyecto}
+                  index={index + 1}
+                  theme={theme}
+                />
               ))}
               {proyectosVisibles.length === 0 && (
                 <EmptyCard theme={theme} title="Sin proyectos visibles" />
@@ -687,25 +704,25 @@ function PortafolioEditorial({
       <div className={theme.shell}>
         <header className={theme.hero}>
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex items-start gap-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
               {data.usuario.foto ? (
                 <img
                   src={data.usuario.foto}
                   alt={nombreCompleto}
-                  className="h-20 w-20 rounded-full object-cover ring-4 ring-blue-100"
+                  className="h-16 w-16 sm:h-20 sm:w-20 rounded-full object-cover ring-4 ring-blue-100"
                 />
               ) : (
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-500 text-3xl font-bold text-white ring-4 ring-blue-100">
+                <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-blue-500 text-2xl sm:text-3xl font-bold text-white ring-4 ring-blue-100">
                   {inicial}
                 </div>
               )}
 
               <div>
                 <span className={theme.badge}>Full Stack Developer</span>
-                <h1 className="mt-3 text-5xl font-bold tracking-tight text-blue-700">
+                <h1 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-blue-700">
                   {nombreCompleto}
                 </h1>
-                <p className={`mt-3 max-w-3xl text-lg ${theme.body}`}>
+                <p className={`mt-3 max-w-3xl text-base sm:text-lg ${theme.body}`}>
                   {data.usuario.biografia ||
                     "Backend, APIs y microservicios. Soluciones web modernas y escalables."}
                 </p>
@@ -737,13 +754,13 @@ function PortafolioEditorial({
           </div>
         </header>
 
-        <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl">
+        <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xl">
           <SectionHeading title="Sobre mí" theme={theme} />
           <div className="mt-4 grid gap-6 lg:grid-cols-[auto_1fr] lg:items-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-500 text-3xl font-bold text-white ring-4 ring-blue-100">
+            <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-blue-500 text-2xl sm:text-3xl font-bold text-white ring-4 ring-blue-100">
               {inicial}
             </div>
-            <p className={`max-w-4xl text-lg leading-8 ${theme.body}`}>
+            <p className={`max-w-4xl text-base sm:text-lg leading-7 sm:leading-8 ${theme.body}`}>
               {data.usuario.biografia ||
                 "Desarrollador enfocado en backend y arquitecturas escalables con experiencia en APIs y microservicios. Me apasiona construir sistemas robustos, eficientes y bien documentados."}
             </p>
@@ -752,7 +769,7 @@ function PortafolioEditorial({
 
         <section className="mt-8">
           <SectionHeading title="Experiencia & stack" theme={theme} />
-          <div className="mt-4 grid gap-8 lg:grid-cols-2">
+          <div className="mt-4 grid gap-6 lg:grid-cols-2">
             <div className={theme.card}>
               <div className="space-y-4">{experienceTimeline(experienciaVisible, theme)}</div>
             </div>
@@ -767,7 +784,12 @@ function PortafolioEditorial({
           <SectionHeading title="Proyectos" theme={theme} />
           <div className="mt-4 space-y-4">
             {proyectosVisibles.slice(0, 4).map((proyecto, index) => (
-              <EditorialProjectRow key={proyecto.id_proyecto} proyecto={proyecto} index={index + 1} theme={theme} />
+              <EditorialProjectRow
+                key={proyecto.id_proyecto}
+                proyecto={proyecto}
+                index={index + 1}
+                theme={theme}
+              />
             ))}
             {proyectosVisibles.length === 0 && (
               <div className={theme.card}>
@@ -785,15 +807,21 @@ function PortafolioEditorial({
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             {academicaVisible.map((edu) => (
               <article key={edu.id_experiencia_academica} className={theme.card}>
-                <p className={`text-sm ${theme.accent}`}>{formatPeriod(edu.fecha_ini, edu.fecha_fin)}</p>
-                <h3 className="mt-2 text-xl font-bold text-slate-900">{edu.titulo}</h3>
+                <p className={`text-sm ${theme.accent}`}>
+                  {formatPeriod(edu.fecha_ini, edu.fecha_fin)}
+                </p>
+                <h3 className="mt-2 text-lg sm:text-xl font-bold text-slate-900">
+                  {edu.titulo}
+                </h3>
                 <p className="text-slate-600">{edu.institucion}</p>
                 <p className={`mt-3 text-sm leading-6 ${theme.body}`}>{edu.descripcion}</p>
               </article>
             ))}
             {academicaVisible.length === 0 && (
               <div className={`${theme.emptyCard} md:col-span-2`}>
-                <p className="font-semibold text-slate-900">Sin experiencia académica registrada</p>
+                <p className="font-semibold text-slate-900">
+                  Sin experiencia académica registrada
+                </p>
                 <p className={`mt-2 leading-6 ${theme.body}`}>
                   Aquí aparecerán tus estudios y certificaciones.
                 </p>
@@ -834,26 +862,26 @@ function BentoHero({
 
   return (
     <header className={theme.hero}>
-      <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-6">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
           {data.usuario.foto ? (
             <img
               src={data.usuario.foto}
               alt={nombreCompleto}
-              className="h-24 w-24 rounded-full object-cover ring-4 ring-blue-100"
+              className="h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 rounded-full object-cover ring-4 ring-blue-100"
             />
           ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-blue-500 text-4xl font-bold text-white ring-4 ring-blue-100">
+            <div className="flex h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 items-center justify-center rounded-full bg-blue-500 text-2xl sm:text-3xl lg:text-4xl font-bold text-white ring-4 ring-blue-100">
               {inicial}
             </div>
           )}
 
           <div>
             <span className={theme.badge}>Full Stack Developer</span>
-            <h1 className="mt-3 text-5xl font-bold tracking-tight text-blue-700">
+            <h1 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-blue-700">
               {nombreCompleto}
             </h1>
-            <p className={`mt-3 max-w-3xl text-lg ${theme.body}`}>
+            <p className={`mt-3 max-w-3xl text-base sm:text-lg ${theme.body}`}>
               {data.usuario.biografia ||
                 "Desarrollo soluciones web modernas y escalables. Enfocado en backend, APIs y microservicios con arquitecturas robustas."}
             </p>
@@ -865,7 +893,7 @@ function BentoHero({
         </div>
       </div>
 
-      <div className="mt-6 flex flex-wrap gap-3 text-sm">
+      <div className="mt-6 flex flex-wrap gap-2 text-sm">
         {data.usuario.email && (
           <span className={theme.chip}>
             <span className="inline-flex items-center gap-2">
@@ -965,7 +993,7 @@ function BentoProjectCard({
 
   return (
     <article className={theme.projectCard}>
-      <div className="relative h-48 border-b border-slate-200">
+      <div className="relative h-40 sm:h-48 border-b border-slate-200">
         {proyecto.imagen_url ? (
           <img
             src={proyecto.imagen_url}
@@ -974,7 +1002,7 @@ function BentoProjectCard({
           />
         ) : (
           <div className={theme.projectPreview}>
-            <div className="flex h-16 w-32 items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm">
+            <div className="flex h-14 w-28 sm:h-16 sm:w-32 items-center justify-center rounded-xl bg-white text-sm text-slate-400 shadow-sm">
               Vista previa
             </div>
           </div>
@@ -985,7 +1013,7 @@ function BentoProjectCard({
         </span>
       </div>
 
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <h3 className={theme.projectTitle}>{proyecto.nombre}</h3>
         <p className={theme.projectText}>{proyecto.descripcion}</p>
 
@@ -1028,12 +1056,12 @@ function SidebarProjectCard({
   return (
     <article className={theme.card}>
       <div className="flex items-start gap-4">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-sm font-bold text-blue-700 ring-1 ring-blue-100">
+        <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-sm font-bold text-blue-700 ring-1 ring-blue-100">
           {String(index).padStart(2, "0")}
         </div>
 
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-lg font-bold text-slate-900">
+          <h3 className="truncate text-base sm:text-lg font-bold text-slate-900">
             {proyecto.nombre}
           </h3>
           <p className="mt-1 text-sm text-slate-600 line-clamp-3">
@@ -1087,8 +1115,8 @@ function EditorialProjectRow({
           {String(index).padStart(2, "0")}
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="h-14 w-20 overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-200">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="h-14 w-full sm:w-20 overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-200">
             {proyecto.imagen_url ? (
               <img
                 src={proyecto.imagen_url}
@@ -1103,7 +1131,7 @@ function EditorialProjectRow({
           </div>
 
           <div>
-            <h3 className="text-xl font-bold text-slate-900">
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900">
               {proyecto.nombre}
             </h3>
             <p className={`mt-1 text-sm leading-6 ${theme.body}`}>
@@ -1147,7 +1175,7 @@ function experienceCards(experiencias: ExperienciaLaboral[], theme: Theme) {
       <p className={`text-sm ${theme.accent}`}>
         {formatPeriod(exp.fecha_ini, exp.fecha_fin)}
       </p>
-      <h3 className="mt-2 text-xl font-bold text-slate-900">{exp.cargo}</h3>
+      <h3 className="mt-2 text-lg sm:text-xl font-bold text-slate-900">{exp.cargo}</h3>
       <p className="text-slate-600">{exp.empresa}</p>
       <p className={`mt-3 text-sm leading-6 ${theme.body}`}>{exp.descripcion}</p>
     </article>
@@ -1214,8 +1242,10 @@ function SkillBars({
     <div className="space-y-4">
       {habilidades.slice(0, 4).map((habilidad) => (
         <div key={habilidad.id_habilidad}>
-          <div className="mb-2 flex items-center justify-between">
-            <span className="font-medium text-slate-900">{habilidad.nombre}</span>
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <span className="font-medium text-slate-900 break-words">
+              {habilidad.nombre}
+            </span>
             <span className={`text-sm ${theme.sub}`}>{habilidad.nivel}%</span>
           </div>
           <div className={theme.barBg}>
@@ -1246,8 +1276,10 @@ function skillsEditorial(habilidades: Habilidad[], theme: Theme) {
 
   return habilidades.slice(0, 5).map((habilidad) => (
     <div key={habilidad.id_habilidad}>
-      <div className="mb-2 flex items-center justify-between">
-        <span className="font-medium text-slate-900">{habilidad.nombre}</span>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <span className="font-medium text-slate-900 break-words">
+          {habilidad.nombre}
+        </span>
         <span className={`text-sm ${theme.sub}`}>{habilidad.nivel}%</span>
       </div>
       <div className={theme.barBg}>
@@ -1280,7 +1312,7 @@ function ChipCloud({ items }: { items: string[]; theme: Theme }) {
 function EmptyCard({ theme, title }: { theme: Theme; title: string }) {
   return (
     <div className={theme.emptyCard}>
-      <div className="flex h-40 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-slate-500">
+      <div className="flex h-32 sm:h-40 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-slate-500">
         <SquareDashedBottom className="mr-2 h-4 w-4" />
         Vista vacía
       </div>
@@ -1311,10 +1343,10 @@ function FooterCTA({
     <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">
+          <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">
             {subtitle}
           </p>
-          <h3 className="mt-1 text-2xl font-bold text-slate-900">{title}</h3>
+          <h3 className="mt-1 text-xl sm:text-2xl font-bold text-slate-900">{title}</h3>
         </div>
 
         <div className="flex flex-wrap gap-3">

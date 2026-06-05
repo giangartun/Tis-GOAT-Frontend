@@ -338,8 +338,13 @@ function Layout() {
           <aside className="hidden border-r border-app-border bg-app-sidebar py-6 text-white lg:flex lg:flex-col lg:items-center lg:gap-6">
             <button
               onClick={() => navigate("/perfil")}
+              disabled={!haySesion}
               title={t("layout.nav.my_profile")}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15 transition hover:bg-white/25"
+              className={`flex h-12 w-12 items-center justify-center rounded-full transition ${
+                haySesion
+                  ? "bg-white/15 hover:bg-white/25"
+                  : "bg-white/5 opacity-40 cursor-not-allowed"
+              }`}
             >
               <UserRound size={22} />
             </button>
@@ -352,19 +357,29 @@ function Layout() {
               <Home size={22} />
             </button>
 
-            <Link
-              to="/privacidad"
+            <button
+              onClick={() => navigate("/privacidad")}
+              disabled={!haySesion}
               title={t("layout.sidebar.privacy_settings")}
-              className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 transition hover:bg-white/25"
+              className={`flex h-12 w-12 items-center justify-center rounded-xl transition ${
+                haySesion
+                  ? "bg-white/15 hover:bg-white/25"
+                  : "bg-white/5 opacity-40 cursor-not-allowed"
+              }`}
             >
               <Settings size={22} />
-            </Link>
+            </button>
 
             <button
               type="button"
-              title={t("layout.sidebar.portfolio_customization")}
               onClick={() => navigate("/personalizacion-portafolio")}
-              className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 transition hover:bg-white/25"
+              disabled={!haySesion}
+              title={t("layout.sidebar.portfolio_customization")}
+              className={`flex h-12 w-12 items-center justify-center rounded-xl transition ${
+                haySesion
+                  ? "bg-white/15 hover:bg-white/25"
+                  : "bg-white/5 opacity-40 cursor-not-allowed"
+              }`}
             >
               <Palette size={22} />
             </button>

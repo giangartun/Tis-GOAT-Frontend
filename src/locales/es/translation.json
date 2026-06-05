@@ -1077,5 +1077,65 @@
     "previous": "Anterior",
     "next": "Siguiente"
   }
-}
+},
+  "experience": {
+    "descriptionPlaceholder": "Describe tus responsabilidades, tecnologías usadas o logros...",
+    "characters": "caracteres",
+    "leaveEmptyIfActive": "Dejar vacío si sigue activo"
+  },
+  "portfolio": {
+    "loading": "Cargando portafolio...",
+    "errorTitle": "No se pudo cargar el portafolio.",
+    "errorUnknown": "Error desconocido",
+    "noToken": "No hay token guardado. Inicia sesión nuevamente.",
+    "sessionExpired": "Tu sesión expiró o el token no es válido. Inicia sesión nuevamente.",
+    "defaultBio": "Profesional apasionado por crear soluciones innovadoras y escalables.",
+    "defaultBioEditorial": "Backend, APIs y microservicios. Soluciones web modernas y escalables.",
+    "defaultBioAbout": "Desarrollador enfocado en backend y arquitecturas escalables con experiencia en APIs y microservicios. Me apasiona construir sistemas robustos, eficientes y bien documentados.",
+    "defaultBioBento": "Desarrollo soluciones web modernas y escalables. Enfocado en backend, APIs y microservicios con arquitecturas robustas.",
+    "badge": "Full Stack Developer",
+    "featuredProjects": "Proyectos destacados",
+    "featuredLabel": "Destacados",
+    "experience": "Experiencia",
+    "projects": "Proyectos",
+    "skills": "Habilidades",
+    "aboutMe": "Sobre mí",
+    "experienceAndStack": "Experiencia & stack",
+    "formation": "Formación",
+    "contactMe": "Contáctame",
+    "contactSubtitle": "Estoy disponible para proyectos y colaboraciones.",
+    "cvLabel": "CV",
+    "generatingPDF": "Generando PDF...",
+    "publicLinks": "Enlaces públicos",
+    "closeModal": "Cerrar",
+    "noPublicLinks": "No hay enlaces públicos registrados.",
+    "emailLabel": "Email",
+    "previewLabel": "Vista previa",
+    "preview": "Preview",
+    "viewProject": "Ver proyecto",
+    "view": "Ver",
+    "emptyView": "Vista vacía",
+    "noProjects": "Sin proyectos aún",
+    "noProjectsDesc": "Los proyectos publicados aparecerán aquí en una vista lineal.",
+    "noProjectsVisible": "Sin proyectos visibles",
+    "noProjectsEmptyDesc": "Cuando existan datos reales, se mostrarán aquí con una composición más profesional.",
+    "noExperience": "Sin experiencia registrada",
+    "noExperienceLaboral": "Sin experiencia laboral registrada",
+    "noExperienceLaboralDesc": "Cuando agregues experiencia desde el panel de gestión, aparecerá aquí.",
+    "noSkills": "Sin habilidades registradas",
+    "noSkillsDesc": "Aquí se mostrarán tus habilidades con barras de nivel.",
+    "noAcademic": "Sin experiencia académica registrada",
+    "noAcademicDesc": "Aquí aparecerán tus estudios y certificaciones.",
+    "stats": {
+      "projects": "Proyectos",
+      "skills": "Habilidades",
+      "exp": "Exp."
+    },
+    "sidebar": {
+      "stack": "Stack",
+      "inNumbers": "En números",
+      "publicLinksButton": "Enlaces públicos"
+    },
+    "current": "Actual"
+  }
 }

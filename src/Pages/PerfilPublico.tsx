@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
+  ArrowRight,
   ExternalLink,
   Mail,
   MapPin,
@@ -105,6 +106,74 @@ interface PortafolioData {
   proyectos?: Proyecto[];
 }
 
+type Theme = {
+  page: string;
+  shell: string;
+  hero: string;
+  card: string;
+  cardSoft: string;
+  title: string;
+  titleSmall: string;
+  body: string;
+  sub: string;
+  social: string;
+  chip: string;
+  linkChip: string;
+  projectCard: string;
+  projectPreview: string;
+  projectTitle: string;
+  projectText: string;
+  projectTag: string;
+  projectLink: string;
+  emptyCard: string;
+  barBg: string;
+  accent: string;
+  statCard: string;
+  sectionLine: string;
+  buttonGhost: string;
+  badge: string;
+};
+
+const theme: Theme = {
+  page: "min-h-screen bg-[#f8fafc] text-slate-900",
+  shell: "mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10",
+  hero:
+    "rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 lg:p-8 shadow-xl",
+  card:
+    "rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 lg:p-6 shadow-sm",
+  cardSoft:
+    "rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5 shadow-sm",
+  title: "text-2xl sm:text-3xl font-bold text-blue-700",
+  titleSmall: "text-xl sm:text-2xl font-semibold text-blue-700",
+  body: "text-slate-600 text-sm sm:text-base",
+  sub: "text-slate-500",
+  social:
+    "rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs sm:text-sm font-medium text-slate-800 transition hover:border-blue-300 hover:text-blue-700 hover:bg-blue-50",
+  chip:
+    "rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs sm:text-sm text-blue-700",
+  linkChip:
+    "rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs sm:text-sm text-blue-700 transition hover:border-blue-300 hover:bg-blue-100",
+  projectCard:
+    "overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg",
+  projectPreview:
+    "flex h-full items-center justify-center bg-slate-100 text-slate-500",
+  projectTitle: "text-lg sm:text-xl font-bold text-blue-700",
+  projectText: "mt-3 text-sm leading-6 text-slate-600",
+  projectTag: "rounded-full bg-blue-50 px-3 py-1 text-xs text-blue-700",
+  projectLink:
+    "mt-5 inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700",
+  emptyCard:
+    "rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm",
+  barBg: "h-3 rounded-full bg-slate-200",
+  accent: "text-blue-600",
+  statCard: "rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm",
+  sectionLine: "h-px flex-1 bg-slate-200",
+  buttonGhost:
+    "inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 sm:px-5 py-3 font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed",
+  badge:
+    "inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-blue-700",
+};
+
 const PLANTILLA_ID_MAP: Record<string, TemplateName> = {
   "01KQR862E61WHCR4HK8PZVPF91": "Bento",
   "01KQR8685VJ6E9KY278ABW3AZZ": "Sidebar",
@@ -176,7 +245,10 @@ function normalizeTemplateName(data?: PortafolioData | null): TemplateName {
   return "Bento";
 }
 
-function getPublicPortafolioUrl(id?: string | null, data?: PortafolioData | null) {
+function getPublicPortafolioUrl(
+  id?: string | null,
+  data?: PortafolioData | null
+) {
   const fromApi =
     data?.portafolio?.enlace_pagi_web ??
     data?.portafolio?.enlace_publico ??
@@ -282,7 +354,7 @@ function PublicLinksModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-6 flex items-start justify-between gap-4">
-          <h2 className="text-[28px] font-extrabold tracking-tight text-slate-900">
+          <h2 className="text-[24px] font-extrabold tracking-tight text-slate-900 md:text-[28px]">
             Enlaces públicos
           </h2>
 
@@ -308,15 +380,15 @@ function PublicLinksModal({
                 >
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div className="min-w-0">
-                      <p className="text-[18px] font-medium text-blue-700">
+                      <p className="text-[16px] font-medium text-blue-700 md:text-[18px]">
                         {enlace.label}
                       </p>
-                      <p className="mt-2 break-all text-[16px] text-slate-600">
+                      <p className="mt-2 break-all text-[14px] text-slate-600 md:text-[16px]">
                         {enlace.url}
                       </p>
                     </div>
 
-                    <div className="flex shrink-0 gap-2">
+                    <div className="flex shrink-0 flex-wrap gap-2">
                       <a
                         href={enlace.url}
                         target="_blank"
@@ -367,7 +439,7 @@ function SectionHeading({
   return (
     <div className="flex items-center gap-3">
       <span className="h-3 w-3 rounded-full bg-blue-500" />
-      <h2 className="text-[20px] font-extrabold tracking-tight text-slate-800 uppercase md:text-[24px]">
+      <h2 className="text-[20px] font-extrabold uppercase tracking-tight text-slate-800 md:text-[24px]">
         {title}
       </h2>
       <div className="h-px flex-1 bg-slate-200" />
@@ -378,7 +450,13 @@ function SectionHeading({
   );
 }
 
-function EmptyCard({ title, description }: { title: string; description: string }) {
+function EmptyCard({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
   return (
     <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex h-36 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-slate-400">
@@ -410,10 +488,12 @@ function SkillBars({ habilidades }: { habilidades: Habilidad[] }) {
         return (
           <div key={habilidad.id_habilidad || habilidad.nombre}>
             <div className="mb-2 flex items-center justify-between gap-3">
-              <span className="font-medium text-slate-900">{habilidad.nombre}</span>
-              <span className="text-sm text-slate-500">{pct}%</span>
+              <span className="break-words font-medium text-slate-900">
+                {habilidad.nombre}
+              </span>
+              <span className={`text-sm ${theme.sub}`}>{pct}%</span>
             </div>
-            <div className="h-3 rounded-full bg-slate-200">
+            <div className={theme.barBg}>
               <div
                 className="h-3 rounded-full bg-blue-500"
                 style={{ width: `${pct}%` }}
@@ -437,10 +517,12 @@ function ExperienceCard({
     type === "laboral"
       ? (exp as ExperienciaLaboral).cargo
       : (exp as ExperienciaAcademica).titulo;
+
   const subtitle =
     type === "laboral"
       ? (exp as ExperienciaLaboral).empresa
       : (exp as ExperienciaAcademica).institucion;
+
   const period = formatPeriod(exp.fecha_ini, exp.fecha_fin ?? null);
 
   return (
@@ -486,7 +568,7 @@ function ExperienceTimeline({
           <div className="flex items-start gap-3">
             <span className="mt-2 h-2.5 w-2.5 rounded-full bg-blue-500" />
             <div>
-              <p className="text-sm font-semibold text-blue-700">
+              <p className={`text-sm ${theme.accent}`}>
                 {formatPeriod(exp.fecha_ini, exp.fecha_fin ?? null)}
               </p>
               <h3 className="mt-1 text-lg font-bold text-slate-900">
@@ -577,6 +659,126 @@ function ProjectCard({
   );
 }
 
+function ProjectRow({
+  proyecto,
+  index,
+}: {
+  proyecto: Proyecto;
+  index: number;
+}) {
+  const tags = (proyecto.tecnologias ?? []).slice(0, 3).map((t) => t.nombre);
+
+  return (
+    <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
+      <div className="grid gap-4 p-5 md:grid-cols-[140px_1fr_auto] md:items-center md:p-6">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-sm font-bold text-blue-700 ring-1 ring-blue-100">
+            {String(index).padStart(2, "0")}
+          </div>
+
+          <div className="h-16 w-24 shrink-0 overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-200">
+            {proyecto.imagen_url ? (
+              <img
+                src={proyecto.imagen_url}
+                alt={proyecto.nombre}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">
+                Preview
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-bold text-slate-900">{proyecto.nombre}</h3>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            {proyecto.descripcion}
+          </p>
+
+          {tags.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full bg-blue-50 px-3 py-1 text-xs text-blue-700"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {proyecto.url_proyecto ? (
+          <a
+            href={proyecto.url_proyecto}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center rounded-full border border-slate-200 px-5 py-3 font-medium text-slate-700 transition hover:bg-slate-50"
+          >
+            Ver <ArrowRight className="ml-2 h-4 w-4" />
+          </a>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
+function SocialLinks({ redes }: { redes: RedProfesional[] }) {
+  const visibles = pickVisible(redes);
+
+  if (visibles.length === 0) return null;
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {visibles.map((red) => (
+        <a
+          key={red.id_redes_prof}
+          href={red.url_red}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-semibold text-white/90 transition hover:bg-white/15 hover:text-white"
+        >
+          {red.nombre_red}
+        </a>
+      ))}
+    </div>
+  );
+}
+
+function FooterCTA({
+  onOpenLinks,
+}: {
+  onOpenLinks: () => void;
+}) {
+  return (
+    <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700 sm:text-sm">
+            Comparte este portafolio
+          </p>
+          <h3 className="mt-1 text-xl font-bold text-slate-900 sm:text-2xl">
+            Enlace público
+          </h3>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={onOpenLinks}
+            className={theme.buttonGhost}
+          >
+            Ver / copiar enlaces
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PortafolioPublico() {
   const { t } = useTranslation();
 
@@ -621,7 +823,9 @@ function PortafolioPublico() {
           );
         }
 
-        const payload = result?.data ?? result?.portafolio ?? result?.contenido ?? result;
+        const payload =
+          result?.data ?? result?.portafolio ?? result?.contenido ?? result;
+
         setData(payload as PortafolioData);
       } catch (err: any) {
         setError(err?.message || t("profileUser.errors.load_profile"));
@@ -650,26 +854,34 @@ function PortafolioPublico() {
   ]);
 
   const habilidadesTecnicas = useMemo(
-    () => (habilidades ?? []).filter((h) => h.tipo !== "blanda"),
+    () => habilidades.filter((h) => h.tipo !== "blanda"),
     [habilidades]
   );
 
   const habilidadesBlandas = useMemo(
-    () => (habilidades ?? []).filter((h) => h.tipo === "blanda"),
+    () => habilidades.filter((h) => h.tipo === "blanda"),
     [habilidades]
   );
 
   const experienciaLaboral = useMemo(
-    () => pickVisible(data?.experiencias_laborales ?? data?.experienciasLaborales ?? []),
+    () =>
+      pickVisible(
+        data?.experiencias_laborales ?? data?.experienciasLaborales ?? []
+      ),
     [data?.experiencias_laborales, data?.experienciasLaborales]
   );
 
   const experienciaAcademica = useMemo(
-    () => pickVisible(data?.experiencias_academicas ?? data?.experienciasAcademicas ?? []),
+    () =>
+      pickVisible(
+        data?.experiencias_academicas ?? data?.experienciasAcademicas ?? []
+      ),
     [data?.experiencias_academicas, data?.experienciasAcademicas]
   );
 
-  const proyectos = useMemo(() => pickVisible(data?.proyectos ?? []), [data?.proyectos]);
+  const proyectos = useMemo(() => pickVisible(data?.proyectos ?? []), [
+    data?.proyectos,
+  ]);
 
   const enlacesPublicos = useMemo(() => {
     const enlaces: { label: string; url: string }[] = [];
@@ -702,13 +914,6 @@ function PortafolioPublico() {
       });
     }
 
-    if (portafolio?.plantilla?.url_vista) {
-      enlaces.push({
-        label: "Vista de plantilla",
-        url: portafolio.plantilla.url_vista,
-      });
-    }
-
     (data?.redes_profesionales ?? [])
       .filter((red) => isVisible(red.visible))
       .forEach((red) => {
@@ -723,16 +928,16 @@ function PortafolioPublico() {
 
   if (cargando) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F5F5F5] px-4">
-        <p className="font-medium text-gray-500">{t("profileUser.loading")}</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#F5F5F5] px-4 text-center text-gray-500">
+        {t("profileUser.loading")}
       </div>
     );
   }
 
   if (error || !usuario) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F5F5F5] px-4">
-        <div className="max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex min-h-screen items-center justify-center bg-[#F5F5F5] px-4 text-center">
+        <div className="max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <p className="text-lg font-semibold text-slate-900">
             {error ? "Error al cargar el perfil" : t("profileUser.errors.profile_not_found")}
           </p>
@@ -757,8 +962,9 @@ function PortafolioPublico() {
           experienciaLaboral={experienciaLaboral}
           experienciaAcademica={experienciaAcademica}
           proyectos={proyectos}
-          publicUrl={publicUrl}
           onOpenPublicLinks={() => setMostrarModalEnlaces(true)}
+          redes={data?.redes_profesionales ?? []}
+          publicUrl={publicUrl}
         />
       );
       break;
@@ -774,8 +980,9 @@ function PortafolioPublico() {
           experienciaLaboral={experienciaLaboral}
           experienciaAcademica={experienciaAcademica}
           proyectos={proyectos}
-          publicUrl={publicUrl}
           onOpenPublicLinks={() => setMostrarModalEnlaces(true)}
+          redes={data?.redes_profesionales ?? []}
+          publicUrl={publicUrl}
         />
       );
       break;
@@ -791,8 +998,8 @@ function PortafolioPublico() {
           experienciaLaboral={experienciaLaboral}
           experienciaAcademica={experienciaAcademica}
           proyectos={proyectos}
-          publicUrl={publicUrl}
           onOpenPublicLinks={() => setMostrarModalEnlaces(true)}
+          redes={data?.redes_profesionales ?? []}
         />
       );
       break;
@@ -818,8 +1025,8 @@ function PortafolioBento({
   experienciaLaboral = [],
   experienciaAcademica = [],
   proyectos = [],
-  publicUrl = "",
   onOpenPublicLinks,
+  redes = [],
 }: {
   usuario: Usuario;
   nombreCompleto: string;
@@ -828,200 +1035,171 @@ function PortafolioBento({
   experienciaLaboral?: ExperienciaLaboral[];
   experienciaAcademica?: ExperienciaAcademica[];
   proyectos?: Proyecto[];
-  publicUrl?: string;
   onOpenPublicLinks?: () => void;
+  redes?: RedProfesional[];
 }) {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] px-4 py-6 font-inter md:px-0 md:py-10">
-      <div className="mx-auto flex max-w-[1240px] flex-col overflow-hidden rounded-[16px] shadow-2xl">
-        <header className="relative shrink-0 overflow-hidden bg-[#1F4E79] p-6 text-white md:p-12">
-          <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex flex-col gap-5 md:flex-row md:items-start md:gap-8">
-              <div className="mx-auto h-28 w-28 shrink-0 overflow-hidden rounded-full border-2 border-white/20 shadow-inner md:mx-0 md:h-32 md:w-32">
-                {usuario.foto ? (
-                  <img
-                    src={usuario.foto}
-                    alt={nombreCompleto}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-white/10 text-4xl font-bold">
-                    {inicial}
-                  </div>
-                )}
-              </div>
+    <div className={theme.page}>
+      <div className={theme.shell}>
+        <header className={theme.hero}>
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+              {usuario.foto ? (
+                <img
+                  src={usuario.foto}
+                  alt={nombreCompleto}
+                  className="h-16 w-16 rounded-full object-cover ring-4 ring-blue-100 sm:h-20 sm:w-20 lg:h-24 lg:w-24"
+                />
+              ) : (
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-500 text-2xl font-bold text-white ring-4 ring-blue-100 sm:h-20 sm:w-20 sm:text-3xl lg:h-24 lg:w-24 lg:text-4xl">
+                  {inicial}
+                </div>
+              )}
 
-              <div className="text-center md:text-left">
-                <h1 className="text-[32px] font-bold tracking-tight md:text-[42px]">
+              <div>
+                <span className={theme.badge}>Portafolio público</span>
+                <h1 className="mt-3 text-3xl font-bold tracking-tight text-blue-700 sm:text-4xl lg:text-5xl">
                   {nombreCompleto}
                 </h1>
-                <p className="mt-2 text-[18px] font-medium italic text-blue-200 opacity-90 md:text-[20px]">
-                  {usuario.profesion || t("profileUser.defaults.professional")}
+                <p className={`mt-3 max-w-3xl text-base ${theme.body} sm:text-lg`}>
+                  {usuario.biografia ||
+                    "Desarrollo soluciones web modernas y escalables. Enfocado en backend, APIs y microservicios con arquitecturas robustas."}
                 </p>
-
-                <div className="mt-5 flex flex-wrap justify-center gap-x-6 gap-y-3 text-[13px] font-medium md:justify-start">
-                  {usuario.email && (
-                    <span className="flex items-center gap-2.5 opacity-80">
-                      <Mail size={16} />
-                      <span className="break-all">{usuario.email}</span>
-                    </span>
-                  )}
-
-                  {(usuario.ciudad || usuario.pais) && (
-                    <span className="flex items-center gap-2.5 opacity-80">
-                      <MapPin size={16} />
-                      <span>
-                        {usuario.ciudad || ""}
-                        {usuario.ciudad && usuario.pais ? ", " : ""}
-                        {usuario.pais || ""}
-                      </span>
-                    </span>
-                  )}
-
-                  {usuario.institucion && (
-                    <span className="flex items-center gap-2.5 opacity-80">
-                      <GraduationCap size={18} />
-                      {usuario.institucion}
-                    </span>
-                  )}
-                </div>
               </div>
             </div>
 
-            {publicUrl && (
-              <div className="flex justify-center lg:justify-end">
-                <button
-                  type="button"
-                  onClick={onOpenPublicLinks}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/15"
-                >
-                  Enlace público
-                </button>
-              </div>
-            )}
+            <div className="flex flex-wrap gap-3">
+              <SocialLinks redes={redes} />
+            </div>
           </div>
 
-          <div className="relative z-10 mt-6 flex flex-wrap gap-2">
-            {topSkillNames(habilidades ?? [], 4).map((skill) => (
-              <span
-                key={skill}
-                className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm text-white"
-              >
-                {skill}
+          <div className="mt-6 flex flex-wrap gap-2 text-sm">
+            {usuario.email && (
+              <span className={theme.chip}>
+                <span className="inline-flex items-center gap-2">
+                  <Mail size={14} />
+                  {usuario.email}
+                </span>
+              </span>
+            )}
+
+            <button
+              type="button"
+              onClick={onOpenPublicLinks}
+              className={theme.linkChip}
+            >
+              Enlace público
+            </button>
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-2">
+            {topSkillNames(habilidades, 4).map((chip) => (
+              <span key={chip} className={theme.chip}>
+                {chip}
               </span>
             ))}
           </div>
         </header>
 
-        <div className="flex flex-col gap-12 border-t border-white/10 bg-white p-6 md:gap-16 md:p-10 lg:p-16">
-          <section>
-            <SectionHeading title="Sobre mí" />
-            <p className="mt-4 max-w-5xl text-[16px] font-medium leading-relaxed text-slate-600 md:text-[18px]">
-              {usuario.biografia || t("profileUser.defaults.no_biography")}
-            </p>
-          </section>
+        <section className="mt-8">
+          <SectionHeading title="Sobre mí" />
+          <p className={`mt-4 max-w-5xl text-base font-medium leading-relaxed ${theme.body} sm:text-lg`}>
+            {usuario.biografia || t("profileUser.defaults.no_biography")}
+          </p>
+        </section>
 
-          <section>
-            <SectionHeading title="Experiencia laboral" />
-            <div className="mt-6 grid gap-6 md:grid-cols-2">
-              {experienciaLaboral.length > 0 ? (
-                experienciaLaboral.map((exp) => (
-                  <ExperienceCard
-                    key={exp.id_experiencia}
-                    exp={exp}
-                    type="laboral"
-                  />
-                ))
-              ) : (
-                <EmptyCard
-                  title={t("profileUser.empty.no_experience")}
-                  description={t("profileUser.defaults.no_description")}
-                />
-              )}
+        <section className="mt-8">
+          <SectionHeading title="Experiencia laboral" />
+          <div className="mt-6 grid gap-6 md:grid-cols-2">
+            {experienciaLaboral.length > 0 ? (
+              experienciaLaboral.map((exp) => (
+                <ExperienceCard key={exp.id_experiencia} exp={exp} type="laboral" />
+              ))
+            ) : (
+              <EmptyCard
+                title={t("profileUser.empty.no_experience")}
+                description={t("profileUser.defaults.no_description")}
+              />
+            )}
+          </div>
+        </section>
+
+        <section className="mt-8">
+          <SectionHeading title="Proyectos" />
+          <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {proyectos.length > 0 ? (
+              proyectos.slice(0, 3).map((proyecto, index) => (
+                <ProjectCard key={proyecto.id_proyecto} proyecto={proyecto} index={index + 1} />
+              ))
+            ) : (
+              <EmptyCard
+                title={t("profileUser.empty.no_projects")}
+                description={t("profileUser.defaults.no_description")}
+              />
+            )}
+          </div>
+        </section>
+
+        <section className="mt-8">
+          <SectionHeading title="Habilidades" />
+          <div className="mt-6 grid gap-6 md:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="mb-5 text-lg font-bold text-slate-900">
+                Habilidades técnicas
+              </h3>
+              <SkillBars habilidades={habilidades.filter((h) => h.tipo !== "blanda")} />
             </div>
-          </section>
 
-          <section>
-            <SectionHeading title="Proyectos" />
-            <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {proyectos.length > 0 ? (
-                proyectos.slice(0, 3).map((proyecto, index) => (
-                  <ProjectCard
-                    key={proyecto.id_proyecto}
-                    proyecto={proyecto}
-                    index={index + 1}
-                  />
-                ))
-              ) : (
-                <EmptyCard
-                  title={t("profileUser.empty.no_projects")}
-                  description={t("profileUser.defaults.no_description")}
-                />
-              )}
-            </div>
-          </section>
-
-          <section>
-            <SectionHeading title="Habilidades" />
-            <div className="mt-6 grid gap-6 md:grid-cols-2">
-              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h3 className="mb-5 text-lg font-bold text-slate-900">
-                  Habilidades técnicas
-                </h3>
-                <SkillBars
-                  habilidades={(habilidades ?? []).filter((h) => h.tipo !== "blanda")}
-                />
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h3 className="mb-5 text-lg font-bold text-slate-900">
-                  Habilidades blandas
-                </h3>
-                <div className="flex flex-wrap gap-3">
-                  {(habilidades ?? []).filter((h) => h.tipo === "blanda").length > 0 ? (
-                    habilidades
-                      .filter((h) => h.tipo === "blanda")
-                      .slice(0, 12)
-                      .map((habilidad) => (
-                        <span
-                          key={habilidad.id_habilidad || habilidad.nombre}
-                          className="rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700"
-                        >
-                          {habilidad.nombre}
-                        </span>
-                      ))
-                  ) : (
-                    <p className="text-sm text-slate-500">
-                      No hay habilidades blandas registradas.
-                    </p>
-                  )}
-                </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="mb-5 text-lg font-bold text-slate-900">
+                Habilidades blandas
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {habilidades.filter((h) => h.tipo === "blanda").length > 0 ? (
+                  habilidades
+                    .filter((h) => h.tipo === "blanda")
+                    .slice(0, 12)
+                    .map((habilidad) => (
+                      <span
+                        key={habilidad.id_habilidad || habilidad.nombre}
+                        className="rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700"
+                      >
+                        {habilidad.nombre}
+                      </span>
+                    ))
+                ) : (
+                  <p className="text-sm text-slate-500">
+                    No hay habilidades blandas registradas.
+                  </p>
+                )}
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section>
-            <SectionHeading title="Experiencia académica" />
-            <div className="mt-6 grid gap-6 md:grid-cols-2">
-              {experienciaAcademica.length > 0 ? (
-                experienciaAcademica.map((edu) => (
-                  <ExperienceCard
-                    key={edu.id_experiencia_academica}
-                    exp={edu}
-                    type="academica"
-                  />
-                ))
-              ) : (
-                <EmptyCard
-                  title={t("profileUser.empty.no_academic_experience")}
-                  description={t("profileUser.defaults.no_description")}
+        <section className="mt-8">
+          <SectionHeading title="Experiencia académica" />
+          <div className="mt-6 grid gap-6 md:grid-cols-2">
+            {experienciaAcademica.length > 0 ? (
+              experienciaAcademica.map((edu) => (
+                <ExperienceCard
+                  key={edu.id_experiencia_academica}
+                  exp={edu}
+                  type="academica"
                 />
-              )}
-            </div>
-          </section>
-        </div>
+              ))
+            ) : (
+              <EmptyCard
+                title={t("profileUser.empty.no_academic_experience")}
+                description={t("profileUser.defaults.no_description")}
+              />
+            )}
+          </div>
+        </section>
+
+        <FooterCTA onOpenLinks={() => onOpenPublicLinks?.()} />
       </div>
     </div>
   );
@@ -1035,8 +1213,9 @@ function PortafolioSidebar({
   experienciaLaboral = [],
   experienciaAcademica = [],
   proyectos = [],
-  publicUrl = "",
   onOpenPublicLinks,
+  redes = [],
+  publicUrl = "",
 }: {
   usuario: Usuario;
   nombreCompleto: string;
@@ -1045,94 +1224,101 @@ function PortafolioSidebar({
   experienciaLaboral?: ExperienciaLaboral[];
   experienciaAcademica?: ExperienciaAcademica[];
   proyectos?: Proyecto[];
-  publicUrl?: string;
   onOpenPublicLinks?: () => void;
+  redes?: RedProfesional[];
+  publicUrl?: string;
 }) {
   const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] font-inter">
-      <div className="mx-auto grid max-w-[1240px] gap-8 px-4 py-6 md:px-6 lg:grid-cols-[320px_1fr] lg:px-0 lg:py-10">
-        <aside className="self-start rounded-[16px] bg-[#1F4E79] p-6 text-white shadow-2xl lg:sticky lg:top-6">
+      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:grid-cols-[320px_1fr] lg:gap-8 lg:px-8 lg:py-10">
+        <aside className={`self-start ${theme.hero} lg:sticky lg:top-6`}>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5 lg:block">
+            <div className="flex items-center gap-4 sm:gap-5">
+              {usuario.foto ? (
+                <img
+                  src={usuario.foto}
+                  alt={nombreCompleto}
+                  className="h-16 w-16 rounded-full object-cover ring-4 ring-blue-100 sm:h-20 sm:w-20"
+                />
+              ) : (
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-500 text-2xl font-bold text-white ring-4 ring-blue-100 sm:h-20 sm:w-20 sm:text-3xl">
+                  {inicial}
+                </div>
+              )}
+
+              <div>
+                <h1 className="text-xl font-bold text-blue-700 sm:text-2xl">
+                  {nombreCompleto}
+                </h1>
+                <p className={`mt-2 text-sm ${theme.body}`}>
+                  {usuario.biografia ||
+                    "Profesional apasionado por crear soluciones innovadoras y escalables."}
+                </p>
+              </div>
+            </div>
+          </div>
+
           {publicUrl && (
-            <div className="mb-5 flex justify-end">
+            <div className="mt-5 flex justify-start">
               <button
                 type="button"
                 onClick={onOpenPublicLinks}
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/15"
+                className={theme.linkChip}
               >
                 Enlace público
               </button>
             </div>
           )}
 
-          <div className="flex flex-col items-center text-center">
-            <div className="h-28 w-28 overflow-hidden rounded-full border-2 border-white/20 shadow-inner">
-              {usuario.foto ? (
-                <img
-                  src={usuario.foto}
-                  alt={nombreCompleto}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-white/10 text-4xl font-bold">
-                  {inicial}
-                </div>
-              )}
-            </div>
-
-            <h1 className="mt-5 text-2xl font-bold">{nombreCompleto}</h1>
-            <p className="mt-2 text-sm text-blue-100 opacity-80">
-              {usuario.profesion || t("profileUser.defaults.professional")}
-            </p>
+          <div className="mt-6 space-y-4">
+            <SidebarSectionTitle title="Habilidades" />
+            <SkillBars habilidades={habilidadesTecnicas.slice(0, 4)} />
           </div>
 
-          <div className="mt-6 space-y-5">
-            <div className="rounded-2xl bg-white/10 p-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-blue-100">
-                Email
-              </p>
-              <p className="mt-2 break-all text-sm text-white/90">
-                {usuario.email || "—"}
-              </p>
-            </div>
+          <div className="mt-6 space-y-4">
+            <SidebarSectionTitle title="Redes" />
+            <SocialLinks redes={redes} />
+          </div>
 
-            <div className="rounded-2xl bg-white/10 p-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-blue-100">
+          <div className="mt-6 space-y-3">
+            {usuario.email && (
+              <a href={`mailto:${usuario.email}`} className={theme.cardSoft}>
+                <p className={`text-[10px] uppercase tracking-[0.18em] ${theme.sub}`}>
+                  Email
+                </p>
+                <p className="mt-1 break-all text-sm font-medium text-slate-900">
+                  {usuario.email}
+                </p>
+              </a>
+            )}
+
+            <div className={theme.cardSoft}>
+              <p className={`text-[10px] uppercase tracking-[0.18em] ${theme.sub}`}>
                 Ubicación
               </p>
-              <p className="mt-2 text-sm text-white/90">
+              <p className="mt-1 text-sm font-medium text-slate-900">
                 {[usuario.ciudad, usuario.pais].filter(Boolean).join(", ") || "—"}
               </p>
             </div>
           </div>
-
-          <div className="mt-6">
-            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-blue-100">
-              Habilidades
-            </p>
-            <SkillBars habilidades={habilidadesTecnicas ?? []} />
-          </div>
         </aside>
 
         <main className="space-y-8">
-          <section className="rounded-[16px] bg-white p-6 shadow-xl md:p-8">
+          <section>
             <SectionHeading title="Sobre mí" />
-            <p className="mt-4 max-w-4xl text-base leading-8 text-slate-600 md:text-lg">
+            <p className={`mt-4 max-w-4xl text-base leading-8 ${theme.body} sm:text-lg`}>
               {usuario.biografia || t("profileUser.defaults.no_biography")}
             </p>
           </section>
 
-          <section className="rounded-[16px] bg-white p-6 shadow-xl md:p-8">
+          <section>
             <SectionHeading title="Proyectos" />
             <div className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {proyectos.length > 0 ? (
                 proyectos.slice(0, 4).map((proyecto, index) => (
-                  <ProjectCard
-                    key={proyecto.id_proyecto}
-                    proyecto={proyecto}
-                    index={index + 1}
-                  />
+                  <ProjectCard key={proyecto.id_proyecto} proyecto={proyecto} index={index + 1} />
                 ))
               ) : (
                 <EmptyCard
@@ -1143,7 +1329,7 @@ function PortafolioSidebar({
             </div>
           </section>
 
-          <section className="rounded-[16px] bg-white p-6 shadow-xl md:p-8">
+          <section>
             <SectionHeading title="Experiencia laboral" />
             <div className="mt-6 space-y-4">
               <ExperienceTimeline
@@ -1155,7 +1341,7 @@ function PortafolioSidebar({
             </div>
           </section>
 
-          <section className="rounded-[16px] bg-white p-6 shadow-xl md:p-8">
+          <section>
             <SectionHeading title="Experiencia académica" />
             <div className="mt-6 space-y-4">
               <ExperienceTimeline
@@ -1181,8 +1367,9 @@ function PortafolioEditorial({
   experienciaLaboral = [],
   experienciaAcademica = [],
   proyectos = [],
-  publicUrl = "",
   onOpenPublicLinks,
+  redes = [],
+  publicUrl = "",
 }: {
   usuario: Usuario;
   nombreCompleto: string;
@@ -1192,8 +1379,9 @@ function PortafolioEditorial({
   experienciaLaboral?: ExperienciaLaboral[];
   experienciaAcademica?: ExperienciaAcademica[];
   proyectos?: Proyecto[];
-  publicUrl?: string;
   onOpenPublicLinks?: () => void;
+  redes?: RedProfesional[];
+  publicUrl?: string;
 }) {
   const { t } = useTranslation();
 
@@ -1265,12 +1453,16 @@ function PortafolioEditorial({
               </span>
             )}
           </div>
+
+          <div className="mt-6">
+            <SocialLinks redes={redes} />
+          </div>
         </header>
 
         <div className="flex flex-col gap-12 bg-white p-6 md:gap-16 md:p-10 lg:p-16">
           <section>
             <SectionHeading title="Sobre mí" />
-            <p className="mt-4 max-w-5xl text-[16px] font-medium leading-relaxed text-slate-600 md:text-[18px]">
+            <p className={`mt-4 max-w-5xl text-[16px] font-medium leading-relaxed ${theme.body} md:text-[18px]`}>
               {usuario.biografia || t("profileUser.defaults.no_biography")}
             </p>
           </section>
@@ -1295,7 +1487,7 @@ function PortafolioEditorial({
                   <h3 className="mb-4 text-lg font-bold text-slate-900">
                     Habilidades técnicas
                   </h3>
-                  <SkillBars habilidades={habilidadesTecnicas ?? []} />
+                  <SkillBars habilidades={habilidadesTecnicas} />
                 </div>
 
                 <div className="pt-4">
@@ -1303,8 +1495,8 @@ function PortafolioEditorial({
                     Habilidades blandas
                   </h3>
                   <div className="flex flex-wrap gap-3">
-                    {(habilidadesBlandas ?? []).length > 0 ? (
-                      (habilidadesBlandas ?? []).slice(0, 12).map((habilidad) => (
+                    {habilidadesBlandas.length > 0 ? (
+                      habilidadesBlandas.slice(0, 12).map((habilidad) => (
                         <span
                           key={habilidad.id_habilidad || habilidad.nombre}
                           className="rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700"
@@ -1325,10 +1517,10 @@ function PortafolioEditorial({
 
           <section>
             <SectionHeading title="Proyectos" />
-            <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-6 space-y-4">
               {proyectos.length > 0 ? (
                 proyectos.slice(0, 4).map((proyecto, index) => (
-                  <ProjectCard
+                  <ProjectRow
                     key={proyecto.id_proyecto}
                     proyecto={proyecto}
                     index={index + 1}
@@ -1362,8 +1554,22 @@ function PortafolioEditorial({
               )}
             </div>
           </section>
+
+          <FooterCTA onOpenLinks={() => onOpenPublicLinks?.()} />
         </div>
       </div>
+    </div>
+  );
+}
+
+function SidebarSectionTitle({ title }: { title: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className={theme.sectionLine} />
+      <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${theme.accent}`}>
+        {title}
+      </p>
+      <span className={theme.sectionLine} />
     </div>
   );
 }

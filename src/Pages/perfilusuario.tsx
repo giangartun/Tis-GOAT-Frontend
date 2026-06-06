@@ -1602,7 +1602,7 @@ export default function PerfilUsuario() {
             ) : academicas.length === 0 ? (
               <Empty label={t('profile.labels.academic_experiences')} />
             ) : (
-              <div className="grid grid-cols-1 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {academicas.map((a) => (
                   <div
                     key={a.id_experiencia_academica}
@@ -1632,6 +1632,40 @@ export default function PerfilUsuario() {
                           <p className="mt-4 text-[14px] text-gray-600 leading-relaxed">
                             {a.descripcion}
                           </p>
+                        )}
+
+                        {a.evidencias && a.evidencias.length > 0 && (
+                          <div className="mt-4 flex flex-wrap gap-3">
+                            {a.evidencias.map((e) => {
+                              const url = e.preview_url || e.url_evidencia;
+                              const esPdf =
+                                e.tipo?.toLowerCase().includes("pdf") ||
+                                e.nombre_archivo?.toLowerCase().endsWith(".pdf");
+
+                              return (
+                                <a
+                                  key={e.id_evidencia}
+                                  href={url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm transition hover:bg-slate-100"
+                                >
+                                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600">
+                                    <FileText size={22} />
+                                  </div>
+
+                                  <div className="min-w-0">
+                                    <p className="truncate text-[13px] font-bold text-slate-800">
+                                      {e.nombre_archivo}
+                                    </p>
+                                    <p className="text-[11px] text-slate-500">
+                                      {esPdf ? "Archivo PDF" : "Archivo adjunto"}
+                                    </p>
+                                  </div>
+                                </a>
+                              );
+                            })}
+                          </div>
                         )}
                       </div>
                     </div>
@@ -1684,7 +1718,7 @@ export default function PerfilUsuario() {
             ) : laborales.length === 0 ? (
               <Empty label="experiencias laborales" />
             ) : (
-              <div className="grid grid-cols-1 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {laborales.map((l) => (
                   <div
                     key={l.id_experiencia}
@@ -1715,6 +1749,41 @@ export default function PerfilUsuario() {
                             {l.descripcion}
                           </p>
                         )}
+
+                        {l.evidencias && l.evidencias.length > 0 && (
+                          <div className="mt-4 flex flex-wrap gap-3">
+                            {l.evidencias.map((e) => {
+                              const url = e.preview_url || e.url_evidencia;
+                              const esPdf =
+                                e.tipo?.toLowerCase().includes("pdf") ||
+                                e.nombre_archivo?.toLowerCase().endsWith(".pdf");
+
+                              return (
+                                <a
+                                  key={e.id_evidencia}
+                                  href={url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm transition hover:bg-slate-100"
+                                >
+                                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600">
+                                    <FileText size={22} />
+                                  </div>
+
+                                  <div className="min-w-0">
+                                    <p className="truncate text-[13px] font-bold text-slate-800">
+                                      {e.nombre_archivo}
+                                    </p>
+                                    <p className="text-[11px] text-slate-500">
+                                      {esPdf ? "Archivo PDF" : "Archivo adjunto"}
+                                    </p>
+                                  </div>
+                                </a>
+                              );
+                            })}
+                          </div>
+                        )}
+
                       </div>
                     </div>
 

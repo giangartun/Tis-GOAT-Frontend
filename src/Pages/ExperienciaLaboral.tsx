@@ -41,10 +41,12 @@ function ExperienciaLaboralModal({
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
+  const successTimerRef = useRef<number | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [sigueActivo, setSigueActivo] = useState(false);
   const [archivos, setArchivos] = useState<File[]>([]);
   const [form, setForm] = useState({
@@ -64,7 +66,6 @@ function ExperienciaLaboralModal({
     return `${year}-${month}-${day}`;
   }, []);
 
-  // Textos con interpolación o que fallan en i18n — resueltos aquí directamente
   const charCountText = useMemo(() => {
     const lang = i18n.language?.slice(0, 2);
     if (lang === "en") return `${form.descripcion.length} / ${MAX_DESC} characters`;
@@ -88,6 +89,7 @@ function ExperienciaLaboralModal({
       setLoading(false);
       setDragActive(false);
       setError(null);
+      setSuccessMessage(null);
       setSigueActivo(false);
       setArchivos([]);
       setForm({
@@ -97,6 +99,11 @@ function ExperienciaLaboralModal({
         fecha_ini: "",
         fecha_fin: "",
       });
+
+      if (successTimerRef.current !== null) {
+        window.clearTimeout(successTimerRef.current);
+        successTimerRef.current = null;
+      }
     }
   }, [abierto]);
 
@@ -104,6 +111,7 @@ function ExperienciaLaboralModal({
     if (!abierto) return;
 
     setError(null);
+    setSuccessMessage(null);
     setArchivos([]);
     setForm({
       empresa: initialData?.empresa ?? "",
@@ -123,6 +131,14 @@ function ExperienciaLaboralModal({
     if (abierto) window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [abierto, onCerrar]);
+
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current !== null) {
+        window.clearTimeout(successTimerRef.current);
+      }
+    };
+  }, []);
 
   if (!abierto) return null;
 
@@ -183,11 +199,13 @@ function ExperienciaLaboralModal({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccessMessage(null);
 
     if (!validar()) return;
 
     try {
       setLoading(true);
+
       await onGuardar?.({
         empresa: form.empresa.trim(),
         cargo: form.cargo.trim(),
@@ -196,12 +214,21 @@ function ExperienciaLaboralModal({
         fecha_fin: sigueActivo ? null : form.fecha_fin,
         archivos,
       });
-      onCerrar();
+
+      setSuccessMessage("Guardado con éxito");
+      setLoading(false);
+
+      if (successTimerRef.current !== null) {
+        window.clearTimeout(successTimerRef.current);
+      }
+
+      successTimerRef.current = window.setTimeout(() => {
+        onCerrar();
+      }, 1200);
     } catch (err) {
       console.error(err);
-      setError(t("workExperience.errors.save_failed"));
-    } finally {
       setLoading(false);
+      setError(t("workExperience.errors.save_failed"));
     }
   };
 
@@ -293,7 +320,6 @@ function ExperienciaLaboralModal({
               placeholder={t("workExperience.placeholders.description")}
               className="w-full rounded-[12px] border border-slate-300 bg-slate-50 px-3 py-2 text-[13px] text-black outline-none placeholder:text-slate-400 focus:border-slate-400 sm:text-[14px]"
             />
-            {/* ✅ CORREGIDO: charCountText resuelto localmente */}
             <p className="mt-1 text-right text-[10px] text-slate-400 sm:text-[11px]">
               {charCountText}
             </p>
@@ -346,7 +372,6 @@ function ExperienciaLaboralModal({
                   size={14}
                 />
               </div>
-              {/* ✅ CORREGIDO: endDateHintText resuelto localmente */}
               <p className="mt-1 text-[10px] text-slate-400 sm:text-[11px]">
                 {endDateHintText}
               </p>
@@ -361,7 +386,10 @@ function ExperienciaLaboralModal({
           </div>
 
           <div
-            onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragActive(true);
+            }}
             onDragLeave={() => setDragActive(false)}
             onDrop={(e) => {
               e.preventDefault();
@@ -439,6 +467,12 @@ function ExperienciaLaboralModal({
           {error && (
             <div className="mt-3 rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700 sm:text-[13px]">
               {error}
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="mt-3 rounded-2xl border border-green-200 bg-green-50 px-3 py-2 text-[12px] text-green-700 sm:text-[13px]">
+              {successMessage}
             </div>
           )}
 

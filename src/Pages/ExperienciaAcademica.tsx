@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import { X, Upload, FileText, CalendarDays, Plus } from "lucide-react";
+import {
+  X,
+  Upload,
+  FileText,
+  CalendarDays,
+  Plus,
+  CheckCircle2,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export interface ExperienciaAcademicaModalSubmit {
@@ -30,6 +37,7 @@ interface ExperienciaAcademicaModalProps {
 const MAX_FILE_SIZE_MB = 5;
 const ALLOWED_MIME_TYPES = ["application/pdf", "image/jpeg", "image/png"];
 const MAX_DESC = 500;
+const SUCCESS_CLOSE_DELAY = 1000;
 
 function ExperienciaAcademicaModal({
   abierto,
@@ -41,10 +49,12 @@ function ExperienciaAcademicaModal({
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [sigueCursando, setSigueCursando] = useState(false);
   const [archivos, setArchivos] = useState<File[]>([]);
   const [form, setForm] = useState({
@@ -67,6 +77,7 @@ function ExperienciaAcademicaModal({
   useEffect(() => {
     if (abierto) {
       setError(null);
+      setSuccess(null);
     }
   }, [abierto]);
 
@@ -75,6 +86,7 @@ function ExperienciaAcademicaModal({
       setLoading(false);
       setDragActive(false);
       setError(null);
+      setSuccess(null);
       setSigueCursando(false);
       setArchivos([]);
       setForm({
@@ -84,6 +96,11 @@ function ExperienciaAcademicaModal({
         fecha_ini: "",
         fecha_fin: "",
       });
+
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     }
   }, [abierto]);
 
@@ -91,6 +108,7 @@ function ExperienciaAcademicaModal({
     if (!abierto) return;
 
     setError(null);
+    setSuccess(null);
     setArchivos([]);
     setForm({
       institucion: initialData?.institucion ?? "",
@@ -115,6 +133,11 @@ function ExperienciaAcademicaModal({
 
     return () => {
       window.removeEventListener("keydown", onKeyDown);
+
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     };
   }, [abierto, onCerrar]);
 
@@ -205,26 +228,51 @@ function ExperienciaAcademicaModal({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
 
     if (!validar()) return;
+
+    const payload: ExperienciaAcademicaModalSubmit = {
+      institucion: form.institucion.trim(),
+      titulo: form.titulo.trim(),
+      descripcion: form.descripcion.trim(),
+      fecha_ini: form.fecha_ini,
+      fecha_fin: sigueCursando ? null : form.fecha_fin,
+      archivos,
+    };
 
     try {
       setLoading(true);
 
-      await onGuardar?.({
-        institucion: form.institucion.trim(),
-        titulo: form.titulo.trim(),
-        descripcion: form.descripcion.trim(),
-        fecha_ini: form.fecha_ini,
-        fecha_fin: sigueCursando ? null : form.fecha_fin,
-        archivos,
+      setSuccess(
+        t("academicExperience.messages.saved_success", {
+          defaultValue: "Guardado con éxito",
+        })
+      );
+
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+      }
+
+      void Promise.resolve(onGuardar?.(payload)).catch((err) => {
+        console.error(err);
+        setError(t("academicExperience.errors.save_failed"));
+        setSuccess(null);
+        setLoading(false);
+
+        if (timeoutRef.current) {
+          window.clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
       });
 
-      onCerrar();
+      timeoutRef.current = window.setTimeout(() => {
+        setLoading(false);
+        onCerrar();
+      }, SUCCESS_CLOSE_DELAY);
     } catch (err) {
       console.error(err);
       setError(t("academicExperience.errors.save_failed"));
-    } finally {
       setLoading(false);
     }
   };
@@ -511,6 +559,13 @@ function ExperienciaAcademicaModal({
               )}
             </div>
           </div>
+
+          {success && (
+            <div className="mt-3 flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-700 shadow-sm sm:text-[13px]">
+              <CheckCircle2 size={16} className="shrink-0" />
+              <span>{success}</span>
+            </div>
+          )}
 
           {error && (
             <div className="mt-3 rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700 sm:text-[13px]">

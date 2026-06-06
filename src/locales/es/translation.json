@@ -781,5 +781,361 @@
     "subtitle": "Estoy disponible para proyectos y colaboraciones.",
     "secondary": "CV"
   }
-}
+},
+"admin": {
+  "header": {
+    "title": "Panel de administración",
+    "admin_label": "Admin"
+  },
+  "tabs": {
+    "usuarios": "Usuarios",
+    "bitacora": "Bitácora",
+    "backup": "Backup",
+    "tecnologias": "Tecnologías",
+    "grados": "Grados",
+    "anuncios": "Anuncios"
+  },
+  "users": {
+    "title": "Gestión de usuarios",
+    "subtitle": "Administra todas las cuentas registradas",
+    "cards": {
+      "total": "Total usuarios",
+      "active": "Activos",
+      "suspended": "Suspendidos",
+      "registered": "Registrados"
+    },
+    "search_placeholder": "Buscar usuarios...",
+    "state": {
+      "all": "Todos",
+      "active": "Activos",
+      "suspended": "Suspendidos"
+    },
+    "no_results": "No se encontraron usuarios.",
+    "table": {
+      "user": "Usuario",
+      "role": "Rol",
+      "status": "Estado",
+      "registered": "Registrado",
+      "last_access": "Último acceso",
+      "actions": "Acciones"
+    },
+    "role_admin": "Admin",
+    "role_user": "Usuario",
+    "status_active": "Activo",
+    "status_suspended": "Suspendido",
+    "suspend": "Suspender",
+    "reactivate": "Reactivar"
+  },
+  "bitacora": {
+    "title": "Bitácora de acciones",
+    "subtitle": "Revisa el historial de eventos del sistema",
+    "since": "Desde",
+    "until": "Hasta",
+    "filters": {
+      "all": "Todos",
+      "suspensions": "Suspensiones",
+      "reactivations": "Reactivaciones",
+      "modifications": "Modificaciones",
+      "creations": "Creaciones",
+      "login": "Inicios de sesión",
+      "logout": "Cierres de sesión"
+    },
+    "table": {
+      "user": "Usuario",
+      "action_type": "Tipo de acción",
+      "current_status": "Estado actual",
+      "date_time": "Fecha y hora",
+      "details": "Detalles"
+    },
+    "status": {
+      "active": "Activo",
+      "suspended": "Suspendido"
+    },
+    "view_context": "Ver contexto",
+    "no_results": "No hay registros.",
+    "apply": "Aplicar filtros",
+    "detail": {
+      "heading": "Contexto detallado",
+      "ip": "Dirección IP",
+      "device": "Dispositivo",
+      "table": "Tabla afectada",
+      "action": "Acción",
+      "reason": "Motivo",
+      "executed_by": "Ejecutado por",
+      "previous_access": "Acceso anterior",
+      "file": "Archivo",
+      "full_json": "Ver JSON completo",
+      "no_additional_info": "No hay información adicional disponible.",
+      "close": "Cerrar"
+    },
+    "types": {
+      "cuenta_suspendida": "Cuenta suspendida",
+      "cuenta_reactivada": "Cuenta reactivada",
+      "cuenta_creada": "Cuenta creada",
+      "inicio_sesion": "Inicio de sesión",
+      "cierre_sesion": "Cierre de sesión",
+      "modificacion_perfil": "Modificación de perfil",
+      "modificacion_foto": "Modificación de foto",
+      "modificacion_tecnologias": "Modificación de tecnologías",
+      "modificacion_habilidades": "Modificación de habilidades",
+      "modificacion_experiencia_laboral": "Modificación de experiencia laboral",
+      "modificacion_experiencia_academica": "Modificación de experiencia académica",
+      "modificacion_redes_sociales": "Modificación de redes sociales",
+      "modificacion_proyectos": "Modificación de proyectos",
+      "modificacion_evidencias": "Modificación de evidencias",
+      "modificacion_privacidad": "Modificación de privacidad",
+      "modificacion_plantilla": "Modificación de plantilla",
+      "importacion_backup": "Importación de backup"
+    }
+  },
+  "backup": {
+    "title": "Gestión de backup",
+    "subtitle": "Exporta o restaura los datos de la plataforma",
+    "export": {
+      "title": "Exportar backup",
+      "description": "Descarga un archivo JSON con todos los datos actuales.",
+      "button": "Descargar backup",
+      "generating": "Generando..."
+    },
+    "import": {
+      "title": "Importar backup",
+      "description": "Se importará {{file}}. Esta acción sobrescribirá todos los datos.",
+      "select_file": "Haz clic para seleccionar el archivo",
+      "file_hint": "JSON o ZIP, máximo 10 MB",
+      "warning": "Al importar, todas las sesiones se cerrarán.",
+      "alert": "Esta acción es irreversible.",
+      "loading": "Importando...",
+      "confirm": "Confirmar"
+    }
+  },
+  "technologies": {
+    "title": "Tecnologías",
+    "subtitle": "Gestiona las tecnologías disponibles en el sistema",
+    "add_button": "+ Agregar tecnología",
+    "no_results": "No hay tecnologías registradas.",
+    "table": {
+      "name": "Nombre",
+      "category": "Categoría",
+      "actions": "Acciones"
+    }
+  },
+  "grades": {
+    "title": "Grados",
+    "subtitle": "Administra los tipos de grados académicos",
+    "add_button": "+ Agregar grado",
+    "no_results": "No hay grados registrados.",
+    "table": {
+      "name": "Nombre del grado",
+      "actions": "Acciones"
+    }
+  },
+  "ads": {
+    "title": "Anuncios",
+    "subtitle": "Publica y administra anuncios del sistema",
+    "add_button": "+ Agregar anuncio",
+    "no_results": "No hay anuncios registrados."
+  },
+  "modals": {
+    "suspend": {
+      "title": "Confirmar suspensión",
+      "description": "La cuenta será suspendida de inmediato."
+    },
+    "reactivate": {
+      "title": "Confirmar reactivación",
+      "description": "La cuenta será reactivada y el usuario podrá acceder nuevamente."
+    },
+    "import": {
+      "title": "Confirmar importación",
+      "description": "Se importará {{file}}. Esta acción sobrescribirá todos los datos.",
+      "alert": "Esta acción es irreversible.",
+      "loading": "Importando...",
+      "confirm": "Confirmar"
+    },
+    "technology": {
+      "new": "+ Nueva tecnología",
+      "edit": "Editar tecnología",
+      "fields": {
+        "name": {
+          "label": "Nombre *",
+          "placeholder": "Ej: React"
+        },
+        "category": {
+          "label": "Categoría *",
+          "placeholder": "Ej: Frontend"
+        }
+      },
+      "delete": {
+        "title": "Eliminar tecnología",
+        "description": "¿Seguro que deseas eliminar {{name}}?"
+      }
+    },
+    "degree": {
+      "new": "+ Nuevo grado",
+      "edit": "Editar grado",
+      "fields": {
+        "name": {
+          "label": "Nombre del grado *",
+          "placeholder": "Ej: Licenciatura"
+        }
+      },
+      "delete": {
+        "title": "Eliminar grado",
+        "description": "¿Seguro que deseas eliminar {{name}}?"
+      }
+    },
+    "ad": {
+      "new": "+ Nuevo anuncio",
+      "edit": "Editar anuncio",
+      "fields": {
+        "title": {
+          "label": "Título *",
+          "placeholder": "Título del anuncio"
+        },
+        "description": {
+          "label": "Descripción",
+          "placeholder": "Descripción (opcional si sube imagen)"
+        },
+        "redirectUrl": {
+          "label": "URL de redirección *",
+          "placeholder": "https://..."
+        },
+        "image": {
+          "label": "Imagen (opcional)",
+          "change": "Cambiar imagen",
+          "select": "Seleccionar imagen",
+          "hint": "JPG, PNG, WebP — máx. 5 MB"
+        }
+      },
+      "delete": {
+        "title": "Eliminar anuncio",
+        "description": "¿Seguro que deseas eliminar {{title}}? La imagen también será eliminada."
+      }
+    }
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "processing": "Procesando...",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "delete": "Eliminar",
+    "deleting": "Eliminando...",
+    "edit": "Editar",
+    "roles": {
+      "admin": "Admin",
+      "user": "Usuario"
+    },
+    "status": {
+      "active": "Activo",
+      "suspended": "Suspendido"
+    }
+  },
+  "notifications": {
+    "account_suspended": "Cuenta suspendida",
+    "error_suspend": "Error al suspender",
+    "account_reactivated": "Cuenta reactivada",
+    "error_reactivate": "Error al reactivar",
+    "backup_downloaded": "Backup descargado",
+    "error_download": "Error al descargar",
+    "backup_imported": "Backup importado. Cerrando sesión...",
+    "backup_imported_login": "Backup importado. Inicia sesión nuevamente.",
+    "error_import": "Error al importar",
+    "error_load_users": "Error al cargar usuarios",
+    "error_load_bitacora": "Error al cargar bitácora",
+    "error_load_technologies": "Error al cargar tecnologías",
+    "error_load_grades": "Error al cargar grados",
+    "error_load_ads": "Error al cargar anuncios",
+    "required_name_category": "Nombre y categoría son obligatorios",
+    "technology_created": "Tecnología creada",
+    "technology_updated": "Tecnología actualizada",
+    "error_save": "Error al guardar",
+    "technology_deleted": "Tecnología eliminada",
+    "error_delete": "Error al eliminar",
+    "required_degree_name": "El nombre es obligatorio",
+    "degree_created": "Grado creado",
+    "degree_updated": "Grado actualizado",
+    "degree_deleted": "Grado eliminado",
+    "required_title_url": "Título y URL son obligatorios",
+    "required_description_or_image": "Incluye al menos descripción o imagen",
+    "ad_created": "Anuncio creado",
+    "ad_updated": "Anuncio actualizado",
+    "ad_deleted": "Anuncio eliminado"
+  },
+  "validation": {
+    "invalid_date": "Fecha inválida",
+    "min_date": "La fecha debe ser posterior a {{date}}",
+    "max_date": "La fecha debe ser anterior a {{date}}"
+  },
+  "log": {
+    "type": "Tipo de acción",
+    "dateTime": "Fecha y hora",
+    "status": "Estado actual"
+  },
+  "pagination": {
+    "users": "usuarios",
+    "records": "registros",
+    "page_info": "Página {{page}} de {{last}} — {{total}} {{label}}",
+    "previous": "Anterior",
+    "next": "Siguiente"
+  }
+},
+  "experience": {
+    "descriptionPlaceholder": "Describe tus responsabilidades, tecnologías usadas o logros...",
+    "characters": "caracteres",
+    "leaveEmptyIfActive": "Dejar vacío si sigue activo"
+  },
+  "portfolio": {
+    "loading": "Cargando portafolio...",
+    "errorTitle": "No se pudo cargar el portafolio.",
+    "errorUnknown": "Error desconocido",
+    "noToken": "No hay token guardado. Inicia sesión nuevamente.",
+    "sessionExpired": "Tu sesión expiró o el token no es válido. Inicia sesión nuevamente.",
+    "defaultBio": "Profesional apasionado por crear soluciones innovadoras y escalables.",
+    "defaultBioEditorial": "Backend, APIs y microservicios. Soluciones web modernas y escalables.",
+    "defaultBioAbout": "Desarrollador enfocado en backend y arquitecturas escalables con experiencia en APIs y microservicios. Me apasiona construir sistemas robustos, eficientes y bien documentados.",
+    "defaultBioBento": "Desarrollo soluciones web modernas y escalables. Enfocado en backend, APIs y microservicios con arquitecturas robustas.",
+    "badge": "Full Stack Developer",
+    "featuredProjects": "Proyectos destacados",
+    "featuredLabel": "Destacados",
+    "experience": "Experiencia",
+    "projects": "Proyectos",
+    "skills": "Habilidades",
+    "aboutMe": "Sobre mí",
+    "experienceAndStack": "Experiencia & stack",
+    "formation": "Formación",
+    "contactMe": "Contáctame",
+    "contactSubtitle": "Estoy disponible para proyectos y colaboraciones.",
+    "cvLabel": "CV",
+    "generatingPDF": "Generando PDF...",
+    "publicLinks": "Enlaces públicos",
+    "closeModal": "Cerrar",
+    "noPublicLinks": "No hay enlaces públicos registrados.",
+    "emailLabel": "Email",
+    "previewLabel": "Vista previa",
+    "preview": "Preview",
+    "viewProject": "Ver proyecto",
+    "view": "Ver",
+    "emptyView": "Vista vacía",
+    "noProjects": "Sin proyectos aún",
+    "noProjectsDesc": "Los proyectos publicados aparecerán aquí en una vista lineal.",
+    "noProjectsVisible": "Sin proyectos visibles",
+    "noProjectsEmptyDesc": "Cuando existan datos reales, se mostrarán aquí con una composición más profesional.",
+    "noExperience": "Sin experiencia registrada",
+    "noExperienceLaboral": "Sin experiencia laboral registrada",
+    "noExperienceLaboralDesc": "Cuando agregues experiencia desde el panel de gestión, aparecerá aquí.",
+    "noSkills": "Sin habilidades registradas",
+    "noSkillsDesc": "Aquí se mostrarán tus habilidades con barras de nivel.",
+    "noAcademic": "Sin experiencia académica registrada",
+    "noAcademicDesc": "Aquí aparecerán tus estudios y certificaciones.",
+    "stats": {
+      "projects": "Proyectos",
+      "skills": "Habilidades",
+      "exp": "Exp."
+    },
+    "sidebar": {
+      "stack": "Stack",
+      "inNumbers": "En números",
+      "publicLinksButton": "Enlaces públicos"
+    },
+    "current": "Actual"
+  }
 }

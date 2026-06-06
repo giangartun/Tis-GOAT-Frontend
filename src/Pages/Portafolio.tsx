@@ -186,7 +186,7 @@ function Portafolio() {
           localStorage.getItem("access_token");
 
         if (!token) {
-          throw new Error("No hay token guardado. Inicia sesión nuevamente.");
+          throw new Error(t("portfolio.noToken"));
         }
 
         const response = await fetch(`${API_URL}/api/portafolio/completo`, {
@@ -201,9 +201,7 @@ function Portafolio() {
           localStorage.removeItem("token");
           localStorage.removeItem("accessToken");
           localStorage.removeItem("access_token");
-          throw new Error(
-            "Tu sesión expiró o el token no es válido. Inicia sesión nuevamente."
-          );
+          throw new Error(t("portfolio.sessionExpired"));
         }
 
         if (!response.ok) {
@@ -216,7 +214,7 @@ function Portafolio() {
       } catch (err) {
         console.error("Error al cargar el portafolio:", err);
         setData(null);
-        setError(err instanceof Error ? err.message : "Error desconocido");
+        setError(err instanceof Error ? err.message : t("portfolio.errorUnknown"));
       } finally {
         setLoading(false);
       }
@@ -245,9 +243,9 @@ function Portafolio() {
   }, [portafolio]);
 
   const nombreCompleto = useMemo(() => {
-    if (!usuario) return "Mi portafolio";
+    if (!usuario) return t("portfolio.loading");
     return `${usuario.nombre || ""} ${usuario.apellido_paterno || ""}`.trim();
-  }, [usuario]);
+  }, [usuario, t]);
 
   const inicial = useMemo(() => {
     const nombre = usuario?.nombre?.trim();
@@ -285,7 +283,7 @@ function Portafolio() {
 
     if (data?.portafolio?.enlace_pagi_web) {
       enlaces.push({
-        label: "Enlace público del portafolio",
+        label: t("portfolio.publicLinks"),
         url: data.portafolio.enlace_pagi_web,
       });
     }
@@ -300,7 +298,7 @@ function Portafolio() {
       });
 
     return enlaces;
-  }, [data]);
+  }, [data, t]);
 
   const abrirModalEnlaces = () => setMostrarModalEnlaces(true);
   const cerrarModalEnlaces = () => setMostrarModalEnlaces(false);
@@ -312,7 +310,7 @@ function Portafolio() {
       descargarPortafolioPDF(data, nombreCompleto);
     } catch (error) {
       console.error("Error al generar el PDF:", error);
-      alert("No se pudo generar el PDF. Intenta nuevamente.");
+      alert(t("portfolio.errorUnknown"));
     } finally {
       setGenerandoPDF(false);
     }
@@ -321,7 +319,7 @@ function Portafolio() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] px-4 text-center text-slate-700">
-        Cargando portafolio...
+        {t("portfolio.loading")}
       </div>
     );
   }
@@ -331,10 +329,10 @@ function Portafolio() {
       <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] px-4 text-center text-slate-700">
         <div className="max-w-lg rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
           <p className="text-lg font-semibold text-slate-900">
-            No se pudo cargar el portafolio.
+            {t("portfolio.errorTitle")}
           </p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            {error ?? "Error desconocido"}
+            {error ?? t("portfolio.errorUnknown")}
           </p>
         </div>
       </div>
@@ -405,14 +403,14 @@ function Portafolio() {
           <div className="w-full max-w-lg rounded-3xl bg-white p-5 sm:p-6 shadow-2xl">
             <div className="flex items-center justify-between gap-4">
               <h3 className="text-xl sm:text-2xl font-bold text-slate-900">
-                Enlaces públicos
+                {t("portfolio.publicLinks")}
               </h3>
               <button
                 type="button"
                 onClick={cerrarModalEnlaces}
                 className="rounded-full border border-slate-200 px-3 py-1 text-sm text-slate-600 hover:bg-slate-50"
               >
-                Cerrar
+                {t("portfolio.closeModal")}
               </button>
             </div>
 
@@ -434,7 +432,7 @@ function Portafolio() {
                 ))
               ) : (
                 <p className="text-sm text-slate-500">
-                  No hay enlaces públicos registrados.
+                  {t("portfolio.noPublicLinks")}
                 </p>
               )}
             </div>
@@ -468,6 +466,8 @@ function PortafolioBento({
   onDescargarPDF: () => void;
   generandoPDF: boolean;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className={theme.page}>
       <div className={theme.shell}>
@@ -482,8 +482,8 @@ function PortafolioBento({
 
         <section className="mt-8">
           <SectionHeading
-            title="Proyectos destacados"
-            actionLabel="Destacados"
+            title={t("portfolio.featuredProjects")}
+            actionLabel={t("portfolio.featuredLabel")}
             theme={theme}
           />
           <div className="mt-4 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
@@ -496,26 +496,26 @@ function PortafolioBento({
               />
             ))}
             {proyectosVisibles.length === 0 && (
-              <EmptyCard theme={theme} title="Sin proyectos aún" />
+              <EmptyCard theme={theme} title={t("portfolio.noProjects")} />
             )}
           </div>
         </section>
 
         <section className="mt-8">
-          <SectionHeading title="Experiencia" theme={theme} />
+          <SectionHeading title={t("portfolio.experience")} theme={theme} />
           <div className="mt-4 grid gap-6 md:grid-cols-2">
-            {experienceCards(experienciaVisible, theme)}
+            {experienceCards(experienciaVisible, theme, t)}
             {experienciaVisible.length === 0 && (
-              <EmptyCard theme={theme} title="Sin experiencia registrada" />
+              <EmptyCard theme={theme} title={t("portfolio.noExperience")} />
             )}
           </div>
         </section>
 
         <FooterCTA
           theme={theme}
-          title="Contáctame"
-          subtitle="Estoy disponible para proyectos y colaboraciones."
-          secondaryLabel="CV"
+          title={t("portfolio.contactMe")}
+          subtitle={t("portfolio.contactSubtitle")}
+          secondaryLabel={t("portfolio.cvLabel")}
           onDescargarPDF={onDescargarPDF}
           generandoPDF={generandoPDF}
         />
@@ -547,10 +547,12 @@ function PortafolioSidebar({
   onDescargarPDF: () => void;
   generandoPDF: boolean;
 }) {
+  const { t } = useTranslation();
+
   const stats = [
-    { label: "Proyectos", value: proyectosVisibles.length },
-    { label: "Habilidades", value: habilidadesVisibles.length },
-    { label: "Exp.", value: experienciaVisible.length },
+    { label: t("portfolio.stats.projects"), value: proyectosVisibles.length },
+    { label: t("portfolio.stats.skills"), value: habilidadesVisibles.length },
+    { label: t("portfolio.stats.exp"), value: experienciaVisible.length },
   ];
 
   return (
@@ -576,25 +578,24 @@ function PortafolioSidebar({
                   {nombreCompleto}
                 </h1>
                 <p className={`mt-2 text-sm ${theme.body}`}>
-                  {data.usuario.biografia ||
-                    "Profesional apasionado por crear soluciones innovadoras y escalables."}
+                  {data.usuario.biografia || t("portfolio.defaultBio")}
                 </p>
               </div>
             </div>
           </div>
 
           <div className="mt-6 space-y-4">
-            <SidebarSectionTitle title="Habilidades" theme={theme} />
+            <SidebarSectionTitle title={t("portfolio.skills")} theme={theme} />
             <SkillBars habilidades={habilidadesVisibles.slice(0, 4)} theme={theme} />
           </div>
 
           <div className="mt-6 space-y-4">
-            <SidebarSectionTitle title="Stack" theme={theme} />
+            <SidebarSectionTitle title={t("portfolio.sidebar.stack")} theme={theme} />
             <ChipCloud items={topSkillNames(habilidadesVisibles, 8)} theme={theme} />
           </div>
 
           <div className="mt-6 space-y-4">
-            <SidebarSectionTitle title="En números" theme={theme} />
+            <SidebarSectionTitle title={t("portfolio.sidebar.inNumbers")} theme={theme} />
             <div className="grid grid-cols-3 gap-3 sm:gap-4">
               {stats.map((stat) => (
                 <div key={stat.label} className={theme.statCard}>
@@ -613,7 +614,7 @@ function PortafolioSidebar({
             {data.usuario.email && (
               <a href={`mailto:${data.usuario.email}`} className={theme.cardSoft}>
                 <p className={`text-[10px] sm:text-xs uppercase tracking-[0.18em] ${theme.sub}`}>
-                  Email
+                  {t("portfolio.emailLabel")}
                 </p>
                 <p className="mt-1 text-sm font-medium text-slate-900 break-all">
                   {data.usuario.email}
@@ -626,7 +627,7 @@ function PortafolioSidebar({
               onClick={onOpenEnlaces}
               className="block w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-medium text-slate-800 transition hover:bg-slate-50"
             >
-              Enlaces públicos
+              {t("portfolio.sidebar.publicLinksButton")}
             </button>
           </div>
 
@@ -637,7 +638,7 @@ function PortafolioSidebar({
 
         <main className="space-y-8">
           <section>
-            <SectionHeading title="Proyectos" theme={theme} />
+            <SectionHeading title={t("portfolio.projects")} theme={theme} />
             <div className="mt-4 grid gap-6 sm:grid-cols-2">
               {proyectosVisibles.slice(0, 4).map((proyecto, index) => (
                 <SidebarProjectCard
@@ -648,23 +649,23 @@ function PortafolioSidebar({
                 />
               ))}
               {proyectosVisibles.length === 0 && (
-                <EmptyCard theme={theme} title="Sin proyectos visibles" />
+                <EmptyCard theme={theme} title={t("portfolio.noProjectsVisible")} />
               )}
             </div>
           </section>
 
           <section>
-            <SectionHeading title="Experiencia" theme={theme} />
+            <SectionHeading title={t("portfolio.experience")} theme={theme} />
             <div className="mt-4 space-y-4">
-              {experienceTimeline(experienciaVisible, theme)}
+              {experienceTimeline(experienciaVisible, theme, t)}
             </div>
           </section>
 
           <FooterCTA
             theme={theme}
-            title="Contáctame"
-            subtitle="Estoy disponible para proyectos y colaboraciones."
-            secondaryLabel="CV"
+            title={t("portfolio.contactMe")}
+            subtitle={t("portfolio.contactSubtitle")}
+            secondaryLabel={t("portfolio.cvLabel")}
             onDescargarPDF={onDescargarPDF}
             generandoPDF={generandoPDF}
           />
@@ -699,6 +700,8 @@ function PortafolioEditorial({
   onDescargarPDF: () => void;
   generandoPDF: boolean;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className={theme.page}>
       <div className={theme.shell}>
@@ -718,13 +721,12 @@ function PortafolioEditorial({
               )}
 
               <div>
-                <span className={theme.badge}>Full Stack Developer</span>
+                <span className={theme.badge}>{t("portfolio.badge")}</span>
                 <h1 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-blue-700">
                   {nombreCompleto}
                 </h1>
                 <p className={`mt-3 max-w-3xl text-base sm:text-lg ${theme.body}`}>
-                  {data.usuario.biografia ||
-                    "Backend, APIs y microservicios. Soluciones web modernas y escalables."}
+                  {data.usuario.biografia || t("portfolio.defaultBioEditorial")}
                 </p>
               </div>
             </div>
@@ -749,39 +751,38 @@ function PortafolioEditorial({
               onClick={onOpenEnlaces}
               className={theme.linkChip}
             >
-              Enlaces públicos
+              {t("portfolio.publicLinks")}
             </button>
           </div>
         </header>
 
         <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xl">
-          <SectionHeading title="Sobre mí" theme={theme} />
+          <SectionHeading title={t("portfolio.aboutMe")} theme={theme} />
           <div className="mt-4 grid gap-6 lg:grid-cols-[auto_1fr] lg:items-center">
             <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-blue-500 text-2xl sm:text-3xl font-bold text-white ring-4 ring-blue-100">
               {inicial}
             </div>
             <p className={`max-w-4xl text-base sm:text-lg leading-7 sm:leading-8 ${theme.body}`}>
-              {data.usuario.biografia ||
-                "Desarrollador enfocado en backend y arquitecturas escalables con experiencia en APIs y microservicios. Me apasiona construir sistemas robustos, eficientes y bien documentados."}
+              {data.usuario.biografia || t("portfolio.defaultBioAbout")}
             </p>
           </div>
         </section>
 
         <section className="mt-8">
-          <SectionHeading title="Experiencia & stack" theme={theme} />
+          <SectionHeading title={t("portfolio.experienceAndStack")} theme={theme} />
           <div className="mt-4 grid gap-6 lg:grid-cols-2">
             <div className={theme.card}>
-              <div className="space-y-4">{experienceTimeline(experienciaVisible, theme)}</div>
+              <div className="space-y-4">{experienceTimeline(experienciaVisible, theme, t)}</div>
             </div>
 
             <div className={theme.card}>
-              <div className="space-y-3">{skillsEditorial(habilidadesVisibles, theme)}</div>
+              <div className="space-y-3">{skillsEditorial(habilidadesVisibles, theme, t)}</div>
             </div>
           </div>
         </section>
 
         <section className="mt-8">
-          <SectionHeading title="Proyectos" theme={theme} />
+          <SectionHeading title={t("portfolio.projects")} theme={theme} />
           <div className="mt-4 space-y-4">
             {proyectosVisibles.slice(0, 4).map((proyecto, index) => (
               <EditorialProjectRow
@@ -793,9 +794,9 @@ function PortafolioEditorial({
             ))}
             {proyectosVisibles.length === 0 && (
               <div className={theme.card}>
-                <p className="font-semibold text-slate-900">Sin proyectos aún</p>
+                <p className="font-semibold text-slate-900">{t("portfolio.noProjects")}</p>
                 <p className={`mt-2 ${theme.body}`}>
-                  Los proyectos publicados aparecerán aquí en una vista lineal.
+                  {t("portfolio.noProjectsDesc")}
                 </p>
               </div>
             )}
@@ -803,12 +804,12 @@ function PortafolioEditorial({
         </section>
 
         <section className="mt-8">
-          <SectionHeading title="Formación" theme={theme} />
+          <SectionHeading title={t("portfolio.formation")} theme={theme} />
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             {academicaVisible.map((edu) => (
               <article key={edu.id_experiencia_academica} className={theme.card}>
                 <p className={`text-sm ${theme.accent}`}>
-                  {formatPeriod(edu.fecha_ini, edu.fecha_fin)}
+                  {formatPeriod(edu.fecha_ini, edu.fecha_fin, t)}
                 </p>
                 <h3 className="mt-2 text-lg sm:text-xl font-bold text-slate-900">
                   {edu.titulo}
@@ -820,10 +821,10 @@ function PortafolioEditorial({
             {academicaVisible.length === 0 && (
               <div className={`${theme.emptyCard} md:col-span-2`}>
                 <p className="font-semibold text-slate-900">
-                  Sin experiencia académica registrada
+                  {t("portfolio.noAcademic")}
                 </p>
                 <p className={`mt-2 leading-6 ${theme.body}`}>
-                  Aquí aparecerán tus estudios y certificaciones.
+                  {t("portfolio.noAcademicDesc")}
                 </p>
               </div>
             )}
@@ -832,9 +833,9 @@ function PortafolioEditorial({
 
         <FooterCTA
           theme={theme}
-          title="Contáctame"
-          subtitle="Estoy disponible para proyectos y colaboraciones."
-          secondaryLabel="CV"
+          title={t("portfolio.contactMe")}
+          subtitle={t("portfolio.contactSubtitle")}
+          secondaryLabel={t("portfolio.cvLabel")}
           onDescargarPDF={onDescargarPDF}
           generandoPDF={generandoPDF}
         />
@@ -858,6 +859,7 @@ function BentoHero({
   habilidadesVisibles: Habilidad[];
   onOpenEnlaces: () => void;
 }) {
+  const { t } = useTranslation();
   const topChips = topSkillNames(habilidadesVisibles, 4);
 
   return (
@@ -877,13 +879,12 @@ function BentoHero({
           )}
 
           <div>
-            <span className={theme.badge}>Full Stack Developer</span>
+            <span className={theme.badge}>{t("portfolio.badge")}</span>
             <h1 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-blue-700">
               {nombreCompleto}
             </h1>
             <p className={`mt-3 max-w-3xl text-base sm:text-lg ${theme.body}`}>
-              {data.usuario.biografia ||
-                "Desarrollo soluciones web modernas y escalables. Enfocado en backend, APIs y microservicios con arquitecturas robustas."}
+              {data.usuario.biografia || t("portfolio.defaultBioBento")}
             </p>
           </div>
         </div>
@@ -904,7 +905,7 @@ function BentoHero({
         )}
 
         <button type="button" onClick={onOpenEnlaces} className={theme.linkChip}>
-          Enlaces públicos
+          {t("portfolio.publicLinks")}
         </button>
       </div>
 
@@ -989,7 +990,8 @@ function BentoProjectCard({
   index: number;
   theme: Theme;
 }) {
-  const tags = (proyecto.tecnologias ?? []).slice(0, 3).map((t) => t.nombre);
+  const { t } = useTranslation();
+  const tags = (proyecto.tecnologias ?? []).slice(0, 3).map((tech) => tech.nombre);
 
   return (
     <article className={theme.projectCard}>
@@ -1003,7 +1005,7 @@ function BentoProjectCard({
         ) : (
           <div className={theme.projectPreview}>
             <div className="flex h-14 w-28 sm:h-16 sm:w-32 items-center justify-center rounded-xl bg-white text-sm text-slate-400 shadow-sm">
-              Vista previa
+              {t("portfolio.previewLabel")}
             </div>
           </div>
         )}
@@ -1034,7 +1036,7 @@ function BentoProjectCard({
             rel="noopener noreferrer"
             className={theme.projectLink}
           >
-            Ver proyecto <ExternalLink className="h-4 w-4" />
+            {t("portfolio.viewProject")} <ExternalLink className="h-4 w-4" />
           </a>
         )}
       </div>
@@ -1051,7 +1053,8 @@ function SidebarProjectCard({
   index: number;
   theme: Theme;
 }) {
-  const tags = (proyecto.tecnologias ?? []).slice(0, 2).map((t) => t.nombre);
+  const { t } = useTranslation();
+  const tags = (proyecto.tecnologias ?? []).slice(0, 2).map((tech) => tech.nombre);
 
   return (
     <article className={theme.card}>
@@ -1088,7 +1091,7 @@ function SidebarProjectCard({
               rel="noopener noreferrer"
               className="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
             >
-              Ver proyecto <ArrowRight className="h-4 w-4" />
+              {t("portfolio.viewProject")} <ArrowRight className="h-4 w-4" />
             </a>
           )}
         </div>
@@ -1106,7 +1109,8 @@ function EditorialProjectRow({
   index: number;
   theme: Theme;
 }) {
-  const tags = (proyecto.tecnologias ?? []).slice(0, 3).map((t) => t.nombre);
+  const { t } = useTranslation();
+  const tags = (proyecto.tecnologias ?? []).slice(0, 3).map((tech) => tech.nombre);
 
   return (
     <article className={`${theme.card} overflow-hidden`}>
@@ -1125,7 +1129,7 @@ function EditorialProjectRow({
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">
-                Preview
+                {t("portfolio.preview")}
               </div>
             )}
           </div>
@@ -1159,7 +1163,7 @@ function EditorialProjectRow({
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center rounded-full border border-slate-200 px-5 py-3 font-medium text-slate-700 transition hover:bg-slate-50"
           >
-            Ver <ArrowRight className="ml-2 h-4 w-4" />
+            {t("portfolio.view")} <ArrowRight className="ml-2 h-4 w-4" />
           </a>
         ) : (
           <div className="text-sm text-slate-500">—</div>
@@ -1169,11 +1173,15 @@ function EditorialProjectRow({
   );
 }
 
-function experienceCards(experiencias: ExperienciaLaboral[], theme: Theme) {
+function experienceCards(
+  experiencias: ExperienciaLaboral[],
+  theme: Theme,
+  t: (key: string) => string
+) {
   return experiencias.slice(0, 2).map((exp) => (
     <article key={exp.id_experiencia} className={theme.card}>
       <p className={`text-sm ${theme.accent}`}>
-        {formatPeriod(exp.fecha_ini, exp.fecha_fin)}
+        {formatPeriod(exp.fecha_ini, exp.fecha_fin, t)}
       </p>
       <h3 className="mt-2 text-lg sm:text-xl font-bold text-slate-900">{exp.cargo}</h3>
       <p className="text-slate-600">{exp.empresa}</p>
@@ -1182,15 +1190,19 @@ function experienceCards(experiencias: ExperienciaLaboral[], theme: Theme) {
   ));
 }
 
-function experienceTimeline(experiencias: ExperienciaLaboral[], theme: Theme) {
+function experienceTimeline(
+  experiencias: ExperienciaLaboral[],
+  theme: Theme,
+  t: (key: string) => string
+) {
   if (experiencias.length === 0) {
     return (
       <div className={theme.emptyCard}>
         <p className="font-semibold text-slate-900">
-          Sin experiencia laboral registrada
+          {t("portfolio.noExperienceLaboral")}
         </p>
         <p className={`mt-2 leading-6 ${theme.body}`}>
-          Cuando agregues experiencia desde el panel de gestión, aparecerá aquí.
+          {t("portfolio.noExperienceLaboralDesc")}
         </p>
       </div>
     );
@@ -1205,7 +1217,7 @@ function experienceTimeline(experiencias: ExperienciaLaboral[], theme: Theme) {
         <span className="mt-2 h-2.5 w-2.5 rounded-full bg-blue-500" />
         <div>
           <p className={`text-sm ${theme.accent}`}>
-            {formatPeriod(exp.fecha_ini, exp.fecha_fin)}
+            {formatPeriod(exp.fecha_ini, exp.fecha_fin, t)}
           </p>
           <h3 className="mt-1 text-lg font-bold text-slate-900">{exp.cargo}</h3>
           <p className="text-slate-600">{exp.empresa}</p>
@@ -1225,14 +1237,16 @@ function SkillBars({
   habilidades: Habilidad[];
   theme: Theme;
 }) {
+  const { t } = useTranslation();
+
   if (habilidades.length === 0) {
     return (
       <div className={theme.emptyCard}>
         <p className="font-semibold text-slate-900">
-          Sin habilidades registradas
+          {t("portfolio.noSkills")}
         </p>
         <p className={`mt-2 leading-6 ${theme.body}`}>
-          Aquí se mostrarán tus habilidades con barras de nivel.
+          {t("portfolio.noSkillsDesc")}
         </p>
       </div>
     );
@@ -1260,15 +1274,19 @@ function SkillBars({
   );
 }
 
-function skillsEditorial(habilidades: Habilidad[], theme: Theme) {
+function skillsEditorial(
+  habilidades: Habilidad[],
+  theme: Theme,
+  t: (key: string) => string
+) {
   if (habilidades.length === 0) {
     return (
       <div className={theme.emptyCard}>
         <p className="font-semibold text-slate-900">
-          Sin habilidades registradas
+          {t("portfolio.noSkills")}
         </p>
         <p className={`mt-2 leading-6 ${theme.body}`}>
-          Aquí se mostrarán tus habilidades con barras de nivel.
+          {t("portfolio.noSkillsDesc")}
         </p>
       </div>
     );
@@ -1310,15 +1328,17 @@ function ChipCloud({ items }: { items: string[]; theme: Theme }) {
 }
 
 function EmptyCard({ theme, title }: { theme: Theme; title: string }) {
+  const { t } = useTranslation();
+
   return (
     <div className={theme.emptyCard}>
       <div className="flex h-32 sm:h-40 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-slate-500">
         <SquareDashedBottom className="mr-2 h-4 w-4" />
-        Vista vacía
+        {t("portfolio.emptyView")}
       </div>
       <h3 className="mt-4 text-lg font-bold text-slate-900">{title}</h3>
       <p className={`mt-2 text-sm leading-6 ${theme.body}`}>
-        Cuando existan datos reales, se mostrarán aquí con una composición más profesional.
+        {t("portfolio.noProjectsEmptyDesc")}
       </p>
     </div>
   );
@@ -1339,6 +1359,8 @@ function FooterCTA({
   onDescargarPDF?: () => void;
   generandoPDF?: boolean;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -1356,7 +1378,7 @@ function FooterCTA({
             disabled={generandoPDF}
             className={theme.buttonGhost}
           >
-            {generandoPDF ? "Generando PDF..." : secondaryLabel}
+            {generandoPDF ? t("portfolio.generatingPDF") : secondaryLabel}
           </button>
         </div>
       </div>
@@ -1372,8 +1394,12 @@ function topSkillNames(habilidades: Habilidad[], max: number) {
     .map((h) => h.nombre);
 }
 
-function formatPeriod(fechaIni: string, fechaFin?: string | null) {
-  return `${fechaIni} — ${fechaFin || "Actual"}`;
+function formatPeriod(
+  fechaIni: string,
+  fechaFin: string | null | undefined,
+  t: (key: string) => string
+) {
+  return `${fechaIni} — ${fechaFin || t("portfolio.current")}`;
 }
 
 export default Portafolio;

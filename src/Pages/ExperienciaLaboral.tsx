@@ -37,7 +37,7 @@ function ExperienciaLaboralModal({
   onGuardar,
   initialData,
 }: ExperienciaLaboralModalProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
@@ -63,6 +63,21 @@ function ExperienciaLaboralModal({
     const day = String(d.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   }, []);
+
+  // Textos con interpolación o que fallan en i18n — resueltos aquí directamente
+  const charCountText = useMemo(() => {
+    const lang = i18n.language?.slice(0, 2);
+    if (lang === "en") return `${form.descripcion.length} / ${MAX_DESC} characters`;
+    if (lang === "fr") return `${form.descripcion.length} / ${MAX_DESC} caractères`;
+    return `${form.descripcion.length} / ${MAX_DESC} caracteres`;
+  }, [form.descripcion.length, i18n.language]);
+
+  const endDateHintText = useMemo(() => {
+    const lang = i18n.language?.slice(0, 2);
+    if (lang === "en") return "Leave empty if you are still active in this position.";
+    if (lang === "fr") return "Laissez vide si vous êtes toujours en poste.";
+    return "Dejar vacío si sigue activo en este cargo.";
+  }, [i18n.language]);
 
   useEffect(() => {
     if (abierto) setError(null);
@@ -120,18 +135,14 @@ function ExperienciaLaboralModal({
 
   const validarArchivo = (file: File) => {
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      return t("workExperience.errors.invalid_file", {
-        fileName: file.name,
-      });
+      return t("workExperience.errors.invalid_file", { fileName: file.name });
     }
-
     if (file.size > maxBytes) {
       return t("workExperience.errors.file_too_large", {
         fileName: file.name,
         size: MAX_FILE_SIZE_MB,
       });
     }
-
     return null;
   };
 
@@ -140,12 +151,10 @@ function ExperienciaLaboralModal({
 
     Array.from(files).forEach((file) => {
       const errorArchivo = validarArchivo(file);
-
       if (errorArchivo) {
         setError(errorArchivo);
         return;
       }
-
       nuevos.push(file);
     });
 
@@ -168,7 +177,6 @@ function ExperienciaLaboralModal({
       setError("La fecha fin es obligatoria o puedes dejarla vacía si sigue activo.");
       return false;
     }
-
     return true;
   };
 
@@ -180,7 +188,6 @@ function ExperienciaLaboralModal({
 
     try {
       setLoading(true);
-
       await onGuardar?.({
         empresa: form.empresa.trim(),
         cargo: form.cargo.trim(),
@@ -189,7 +196,6 @@ function ExperienciaLaboralModal({
         fecha_fin: sigueActivo ? null : form.fecha_fin,
         archivos,
       });
-
       onCerrar();
     } catch (err) {
       console.error(err);
@@ -244,7 +250,6 @@ function ExperienciaLaboralModal({
             <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold tracking-[0.16em] text-slate-400 uppercase sm:px-3 sm:text-[11px]">
               {t("workExperience.sections.company")}
             </span>
-
             <div className="h-px flex-1 bg-slate-200" />
           </div>
 
@@ -253,7 +258,6 @@ function ExperienciaLaboralModal({
               <label className="mb-1 block text-[11px] font-extrabold uppercase tracking-wide text-slate-600 sm:text-[12px]">
                 {t("workExperience.fields.company")}
               </label>
-
               <input
                 name="empresa"
                 value={form.empresa}
@@ -267,7 +271,6 @@ function ExperienciaLaboralModal({
               <label className="mb-1 block text-[11px] font-extrabold uppercase tracking-wide text-slate-600 sm:text-[12px]">
                 {t("workExperience.fields.position")}
               </label>
-
               <input
                 name="cargo"
                 value={form.cargo}
@@ -282,17 +285,17 @@ function ExperienciaLaboralModal({
             <label className="mb-1 block text-[11px] font-extrabold uppercase tracking-wide text-slate-600 sm:text-[12px]">
               {t("workExperience.fields.description")}
             </label>
-
             <textarea
               name="descripcion"
               value={form.descripcion}
               onChange={handleChange}
               rows={3}
-              placeholder="Describe tus responsabilidades, tecnologías usadas o logros..."
+              placeholder={t("workExperience.placeholders.description")}
               className="w-full rounded-[12px] border border-slate-300 bg-slate-50 px-3 py-2 text-[13px] text-black outline-none placeholder:text-slate-400 focus:border-slate-400 sm:text-[14px]"
             />
+            {/* ✅ CORREGIDO: charCountText resuelto localmente */}
             <p className="mt-1 text-right text-[10px] text-slate-400 sm:text-[11px]">
-              {form.descripcion.length}/{MAX_DESC} caracteres
+              {charCountText}
             </p>
           </div>
 
@@ -300,7 +303,6 @@ function ExperienciaLaboralModal({
             <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold tracking-[0.16em] text-slate-400 uppercase sm:px-3 sm:text-[11px]">
               {t("workExperience.sections.period")}
             </span>
-
             <div className="h-px flex-1 bg-slate-200" />
           </div>
 
@@ -309,7 +311,6 @@ function ExperienciaLaboralModal({
               <label className="mb-1 block text-[11px] font-extrabold uppercase tracking-wide text-slate-600 sm:text-[12px]">
                 {t("workExperience.fields.start_date")}
               </label>
-
               <div className="relative">
                 <input
                   type="date"
@@ -319,7 +320,6 @@ function ExperienciaLaboralModal({
                   max={today}
                   className="h-9 w-full rounded-[12px] border border-slate-300 bg-slate-50 px-3 pr-9 text-[13px] text-black outline-none focus:border-slate-400 sm:h-10 sm:text-[14px]"
                 />
-
                 <CalendarDays
                   className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"
                   size={14}
@@ -331,7 +331,6 @@ function ExperienciaLaboralModal({
               <label className="mb-1 block text-[11px] font-extrabold uppercase tracking-wide text-slate-600 sm:text-[12px]">
                 {t("workExperience.fields.end_date")}
               </label>
-
               <div className="relative">
                 <input
                   type="date"
@@ -342,14 +341,14 @@ function ExperienciaLaboralModal({
                   max={today}
                   className="h-9 w-full rounded-[12px] border border-slate-300 bg-slate-50 px-3 pr-9 text-[13px] text-black outline-none disabled:opacity-60 focus:border-slate-400 sm:h-10 sm:text-[14px]"
                 />
-
                 <CalendarDays
                   className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"
                   size={14}
                 />
               </div>
+              {/* ✅ CORREGIDO: endDateHintText resuelto localmente */}
               <p className="mt-1 text-[10px] text-slate-400 sm:text-[11px]">
-                Dejar vacío si sigue activo
+                {endDateHintText}
               </p>
             </div>
           </div>
@@ -358,23 +357,16 @@ function ExperienciaLaboralModal({
             <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold tracking-[0.16em] text-slate-400 uppercase sm:px-3 sm:text-[11px]">
               {t("workExperience.sections.documents")}
             </span>
-
             <div className="h-px flex-1 bg-slate-200" />
           </div>
 
           <div
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragActive(true);
-            }}
+            onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
             onDragLeave={() => setDragActive(false)}
             onDrop={(e) => {
               e.preventDefault();
               setDragActive(false);
-
-              if (e.dataTransfer.files?.length) {
-                agregarArchivos(e.dataTransfer.files);
-              }
+              if (e.dataTransfer.files?.length) agregarArchivos(e.dataTransfer.files);
             }}
             className={`rounded-[14px] border-2 border-dashed bg-[#F8FBFF] px-3 py-4 text-center transition sm:px-4 ${
               dragActive ? "border-[#203A63] bg-blue-50" : "border-slate-300"
@@ -390,9 +382,7 @@ function ExperienciaLaboralModal({
               </p>
 
               <p className="mt-1 text-[10px] text-slate-500 sm:text-[11px]">
-                {t("workExperience.upload.subtitle", {
-                  size: MAX_FILE_SIZE_MB,
-                })}
+                {t("workExperience.upload.subtitle", { size: MAX_FILE_SIZE_MB })}
               </p>
 
               <input
@@ -427,19 +417,15 @@ function ExperienciaLaboralModal({
                         <p className="truncate text-[12px] font-semibold text-slate-700 sm:text-[13px]">
                           {file.name}
                         </p>
-
                         <p className="text-[10px] text-slate-400 sm:text-[11px]">
                           {(file.size / 1024 / 1024).toFixed(2)} MB
                         </p>
                       </div>
-
                       <button
                         type="button"
                         onClick={() => eliminarArchivo(index)}
                         className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                        aria-label={t("workExperience.actions.delete_file", {
-                          fileName: file.name,
-                        })}
+                        aria-label={t("workExperience.actions.delete_file", { fileName: file.name })}
                       >
                         <X size={13} />
                       </button>
@@ -471,9 +457,7 @@ function ExperienciaLaboralModal({
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#203A63] px-4 py-2 text-[12px] font-semibold text-white transition hover:bg-[#182d4b] disabled:cursor-not-allowed disabled:opacity-70 sm:px-5 sm:text-[13px]"
             >
               <Plus size={14} />
-              {loading
-                ? t("workExperience.actions.saving")
-                : t("workExperience.actions.save")}
+              {loading ? t("workExperience.actions.saving") : t("workExperience.actions.save")}
             </button>
           </div>
         </form>

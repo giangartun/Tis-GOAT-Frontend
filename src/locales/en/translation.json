@@ -781,5 +781,361 @@
     "subtitle": "I am available for projects and collaborations.",
     "secondary": "CV"
   }
-}
+},
+"admin": {
+  "header": {
+    "title": "Admin panel",
+    "admin_label": "Admin"
+  },
+  "tabs": {
+    "usuarios": "Users",
+    "bitacora": "Audit log",
+    "backup": "Backup",
+    "tecnologias": "Technologies",
+    "grados": "Grades",
+    "anuncios": "Ads"
+  },
+  "users": {
+    "title": "User management",
+    "subtitle": "Manage all registered accounts",
+    "cards": {
+      "total": "Total users",
+      "active": "Active",
+      "suspended": "Suspended",
+      "registered": "Registered"
+    },
+    "search_placeholder": "Search users...",
+    "state": {
+      "all": "All",
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "no_results": "No users found.",
+    "table": {
+      "user": "User",
+      "role": "Role",
+      "status": "Status",
+      "registered": "Registered",
+      "last_access": "Last access",
+      "actions": "Actions"
+    },
+    "role_admin": "Admin",
+    "role_user": "User",
+    "status_active": "Active",
+    "status_suspended": "Suspended",
+    "suspend": "Suspend",
+    "reactivate": "Reactivate"
+  },
+  "bitacora": {
+    "title": "Audit log",
+    "subtitle": "Review the system event history",
+    "since": "Since",
+    "until": "Until",
+    "filters": {
+      "all": "All",
+      "suspensions": "Suspensions",
+      "reactivations": "Reactivations",
+      "modifications": "Modifications",
+      "creations": "Creations",
+      "login": "Logins",
+      "logout": "Logouts"
+    },
+    "table": {
+      "user": "User",
+      "action_type": "Action type",
+      "current_status": "Current status",
+      "date_time": "Date and time",
+      "details": "Details"
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "view_context": "View context",
+    "no_results": "No records found.",
+    "apply": "Apply filters",
+    "detail": {
+      "heading": "Detailed context",
+      "ip": "IP address",
+      "device": "Device",
+      "table": "Affected table",
+      "action": "Action",
+      "reason": "Reason",
+      "executed_by": "Executed by",
+      "previous_access": "Previous access",
+      "file": "File",
+      "full_json": "View full JSON",
+      "no_additional_info": "No additional information available.",
+      "close": "Close"
+    },
+    "types": {
+      "cuenta_suspendida": "Account suspended",
+      "cuenta_reactivada": "Account reactivated",
+      "cuenta_creada": "Account created",
+      "inicio_sesion": "Login",
+      "cierre_sesion": "Logout",
+      "modificacion_perfil": "Profile update",
+      "modificacion_foto": "Photo update",
+      "modificacion_tecnologias": "Technologies update",
+      "modificacion_habilidades": "Skills update",
+      "modificacion_experiencia_laboral": "Work experience update",
+      "modificacion_experiencia_academica": "Academic experience update",
+      "modificacion_redes_sociales": "Social networks update",
+      "modificacion_proyectos": "Projects update",
+      "modificacion_evidencias": "Evidence update",
+      "modificacion_privacidad": "Privacy update",
+      "modificacion_plantilla": "Template update",
+      "importacion_backup": "Backup import"
+    }
+  },
+  "backup": {
+    "title": "Backup management",
+    "subtitle": "Export or restore the platform data",
+    "export": {
+      "title": "Export backup",
+      "description": "Download a JSON file with all current data.",
+      "button": "Download backup",
+      "generating": "Generating..."
+    },
+    "import": {
+      "title": "Import backup",
+      "description": "The file {{file}} will be imported. This action will overwrite all data.",
+      "select_file": "Click to select a file",
+      "file_hint": "JSON or ZIP, max 10 MB",
+      "warning": "All sessions will be closed when importing.",
+      "alert": "This action is irreversible.",
+      "loading": "Importing...",
+      "confirm": "Confirm"
+    }
+  },
+  "technologies": {
+    "title": "Technologies",
+    "subtitle": "Manage the technologies available in the system",
+    "add_button": "+ Add technology",
+    "no_results": "No technologies registered.",
+    "table": {
+      "name": "Name",
+      "category": "Category",
+      "actions": "Actions"
+    }
+  },
+  "grades": {
+    "title": "Grades",
+    "subtitle": "Manage academic degree types",
+    "add_button": "+ Add grade",
+    "no_results": "No grades registered.",
+    "table": {
+      "name": "Degree name",
+      "actions": "Actions"
+    }
+  },
+  "ads": {
+    "title": "Ads",
+    "subtitle": "Publish and manage system ads",
+    "add_button": "+ Add ad",
+    "no_results": "No ads registered."
+  },
+  "modals": {
+    "suspend": {
+      "title": "Confirm suspension",
+      "description": "The account will be suspended immediately."
+    },
+    "reactivate": {
+      "title": "Confirm reactivation",
+      "description": "The account will be reactivated and the user will be able to access again."
+    },
+    "import": {
+      "title": "Confirm import",
+      "description": "The file {{file}} will be imported. This action will overwrite all data.",
+      "alert": "This action is irreversible.",
+      "loading": "Importing...",
+      "confirm": "Confirm"
+    },
+    "technology": {
+      "new": "+ New technology",
+      "edit": "Edit technology",
+      "fields": {
+        "name": {
+          "label": "Name *",
+          "placeholder": "Ex: React"
+        },
+        "category": {
+          "label": "Category *",
+          "placeholder": "Ex: Frontend"
+        }
+      },
+      "delete": {
+        "title": "Delete technology",
+        "description": "Are you sure you want to delete {{name}}?"
+      }
+    },
+    "degree": {
+      "new": "+ New grade",
+      "edit": "Edit grade",
+      "fields": {
+        "name": {
+          "label": "Degree name *",
+          "placeholder": "Ex: Bachelor’s degree"
+        }
+      },
+      "delete": {
+        "title": "Delete grade",
+        "description": "Are you sure you want to delete {{name}}?"
+      }
+    },
+    "ad": {
+      "new": "+ New ad",
+      "edit": "Edit ad",
+      "fields": {
+        "title": {
+          "label": "Title *",
+          "placeholder": "Ad title"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Description (optional if image is added)"
+        },
+        "redirectUrl": {
+          "label": "Redirect URL *",
+          "placeholder": "https://..."
+        },
+        "image": {
+          "label": "Image (optional)",
+          "change": "Change image",
+          "select": "Select image",
+          "hint": "JPG, PNG, WebP — max 5 MB"
+        }
+      },
+      "delete": {
+        "title": "Delete ad",
+        "description": "Are you sure you want to delete {{title}}? The image will also be deleted."
+      }
+    }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "processing": "Processing...",
+    "save": "Save",
+    "saving": "Saving...",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "edit": "Edit",
+    "roles": {
+      "admin": "Admin",
+      "user": "User"
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended"
+    }
+  },
+  "notifications": {
+    "account_suspended": "Account suspended",
+    "error_suspend": "Error suspending account",
+    "account_reactivated": "Account reactivated",
+    "error_reactivate": "Error reactivating account",
+    "backup_downloaded": "Backup downloaded",
+    "error_download": "Error downloading backup",
+    "backup_imported": "Backup imported. Logging out...",
+    "backup_imported_login": "Backup imported. Please log in again.",
+    "error_import": "Error importing backup",
+    "error_load_users": "Error loading users",
+    "error_load_bitacora": "Error loading audit log",
+    "error_load_technologies": "Error loading technologies",
+    "error_load_grades": "Error loading grades",
+    "error_load_ads": "Error loading ads",
+    "required_name_category": "Name and category are required",
+    "technology_created": "Technology created",
+    "technology_updated": "Technology updated",
+    "error_save": "Error saving",
+    "technology_deleted": "Technology deleted",
+    "error_delete": "Error deleting",
+    "required_degree_name": "Degree name is required",
+    "degree_created": "Degree created",
+    "degree_updated": "Degree updated",
+    "degree_deleted": "Degree deleted",
+    "required_title_url": "Title and URL are required",
+    "required_description_or_image": "Include at least a description or an image",
+    "ad_created": "Ad created",
+    "ad_updated": "Ad updated",
+    "ad_deleted": "Ad deleted"
+  },
+  "validation": {
+    "invalid_date": "Invalid date",
+    "min_date": "Date must be after {{date}}",
+    "max_date": "Date must be before {{date}}"
+  },
+  "log": {
+    "type": "Action type",
+    "dateTime": "Date and time",
+    "status": "Current status"
+  },
+  "pagination": {
+    "users": "users",
+    "records": "records",
+    "page_info": "Page {{page}} of {{last}} — {{total}} {{label}}",
+    "previous": "Previous",
+    "next": "Next"
+  }
+},
+  "experience": {
+    "descriptionPlaceholder": "Describe your responsibilities, technologies used, or achievements...",
+    "characters": "characters",
+    "leaveEmptyIfActive": "Leave blank if still active"
+  },
+  "portfolio": {
+    "loading": "Loading portfolio...",
+    "errorTitle": "Failed to load portfolio.",
+    "errorUnknown": "Unknown error",
+    "noToken": "No token found. Please sign in again.",
+    "sessionExpired": "Your session expired or the token is invalid. Please sign in again.",
+    "defaultBio": "Professional passionate about creating innovative and scalable solutions.",
+    "defaultBioEditorial": "Backend, APIs and microservices. Modern and scalable web solutions.",
+    "defaultBioAbout": "Developer focused on backend and scalable architectures with experience in APIs and microservices. I'm passionate about building robust, efficient, and well-documented systems.",
+    "defaultBioBento": "Building modern and scalable web solutions. Focused on backend, APIs and microservices with robust architectures.",
+    "badge": "Full Stack Developer",
+    "featuredProjects": "Featured Projects",
+    "featuredLabel": "Featured",
+    "experience": "Experience",
+    "projects": "Projects",
+    "skills": "Skills",
+    "aboutMe": "About Me",
+    "experienceAndStack": "Experience & Stack",
+    "formation": "Education",
+    "contactMe": "Contact Me",
+    "contactSubtitle": "Available for projects and collaborations.",
+    "cvLabel": "CV",
+    "generatingPDF": "Generating PDF...",
+    "publicLinks": "Public Links",
+    "closeModal": "Close",
+    "noPublicLinks": "No public links registered.",
+    "emailLabel": "Email",
+    "previewLabel": "Preview",
+    "preview": "Preview",
+    "viewProject": "View project",
+    "view": "View",
+    "emptyView": "Empty view",
+    "noProjects": "No projects yet",
+    "noProjectsDesc": "Published projects will appear here in a linear view.",
+    "noProjectsVisible": "No visible projects",
+    "noProjectsEmptyDesc": "When real data exists, it will be displayed here with a more professional layout.",
+    "noExperience": "No experience registered",
+    "noExperienceLaboral": "No work experience registered",
+    "noExperienceLaboralDesc": "When you add experience from the management panel, it will appear here.",
+    "noSkills": "No skills registered",
+    "noSkillsDesc": "Your skills will be displayed here with level bars.",
+    "noAcademic": "No academic experience registered",
+    "noAcademicDesc": "Your studies and certifications will appear here.",
+    "stats": {
+      "projects": "Projects",
+      "skills": "Skills",
+      "exp": "Exp."
+    },
+    "sidebar": {
+      "stack": "Stack",
+      "inNumbers": "By the numbers",
+      "publicLinksButton": "Public links"
+    },
+    "current": "Present"
+  }
 }

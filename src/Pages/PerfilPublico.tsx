@@ -942,7 +942,7 @@ function PortafolioPublico() {
             {error ? "Error al cargar el perfil" : t("profileUser.errors.profile_not_found")}
           </p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            {error || t("profileUser.errors.load_profile")}
+            {error || t("profileUser.defaults.no_biography")}
           </p>
         </div>
       </div>
@@ -962,9 +962,7 @@ function PortafolioPublico() {
           experienciaLaboral={experienciaLaboral}
           experienciaAcademica={experienciaAcademica}
           proyectos={proyectos}
-          onOpenPublicLinks={() => setMostrarModalEnlaces(true)}
           redes={data?.redes_profesionales ?? []}
-          publicUrl={publicUrl}
         />
       );
       break;
@@ -1084,14 +1082,6 @@ function PortafolioBento({
                 </span>
               </span>
             )}
-
-            <button
-              type="button"
-              onClick={onOpenPublicLinks}
-              className={theme.linkChip}
-            >
-              Enlace público
-            </button>
           </div>
 
           <div className="mt-6 flex flex-wrap gap-2">
@@ -1213,9 +1203,7 @@ function PortafolioSidebar({
   experienciaLaboral = [],
   experienciaAcademica = [],
   proyectos = [],
-  onOpenPublicLinks,
   redes = [],
-  publicUrl = "",
 }: {
   usuario: Usuario;
   nombreCompleto: string;
@@ -1224,9 +1212,7 @@ function PortafolioSidebar({
   experienciaLaboral?: ExperienciaLaboral[];
   experienciaAcademica?: ExperienciaAcademica[];
   proyectos?: Proyecto[];
-  onOpenPublicLinks?: () => void;
   redes?: RedProfesional[];
-  publicUrl?: string;
 }) {
   const { t } = useTranslation();
 
@@ -1259,18 +1245,6 @@ function PortafolioSidebar({
               </div>
             </div>
           </div>
-
-          {publicUrl && (
-            <div className="mt-5 flex justify-start">
-              <button
-                type="button"
-                onClick={onOpenPublicLinks}
-                className={theme.linkChip}
-              >
-                Enlace público
-              </button>
-            </div>
-          )}
 
           <div className="mt-6 space-y-4">
             <SidebarSectionTitle title="Habilidades" />
@@ -1369,7 +1343,6 @@ function PortafolioEditorial({
   proyectos = [],
   onOpenPublicLinks,
   redes = [],
-  publicUrl = "",
 }: {
   usuario: Usuario;
   nombreCompleto: string;
@@ -1417,18 +1390,6 @@ function PortafolioEditorial({
                 </p>
               </div>
             </div>
-
-            {publicUrl && (
-              <div className="flex justify-center lg:justify-end">
-                <button
-                  type="button"
-                  onClick={onOpenPublicLinks}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/15"
-                >
-                  Enlace público
-                </button>
-              </div>
-            )}
           </div>
 
           <div className="mt-6 flex flex-wrap gap-3 text-sm">

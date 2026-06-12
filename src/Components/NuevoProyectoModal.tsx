@@ -1,0 +1,442 @@
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Check, X } from "lucide-react";
+
+type Tecnologia = {
+  id_tecnologia: string;
+  nombre: string;
+  categoria?: string | null;
+};
+
+type ProyectoLocal = {
+  nombre: string;
+  descripcion: string;
+  github: string;
+  demo: string;
+  fechaInicio: string;
+  fechaFin: string;
+  tecnologias: string[];
+  imagen: string;
+  archivoPdf: File | null;
+};
+
+type NuevoProyectoModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (form: ProyectoLocal) => Promise<void> | void;
+  proyectoInicial?: ProyectoLocal | null;
+  tecnologiasDisponibles: Tecnologia[];
+};
+
+function NuevoProyectoModal({
+  isOpen,
+  onClose,
+  onSave,
+  proyectoInicial,
+  tecnologiasDisponibles,
+}: NuevoProyectoModalProps) {
+  const { t } = useTranslation();
+
+  const [form, setForm] = useState<ProyectoLocal>({
+    nombre: "",
+    descripcion: "",
+    github: "",
+    demo: "",
+    fechaInicio: "",
+    fechaFin: "",
+    tecnologias: [],
+    imagen: "",
+    archivoPdf: null,
+  });
+
+  const [formError, setFormError] = useState("");
+  const [archivoPdf, setArchivoPdf] = useState<File | null>(null);
+
+  useEffect(() => {
+    if (proyectoInicial) {
+      setForm(proyectoInicial);
+      setArchivoPdf(null);
+    } else {
+      setForm({
+        nombre: "",
+        descripcion: "",
+        github: "",
+        demo: "",
+        fechaInicio: "",
+        fechaFin: "",
+        tecnologias: [],
+        imagen: "",
+        archivoPdf: null,
+      });
+      setArchivoPdf(null);
+    }
+
+    setFormError("");
+  }, [proyectoInicial, isOpen]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (formError) setFormError("");
+  };
+
+  const toggleTecnologia = (idTecnologia: string) => {
+    setForm((prev) => ({
+      ...prev,
+      tecnologias: prev.tecnologias.includes(idTecnologia)
+        ? prev.tecnologias.filter((id) => id !== idTecnologia)
+        : [...prev.tecnologias, idTecnologia],
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setFormError("");
+
+    const githubRegex = /^https?:\/\/(www\.)?github\.com\/.+/i;
+    const githubLimpio = form.github.trim();
+
+    if (!githubRegex.test(githubLimpio)) {
+      setFormError(t("projectModal.errors.github_invalid"));
+      return;
+    }
+
+    await onSave({
+      ...form,
+      github: githubLimpio,
+      demo: form.demo.trim(),
+      imagen: form.imagen.trim(),
+      archivoPdf,
+    });
+
+    onClose();
+  };
+
+  const categoriasOrdenadas = [
+    "Lenguajes de programación",
+    "Frameworks y Librerías",
+    "Base de Datos",
+    "Herramientas y Tecnologías",
+    "Otros",
+  ];
+
+  const tecnologiasAgrupadas = tecnologiasDisponibles.reduce((acc, tec) => {
+    const categoria = tec.categoria?.trim() || "Otros";
+
+    if (!acc[categoria]) {
+      acc[categoria] = [];
+    }
+
+    acc[categoria].push(tec);
+    return acc;
+  }, {} as Record<string, Tecnologia[]>);
+
+  const categoriasExistentes = [
+    ...categoriasOrdenadas.filter((categoria) => tecnologiasAgrupadas[categoria]),
+    ...Object.keys(tecnologiasAgrupadas).filter(
+      (categoria) => !categoriasOrdenadas.includes(categoria)
+    ),
+  ];
+
+  const traducirCategoria = (categoria: string) => {
+    const categorias: Record<string, string> = {
+      "Lenguajes de programación": t("projectModal.categories.programming_languages"),
+      "Frameworks y Librerías": t("projectModal.categories.frameworks"),
+      "Base de Datos": t("projectModal.categories.databases"),
+      "Herramientas y Tecnologías": t("projectModal.categories.tools"),
+      Otros: t("projectModal.categories.others"),
+    };
+
+    return categorias[categoria] || categoria;
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 sm:p-4">
+      <form
+        onSubmit={handleSubmit}
+        className="flex max-h-[95vh] w-full max-w-5xl flex-col overflow-hidden rounded-sm border border-app-border bg-app-bg shadow-2xl"
+      >
+        <div className="flex items-center justify-between border-b border-app-border px-4 py-3 sm:px-6 sm:py-4">
+          <h2 className="text-2xl font-extrabold text-app-text sm:text-3xl">
+            {proyectoInicial
+              ? t("projectModal.title_edit")
+              : t("projectModal.title_new")}
+          </h2>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full p-2 text-app-muted transition hover:bg-white/10 hover:text-app-text"
+          >
+            <X size={22} />
+          </button>
+        </div>
+
+        <div className="flex-1 space-y-5 overflow-y-auto px-4 py-5 sm:px-8 sm:py-6">
+          <div>
+            <label className="mb-1 block text-base font-medium text-app-text">
+              {t("projectModal.fields.name")}
+            </label>
+
+            <input
+              name="nombre"
+              value={form.nombre}
+              onChange={handleChange}
+              type="text"
+              placeholder={t("projectModal.placeholders.name")}
+              required
+              className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm text-app-text outline-none placeholder:text-app-muted"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-base font-medium text-app-text">
+              {t("projectModal.fields.description")}
+            </label>
+
+            <textarea
+              name="descripcion"
+              value={form.descripcion}
+              onChange={handleChange}
+              rows={5}
+              maxLength={200}
+              required
+              placeholder={t("projectModal.placeholders.description")}
+              className="w-full rounded-2xl border border-app-border bg-white px-4 py-3 text-sm text-app-text outline-none placeholder:text-app-muted"
+            />
+
+            <p className="mt-1 text-xs text-app-muted">
+              {form.descripcion.length}/200 {t("projectModal.helpers.characters")}
+            </p>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-base font-medium text-app-text">
+              {t("projectModal.fields.github")}
+            </label>
+
+            <input
+              name="github"
+              value={form.github}
+              onChange={handleChange}
+              type="url"
+              placeholder="https://github.com/usuario/proyecto"
+              required
+              pattern="^https?:\/\/(www\.)?github\.com\/.+"
+              title={t("projectModal.helpers.github_title")}
+              className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm text-app-text outline-none placeholder:text-app-muted"
+            />
+
+            <p className="mt-1 text-xs text-app-muted">
+              {t("projectModal.helpers.github_required")}
+            </p>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-base font-medium text-app-text">
+              {t("projectModal.fields.demo")}
+            </label>
+
+            <input
+              name="demo"
+              value={form.demo}
+              onChange={handleChange}
+              type="url"
+              placeholder="https://demo.com"
+              className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm text-app-text outline-none placeholder:text-app-muted"
+            />
+
+            <p className="mt-1 text-xs text-app-muted">
+              {t("projectModal.helpers.optional")}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-base font-medium text-app-text">
+                {t("projectModal.fields.start_date")}
+              </label>
+
+              <input
+                name="fechaInicio"
+                value={form.fechaInicio}
+                onChange={handleChange}
+                type="date"
+                required
+                className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm text-app-text outline-none [color-scheme:light]"
+                style={{ colorScheme: "light" }}
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-base font-medium text-app-text">
+                {t("projectModal.fields.end_date")}
+              </label>
+
+              <input
+                name="fechaFin"
+                value={form.fechaFin}
+                onChange={handleChange}
+                type="date"
+                required
+                className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm text-app-text outline-none [color-scheme:light]"
+                style={{ colorScheme: "light" }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-3 block text-base font-medium text-app-text">
+              {t("projectModal.fields.technologies")}
+            </label>
+
+            <div className="space-y-5">
+              {categoriasExistentes.map((categoria) => {
+                const tecnologiasDeCategoria = tecnologiasAgrupadas[categoria];
+
+                if (!tecnologiasDeCategoria || tecnologiasDeCategoria.length === 0) {
+                  return null;
+                }
+
+                return (
+                  <div
+                    key={categoria}
+                    className="rounded-2xl border border-app-border bg-app-bg p-4 shadow-sm"
+                  >
+                    <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-app-text">
+                      {traducirCategoria(categoria)}
+                    </h3>
+
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                      {tecnologiasDeCategoria.map((tec) => {
+                        const checked = form.tecnologias.includes(
+                          tec.id_tecnologia
+                        );
+
+                        return (
+                          <label
+                            key={tec.id_tecnologia}
+                            className="flex cursor-pointer items-start gap-3 rounded-xl border border-app-border bg-app-bg px-3 py-3 text-sm text-app-text transition hover:border-blue-400"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => toggleTecnologia(tec.id_tecnologia)}
+                              className="peer sr-only"
+                            />
+
+                            <span
+                              className={[
+                                "mt-1 flex h-4 w-4 items-center justify-center rounded border transition",
+                                checked
+                                  ? "border-blue-500 bg-white"
+                                  : "border-gray-300 bg-white",
+                              ].join(" ")}
+                            >
+                              {checked && (
+                                <Check size={12} className="text-blue-600" />
+                              )}
+                            </span>
+
+                            <div className="min-w-0">
+                              <span className="block font-medium">
+                                {tec.nombre}
+                              </span>
+
+                              {tec.categoria && (
+                                <span className="block text-xs text-app-muted">
+                                  {traducirCategoria(tec.categoria)}
+                                </span>
+                              )}
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-base font-medium text-app-text">
+              {t("projectModal.fields.image_url")}
+            </label>
+
+            <input
+              name="imagen"
+              value={form.imagen}
+              onChange={handleChange}
+              type="text"
+              placeholder="https://..."
+              className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm text-app-text outline-none placeholder:text-app-muted"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-base font-medium text-app-text">
+              {t("projectModal.fields.pdf")}
+            </label>
+
+            <input
+              type="file"
+              accept="application/pdf,.pdf"
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                setArchivoPdf(file);
+              }}
+              className="w-full rounded-full border border-app-border bg-white px-4 py-2 text-sm text-app-text outline-none"
+            />
+
+            <p className="mt-1 text-xs text-app-muted">
+              {t("projectModal.helpers.pdf")}
+            </p>
+
+            {archivoPdf && (
+              <p className="mt-2 text-sm text-green-700">
+                {t("projectModal.helpers.selected_file")}: {archivoPdf.name}
+              </p>
+            )}
+          </div>
+
+          {formError && (
+            <div className="rounded-xl border border-red-300 bg-red-100 px-4 py-3 text-sm text-red-700">
+              {formError}
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-3 border-t border-app-border px-4 py-4 sm:flex-row sm:justify-between sm:px-8 sm:py-5">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full bg-red-600 px-6 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+          >
+            {t("projectModal.actions.cancel")}
+          </button>
+
+          <button
+            type="submit"
+            className="rounded-full bg-app-topbar px-6 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+          >
+            {proyectoInicial
+              ? t("projectModal.actions.update")
+              : t("projectModal.actions.save")}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+export default NuevoProyectoModal;

@@ -14,6 +14,28 @@ import type {
   TipoBitacora, Tecnologia, Grado, Anuncio,
 } from '../Services/admin';
 
+// ── Estilos de impresión ──────────────────────────────────────────────────────
+const PRINT_STYLES = `
+@media print {
+  body * { visibility: hidden !important; }
+  #print-area, #print-area * { visibility: visible !important; }
+  #print-area { position: fixed; inset: 0; padding: 24px; background: white; }
+  .no-print { display: none !important; }
+}
+`;
+
+const BtnPDF: React.FC<{ label?: string }> = ({ label = 'Exportar PDF' }) => (
+  <button
+    onClick={() => window.print()}
+    className="no-print rounded-full border border-gray-300 bg-white text-gray-700 px-4 py-2 text-sm font-medium hover:bg-gray-100 transition flex items-center gap-2"
+  >
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+    </svg>
+    {label}
+  </button>
+);
+
 // ── Componentes auxiliares ────────────────────────────────────────────────────
 
 const Modal: React.FC<{ children: React.ReactNode; onClose: () => void; wide?: boolean }> = ({ children, onClose, wide }) => (
@@ -64,7 +86,7 @@ const FormInput: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { label:
 const Paginacion: React.FC<{ pagina: number; lastPage: number; total: number; label: string; onPrev: () => void; onNext: () => void }> = ({ pagina, lastPage, total, label, onPrev, onNext }) => {
   const { t } = useTranslation();
   return lastPage > 1 ? (
-    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 no-print">
       <span className="text-xs text-gray-400">{t('admin.pagination.page_info', { page: pagina, last: lastPage, total, label })}</span>
       <div className="flex gap-2">
         <button className="rounded-full border border-gray-200 px-3 py-1 text-xs disabled:opacity-40" disabled={pagina === 1} onClick={onPrev}>{`← ${t('admin.pagination.previous')}`}</button>
@@ -72,7 +94,7 @@ const Paginacion: React.FC<{ pagina: number; lastPage: number; total: number; la
       </div>
     </div>
   ) : null;
-}
+};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -165,7 +187,6 @@ const LanguageSelector: React.FC = () => {
         setAbierto(false);
       }
     };
-
     document.addEventListener('mousedown', cerrarDropdown);
     return () => document.removeEventListener('mousedown', cerrarDropdown);
   }, []);
@@ -179,7 +200,7 @@ const LanguageSelector: React.FC = () => {
   };
 
   return (
-    <div ref={selectorRef} className="relative">
+    <div ref={selectorRef} className="relative no-print">
       <button
         type="button"
         onClick={() => setAbierto(!abierto)}
@@ -187,28 +208,17 @@ const LanguageSelector: React.FC = () => {
       >
         <Globe2 size={17} />
         <span>{idiomaActual.codigo}</span>
-        <ChevronDown
-          size={16}
-          className={`transition-transform duration-200 ${abierto ? 'rotate-180' : ''}`}
-        />
+        <ChevronDown size={16} className={`transition-transform duration-200 ${abierto ? 'rotate-180' : ''}`} />
       </button>
-
       {abierto && (
         <div className="absolute right-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-xl border border-gray-200 bg-white py-2 text-gray-800 shadow-xl">
           {IDIOMAS.map((idioma) => (
-            <button
-              key={idioma.codigo}
-              type="button"
-              onClick={() => cambiarIdioma(idioma)}
-              className="flex w-full items-center justify-between px-4 py-3 text-sm transition hover:bg-gray-100"
-            >
+            <button key={idioma.codigo} type="button" onClick={() => cambiarIdioma(idioma)} className="flex w-full items-center justify-between px-4 py-3 text-sm transition hover:bg-gray-100">
               <div className="flex items-center gap-3">
                 <span className="text-lg">{idioma.bandera}</span>
                 <span>{t(idioma.nombreKey)}</span>
               </div>
-              {idiomaActual.codigo === idioma.codigo && (
-                <Check size={17} className="text-blue-600" />
-              )}
+              {idiomaActual.codigo === idioma.codigo && <Check size={17} className="text-blue-600" />}
             </button>
           ))}
         </div>
@@ -225,13 +235,13 @@ const AdminUsuarios: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const [tab, setTab]         = useState<Tab>('usuarios');
-  const [saving, setSaving]   = useState(false);
-  const [modal, setModal]     = useState<ModalInfo>(null);
+  const [tab, setTab]           = useState<Tab>('usuarios');
+  const [saving, setSaving]     = useState(false);
+  const [modal, setModal]       = useState<ModalInfo>(null);
   const [modalCtx, setModalCtx] = useState<BitacoraItem | null>(null);
-  const [toast, setToast]     = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
-  const fileRef               = useRef<HTMLInputElement>(null);
-  const fotoRef               = useRef<HTMLInputElement>(null);
+  const [toast, setToast]       = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const fileRef                 = useRef<HTMLInputElement>(null);
+  const fotoRef                 = useRef<HTMLInputElement>(null);
 
   const [usuarios, setUsuarios] = useState<UsuarioAdmin[]>([]);
   const [loadU, setLoadU]       = useState(true);
@@ -255,9 +265,9 @@ const AdminUsuarios: React.FC = () => {
   const [descargando, setDescargando] = useState(false);
   const [importando, setImportando]   = useState(false);
 
-  const [tecns, setTecns]     = useState<Tecnologia[]>([]);
-  const [loadT, setLoadT]     = useState(false);
-  const [formTec, setFormTec] = useState({ nombre: '', categoria: '' });
+  const [tecns, setTecns]       = useState<Tecnologia[]>([]);
+  const [loadT, setLoadT]       = useState(false);
+  const [formTec, setFormTec]   = useState({ nombre: '', categoria: '' });
 
   const [grados, setGrados]       = useState<Grado[]>([]);
   const [loadG, setLoadG]         = useState(false);
@@ -273,27 +283,23 @@ const AdminUsuarios: React.FC = () => {
   const toast$ = (msg: string, type: 'success' | 'error') => { setToast({ msg, type }); setTimeout(() => setToast(null), 3500); };
   const closeM  = () => setModal(null);
 
-  const etiquetaTipo = (tipo: string) => t(TIPO_LABEL_KEYS[tipo] ?? tipo);
-  const obtenerTabLabel = (key: Tab) => t(`admin.tabs.${key}`);
-  const obtenerRolLabel = (rol: string) => rol === 'admin' ? t('admin.users.role_admin') : t('admin.users.role_user');
+  const etiquetaTipo      = (tipo: string) => t(TIPO_LABEL_KEYS[tipo] ?? tipo);
+  const obtenerTabLabel   = (key: Tab) => t(`admin.tabs.${key}`);
+  const obtenerRolLabel   = (rol: string) => rol === 'admin' ? t('admin.users.role_admin') : t('admin.users.role_user');
   const obtenerEstadoLabel = (estado: string) => estado === 'activo' ? t('admin.users.status_active') : t('admin.users.status_suspended');
   const obtenerFiltroBitacora = (tipo: TipoBitacora | 'todos') => {
     const map: Record<string, string> = {
-      todos: 'admin.bitacora.filters.all',
-      suspender: 'admin.bitacora.filters.suspensions',
-      reactivar: 'admin.bitacora.filters.reactivations',
-      modificaciones: 'admin.bitacora.filters.modifications',
-      creacion: 'admin.bitacora.filters.creations',
-      login: 'admin.bitacora.filters.login',
-      logout: 'admin.bitacora.filters.logout',
+      todos: 'admin.bitacora.filters.all', suspender: 'admin.bitacora.filters.suspensions',
+      reactivar: 'admin.bitacora.filters.reactivations', modificaciones: 'admin.bitacora.filters.modifications',
+      creacion: 'admin.bitacora.filters.creations', login: 'admin.bitacora.filters.login', logout: 'admin.bitacora.filters.logout',
     };
     return t(map[tipo] ?? 'admin.bitacora.filters.all');
   };
 
   const logout = async () => {
     try {
-      const t = localStorage.getItem('token');
-      if (t) await fetch(import.meta.env.VITE_API_URL + '/api/usuario/logout', { method: 'POST', headers: { Authorization: `Bearer ${t}`, 'Content-Type': 'application/json', Accept: 'application/json' } });
+      const tk = localStorage.getItem('token');
+      if (tk) await fetch(import.meta.env.VITE_API_URL + '/api/usuario/logout', { method: 'POST', headers: { Authorization: `Bearer ${tk}`, 'Content-Type': 'application/json', Accept: 'application/json' } });
     } catch { /* silent */ } finally { localStorage.clear(); navigate('/login', { replace: true }); }
   };
 
@@ -403,8 +409,11 @@ const AdminUsuarios: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
 
+      {/* Estilos de impresión inyectados en el head */}
+      <style>{PRINT_STYLES}</style>
+
       {/* TOPBAR */}
-      <header className="flex items-center justify-between bg-app-header px-6 py-4 text-white">
+      <header className="flex items-center justify-between bg-app-header px-6 py-4 text-white no-print">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-md border border-white/20 bg-white/10 text-sm font-bold">TG</div>
           <div>
@@ -412,10 +421,8 @@ const AdminUsuarios: React.FC = () => {
             <span className="text-xs bg-red-600 text-white font-bold px-2 py-0.5 rounded">{t('admin.header.admin_label')}</span>
           </div>
         </div>
-
         <div className="flex items-center gap-3">
           <LanguageSelector />
-
           <button onClick={logout} className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium hover:bg-white/20 transition">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" /></svg>
             {t('layout.auth.logout')}
@@ -424,15 +431,15 @@ const AdminUsuarios: React.FC = () => {
       </header>
 
       {/* SUBNAV */}
-      <nav className="bg-app-topbar px-6 py-2 text-white text-sm">
+      <nav className="bg-app-topbar px-6 py-2 text-white text-sm no-print">
         <span className="text-white/50">Admin</span><span className="text-white/40 mx-2">›</span>
         <span className="text-white/90">{obtenerTabLabel(tab)}</span>
       </nav>
 
       <div className="flex flex-1">
 
-        {/* SIDEBAR — solo texto, sin emojis */}
-        <aside className="hidden lg:flex flex-col w-24 bg-app-sidebar text-white py-4 gap-1 items-center border-r border-app-border shrink-0">
+        {/* SIDEBAR */}
+        <aside className="hidden lg:flex flex-col w-24 bg-app-sidebar text-white py-4 gap-1 items-center border-r border-app-border shrink-0 no-print">
           {TABS.map((key) => (
             <button key={key} onClick={() => setTab(key)} title={obtenerTabLabel(key)}
               className={`w-20 px-2 py-3 rounded-xl text-center text-xs font-medium transition leading-tight
@@ -445,216 +452,228 @@ const AdminUsuarios: React.FC = () => {
         <main className="flex-1 p-6 overflow-auto space-y-5">
 
           {/* ══ USUARIOS ══ */}
-          {tab === 'usuarios' && <>
-            <div><h2 className="text-2xl font-bold text-gray-800">{t('admin.users.title')}</h2><p className="text-sm text-gray-500 mt-1">{t('admin.users.subtitle')}</p></div>
-
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {[['admin.users.cards.total', totU, 'text-gray-800'], ['admin.users.cards.active', totA, 'text-green-700'], ['admin.users.cards.suspended', totS, 'text-red-600'], ['admin.users.cards.registered', totU, 'text-gray-800']].map(([key, v, c]) => (
-                <div key={key as string} className="rounded-2xl border border-app-border bg-white p-4 shadow-sm">
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t(key as string)}</p>
-                  <p className={`text-3xl font-bold ${c as string}`}>{v as number}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-3 flex-wrap">
-              <div className="flex items-center gap-2 flex-1 min-w-52 rounded-2xl border border-app-border bg-white px-4 py-2 shadow-sm">
-                <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/></svg>
-                <input type="text" placeholder={t('admin.users.search_placeholder')} className="w-full bg-transparent text-sm outline-none text-gray-700 placeholder-gray-400" onChange={e => onSearch(e.target.value)} />
+          {tab === 'usuarios' && (
+            <div id="print-area">
+              <div className="flex items-start justify-between">
+                <div><h2 className="text-2xl font-bold text-gray-800">{t('admin.users.title')}</h2><p className="text-sm text-gray-500 mt-1">{t('admin.users.subtitle')}</p></div>
+                <BtnPDF />
               </div>
-              <select className="rounded-2xl border border-app-border bg-white px-4 py-2 text-sm text-gray-700 shadow-sm outline-none" value={filtU.estado ?? 'todos'} onChange={e => setFiltU(p => ({ ...p, estado: e.target.value as FiltrosUsuarios['estado'] }))}>
-                <option value="todos">{t('admin.users.state.all')}</option><option value="activo">{t('admin.users.state.active')}</option><option value="suspendido">{t('admin.users.state.suspended')}</option>
-              </select>
-            </div>
 
-            <div className="rounded-2xl border border-app-border bg-white shadow-sm overflow-hidden">
-              {loadU ? <Skeleton n={5} /> : usuarios.length === 0 ? <div className="py-12 text-center text-sm text-gray-400">{t('admin.users.no_results')}</div> : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="border-b border-gray-100">
-                      <tr>{[
-                        t('admin.users.table.user'),
-                        t('admin.users.table.role'),
-                        t('admin.users.table.status'),
-                        t('admin.users.table.registered'),
-                        t('admin.users.table.last_access'),
-                        t('admin.users.table.actions'),
-                      ].map((h) => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">{h}</th>)}</tr>
-                    </thead>
-                    <tbody>
-                      {usuarios.map(u => (
-                        <tr key={u.id_usuario} className={`border-b border-gray-50 hover:bg-gray-50 transition ${u.estado === 'suspendido' ? 'bg-red-50' : ''}`}>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${u.estado === 'suspendido' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>{iniciales(u.nombre)}</div>
-                              <div><p className="font-medium text-gray-800">{u.nombre}</p><p className="text-xs text-gray-400">{u.email}</p></div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3"><Badge cls={u.rol === 'admin' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}>{obtenerRolLabel(u.rol)}</Badge></td>
-                          <td className="px-4 py-3"><Badge cls={u.estado === 'activo' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>{obtenerEstadoLabel(u.estado)}</Badge></td>
-                          <td className="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">{u.fecha_registro}</td>
-                          <td className="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">{u.fecha_ult_acceso}</td>
-                          <td className="px-4 py-3">
-                            {u.rol !== 'admin' && (u.estado === 'activo'
-                              ? <button onClick={() => setModal({ tipo: 'suspender', usuario: u })} className="rounded-full border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition">{t('admin.users.suspend')}</button>
-                              : <button onClick={() => setModal({ tipo: 'reactivar', usuario: u })} className="rounded-full border border-green-200 bg-white px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-50 transition">{t('admin.users.reactivate')}</button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {[['admin.users.cards.total', totU, 'text-gray-800'], ['admin.users.cards.active', totA, 'text-green-700'], ['admin.users.cards.suspended', totS, 'text-red-600'], ['admin.users.cards.registered', totU, 'text-gray-800']].map(([key, v, c]) => (
+                  <div key={key as string} className="rounded-2xl border border-app-border bg-white p-4 shadow-sm">
+                    <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t(key as string)}</p>
+                    <p className={`text-3xl font-bold ${c as string}`}>{v as number}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-3 flex-wrap no-print">
+                <div className="flex items-center gap-2 flex-1 min-w-52 rounded-2xl border border-app-border bg-white px-4 py-2 shadow-sm">
+                  <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/></svg>
+                  <input type="text" placeholder={t('admin.users.search_placeholder')} className="w-full bg-transparent text-sm outline-none text-gray-700 placeholder-gray-400" onChange={e => onSearch(e.target.value)} />
                 </div>
-              )}
-              <Paginacion pagina={pagU} lastPage={lastU} total={totU} label={t('admin.pagination.users')} onPrev={() => loadUsuarios(pagU - 1)} onNext={() => loadUsuarios(pagU + 1)} />
+                <select className="rounded-2xl border border-app-border bg-white px-4 py-2 text-sm text-gray-700 shadow-sm outline-none" value={filtU.estado ?? 'todos'} onChange={e => setFiltU(p => ({ ...p, estado: e.target.value as FiltrosUsuarios['estado'] }))}>
+                  <option value="todos">{t('admin.users.state.all')}</option><option value="activo">{t('admin.users.state.active')}</option><option value="suspendido">{t('admin.users.state.suspended')}</option>
+                </select>
+              </div>
+
+              <div className="rounded-2xl border border-app-border bg-white shadow-sm overflow-hidden">
+                {loadU ? <Skeleton n={5} /> : usuarios.length === 0 ? <div className="py-12 text-center text-sm text-gray-400">{t('admin.users.no_results')}</div> : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="border-b border-gray-100">
+                        <tr>{[t('admin.users.table.user'), t('admin.users.table.role'), t('admin.users.table.status'), t('admin.users.table.registered'), t('admin.users.table.last_access'), t('admin.users.table.actions')].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">{h}</th>)}</tr>
+                      </thead>
+                      <tbody>
+                        {usuarios.map(u => (
+                          <tr key={u.id_usuario} className={`border-b border-gray-50 hover:bg-gray-50 transition ${u.estado === 'suspendido' ? 'bg-red-50' : ''}`}>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${u.estado === 'suspendido' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>{iniciales(u.nombre)}</div>
+                                <div><p className="font-medium text-gray-800">{u.nombre}</p><p className="text-xs text-gray-400">{u.email}</p></div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3"><Badge cls={u.rol === 'admin' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}>{obtenerRolLabel(u.rol)}</Badge></td>
+                            <td className="px-4 py-3"><Badge cls={u.estado === 'activo' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>{obtenerEstadoLabel(u.estado)}</Badge></td>
+                            <td className="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">{u.fecha_registro}</td>
+                            <td className="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">{u.fecha_ult_acceso}</td>
+                            <td className="px-4 py-3 no-print">
+                              {u.rol !== 'admin' && (u.estado === 'activo'
+                                ? <button onClick={() => setModal({ tipo: 'suspender', usuario: u })} className="rounded-full border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition">{t('admin.users.suspend')}</button>
+                                : <button onClick={() => setModal({ tipo: 'reactivar', usuario: u })} className="rounded-full border border-green-200 bg-white px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-50 transition">{t('admin.users.reactivate')}</button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                <Paginacion pagina={pagU} lastPage={lastU} total={totU} label={t('admin.pagination.users')} onPrev={() => loadUsuarios(pagU - 1)} onNext={() => loadUsuarios(pagU + 1)} />
+              </div>
             </div>
-          </>}
+          )}
 
           {/* ══ BITÁCORA ══ */}
-          {tab === 'bitacora' && <>
-            <div><h2 className="text-2xl font-bold text-gray-800">{t('admin.bitacora.title')}</h2><p className="text-sm text-gray-500 mt-1">{t('admin.bitacora.subtitle')}</p></div>
+          {tab === 'bitacora' && (
+            <div id="print-area">
+              <div className="flex items-start justify-between">
+                <div><h2 className="text-2xl font-bold text-gray-800">{t('admin.bitacora.title')}</h2><p className="text-sm text-gray-500 mt-1">{t('admin.bitacora.subtitle')}</p></div>
+                <BtnPDF />
+              </div>
 
-            <div className="flex gap-3 flex-wrap items-end">
-              {([['admin.bitacora.since', errDesde, onFechaDesde], ['admin.bitacora.until', errHasta, onFechaHasta]] as [string, string, (v: string) => void][]).map(([key, err, fn]) => (
-                <div key={key} className="flex flex-col gap-1">
-                  <label className="text-xs text-gray-400">{t(key)}</label>
-                  <input type="date" min={FECHA_MIN} max={FECHA_MAX} defaultValue="" className={`rounded-xl border px-3 py-2 text-sm outline-none bg-white text-gray-800 ${err ? 'border-red-400' : 'border-app-border'}`} onChange={e => fn(e.target.value)} />
-                  {err && <span className="text-xs text-red-500">{err}</span>}
-                </div>
-              ))}
-              <select className="rounded-xl border border-app-border bg-white px-3 py-2 text-sm outline-none text-gray-700" value={filtB.tipo ?? 'todos'} onChange={e => setFiltB(p => ({ ...p, tipo: e.target.value as TipoBitacora }))}>
-                {(['todos', 'suspender', 'reactivar', 'modificaciones', 'creacion', 'login', 'logout'] as Array<TipoBitacora | 'todos'>).map((tipo) => (
-                  <option key={tipo} value={tipo}>{obtenerFiltroBitacora(tipo)}</option>
+              <div className="flex gap-3 flex-wrap items-end no-print">
+                {([['admin.bitacora.since', errDesde, onFechaDesde], ['admin.bitacora.until', errHasta, onFechaHasta]] as [string, string, (v: string) => void][]).map(([key, err, fn]) => (
+                  <div key={key} className="flex flex-col gap-1">
+                    <label className="text-xs text-gray-400">{t(key)}</label>
+                    <input type="date" min={FECHA_MIN} max={FECHA_MAX} defaultValue="" className={`rounded-xl border px-3 py-2 text-sm outline-none bg-white text-gray-800 ${err ? 'border-red-400' : 'border-app-border'}`} onChange={e => fn(e.target.value)} />
+                    {err && <span className="text-xs text-red-500">{err}</span>}
+                  </div>
                 ))}
-              </select>
-              <button className="rounded-xl border border-app-border bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition" onClick={() => loadBitacora(1)}>{t('admin.bitacora.apply')}</button>
-            </div>
+                <select className="rounded-xl border border-app-border bg-white px-3 py-2 text-sm outline-none text-gray-700" value={filtB.tipo ?? 'todos'} onChange={e => setFiltB(p => ({ ...p, tipo: e.target.value as TipoBitacora }))}>
+                  {(['todos', 'suspender', 'reactivar', 'modificaciones', 'creacion', 'login', 'logout'] as Array<TipoBitacora | 'todos'>).map(tipo => (
+                    <option key={tipo} value={tipo}>{obtenerFiltroBitacora(tipo)}</option>
+                  ))}
+                </select>
+                <button className="rounded-xl border border-app-border bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition" onClick={() => loadBitacora(1)}>{t('admin.bitacora.apply')}</button>
+              </div>
 
-            <div className="rounded-2xl border border-app-border bg-white shadow-sm overflow-hidden">
-              {loadB ? <Skeleton n={4} /> : bitacora.length === 0 ? <div className="py-12 text-center text-sm text-gray-400">{t('admin.bitacora.no_results')}</div> : (
-                <div className="overflow-x-auto">
+              <div className="rounded-2xl border border-app-border bg-white shadow-sm overflow-hidden">
+                {loadB ? <Skeleton n={4} /> : bitacora.length === 0 ? <div className="py-12 text-center text-sm text-gray-400">{t('admin.bitacora.no_results')}</div> : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="border-b border-gray-100">
+                        <tr>{[t('admin.bitacora.table.user'), t('admin.bitacora.table.action_type'), t('admin.bitacora.table.current_status'), t('admin.bitacora.table.date_time'), t('admin.bitacora.table.details')].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">{h}</th>)}</tr>
+                      </thead>
+                      <tbody>
+                        {bitacora.map(b => (
+                          <tr key={b.id_registro} className="border-b border-gray-50 hover:bg-gray-50 transition">
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${b.estado_actual === 'suspendido' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>{iniciales(b.nombre)}</div>
+                                <div><p className="font-medium text-gray-800">{b.nombre}</p><p className="text-xs text-gray-400">{b.email}</p></div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3"><Badge cls={colorTipo(b.tipo_accion)}>{etiquetaTipo(b.tipo_accion)}</Badge></td>
+                            <td className="px-4 py-3"><Badge cls={b.estado_actual === 'activo' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>{b.estado_actual === 'activo' ? t('admin.bitacora.status.active') : t('admin.bitacora.status.suspended')}</Badge></td>
+                            <td className="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">{b.fecha_accion}</td>
+                            <td className="px-4 py-3 no-print"><button onClick={() => setModalCtx(b)} className="text-xs text-blue-600 hover:underline font-medium">{t('admin.bitacora.view_context')}</button></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                <Paginacion pagina={pagB} lastPage={lastB} total={totB} label={t('admin.pagination.records')} onPrev={() => loadBitacora(pagB - 1)} onNext={() => loadBitacora(pagB + 1)} />
+              </div>
+            </div>
+          )}
+
+          {/* ══ TECNOLOGÍAS ══ */}
+          {tab === 'tecnologias' && (
+            <div id="print-area">
+              <div className="flex items-start justify-between">
+                <div><h2 className="text-2xl font-bold text-gray-800">{t('admin.technologies.title')}</h2><p className="text-sm text-gray-500 mt-1">{t('admin.technologies.subtitle')}</p></div>
+                <div className="flex gap-2 no-print">
+                  <BtnPDF />
+                  <button onClick={() => { setFormTec({ nombre: '', categoria: '' }); setModal({ tipo: 'nueva-tecnologia' }); }} className="rounded-full bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">{t('admin.technologies.add_button')}</button>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+                {loadT ? <Skeleton n={4} /> : tecns.length === 0 ? <div className="py-12 text-center text-sm text-gray-500">{t('admin.technologies.no_results')}</div> : (
                   <table className="w-full text-sm">
-                    <thead className="border-b border-gray-100">
-                      <tr>{[
-                        t('admin.bitacora.table.user'),
-                        t('admin.bitacora.table.action_type'),
-                        t('admin.bitacora.table.current_status'),
-                        t('admin.bitacora.table.date_time'),
-                        t('admin.bitacora.table.details'),
-                      ].map((h) => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">{h}</th>)}</tr>
+                    <thead className="border-b border-gray-200 bg-gray-50">
+                      <tr>{[t('admin.technologies.table.name'), t('admin.technologies.table.category'), t('admin.technologies.table.actions')].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">{h}</th>)}</tr>
                     </thead>
                     <tbody>
-                      {bitacora.map(b => (
-                        <tr key={b.id_registro} className="border-b border-gray-50 hover:bg-gray-50 transition">
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${b.estado_actual === 'suspendido' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>{iniciales(b.nombre)}</div>
-                              <div><p className="font-medium text-gray-800">{b.nombre}</p><p className="text-xs text-gray-400">{b.email}</p></div>
+                      {tecns.map(tecnologia => (
+                        <tr key={tecnologia.id_tecnologia} className="border-b border-gray-100 hover:bg-blue-50 transition">
+                          <td className="px-4 py-3 font-medium text-gray-900">{tecnologia.nombre}</td>
+                          <td className="px-4 py-3"><span className="text-xs bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full font-medium">{tecnologia.categoria}</span></td>
+                          <td className="px-4 py-3 no-print">
+                            <div className="flex gap-2">
+                              <button onClick={() => { setFormTec({ nombre: tecnologia.nombre, categoria: tecnologia.categoria }); setModal({ tipo: 'editar-tecnologia', item: tecnologia }); }} className="rounded-full border border-gray-300 bg-white text-gray-700 px-3 py-1 text-xs hover:bg-gray-100 transition font-medium">{t('admin.common.edit')}</button>
+                              <button onClick={() => setModal({ tipo: 'eliminar-tecnologia', item: tecnologia })} className="rounded-full border border-red-200 bg-white text-red-600 px-3 py-1 text-xs hover:bg-red-50 transition font-medium">{t('admin.common.delete')}</button>
                             </div>
                           </td>
-                          <td className="px-4 py-3"><Badge cls={colorTipo(b.tipo_accion)}>{etiquetaTipo(b.tipo_accion)}</Badge></td>
-                          <td className="px-4 py-3"><Badge cls={b.estado_actual === 'activo' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>{b.estado_actual === 'activo' ? t('admin.bitacora.status.active') : t('admin.bitacora.status.suspended')}</Badge></td>
-                          <td className="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">{b.fecha_accion}</td>
-                          <td className="px-4 py-3"><button onClick={() => setModalCtx(b)} className="text-xs text-blue-600 hover:underline font-medium">{t('admin.bitacora.view_context')}</button></td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                </div>
-              )}
-              <Paginacion pagina={pagB} lastPage={lastB} total={totB} label={t('admin.pagination.records')} onPrev={() => loadBitacora(pagB - 1)} onNext={() => loadBitacora(pagB + 1)} />
+                )}
+              </div>
             </div>
-          </>}
-
-          {/* ══ TECNOLOGÍAS ══ */}
-          {tab === 'tecnologias' && <>
-            <div className="flex items-start justify-between">
-              <div><h2 className="text-2xl font-bold text-gray-800">{t('admin.technologies.title')}</h2><p className="text-sm text-gray-500 mt-1">{t('admin.technologies.subtitle')}</p></div>
-              <button onClick={() => { setFormTec({ nombre: '', categoria: '' }); setModal({ tipo: 'nueva-tecnologia' }); }} className="rounded-full bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">{t('admin.technologies.add_button')}</button>
-            </div>
-            <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-              {loadT ? <Skeleton n={4} /> : tecns.length === 0 ? <div className="py-12 text-center text-sm text-gray-500">{t('admin.technologies.no_results')}</div> : (
-                <table className="w-full text-sm">
-                  <thead className="border-b border-gray-200 bg-gray-50">
-                    <tr>{[t('admin.technologies.table.name'),t('admin.technologies.table.category'),t('admin.technologies.table.actions')].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">{h}</th>)}</tr>
-                  </thead>
-                  <tbody>
-                    {tecns.map((tecnologia) => (
-                      <tr key={tecnologia.id_tecnologia} className="border-b border-gray-100 hover:bg-blue-50 transition">
-                        <td className="px-4 py-3 font-medium text-gray-900">{tecnologia.nombre}</td>
-                        <td className="px-4 py-3"><span className="text-xs bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full font-medium">{tecnologia.categoria}</span></td>
-                        <td className="px-4 py-3">
-                          <div className="flex gap-2">
-                            <button onClick={() => { setFormTec({ nombre: tecnologia.nombre, categoria: tecnologia.categoria }); setModal({ tipo: 'editar-tecnologia', item: tecnologia }); }} className="rounded-full border border-gray-300 bg-white text-gray-700 px-3 py-1 text-xs hover:bg-gray-100 transition font-medium">{t('admin.common.edit')}</button>
-                            <button onClick={() => setModal({ tipo: 'eliminar-tecnologia', item: tecnologia })} className="rounded-full border border-red-200 bg-white text-red-600 px-3 py-1 text-xs hover:bg-red-50 transition font-medium">{t('admin.common.delete')}</button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </>}
+          )}
 
           {/* ══ GRADOS ══ */}
-          {tab === 'grados' && <>
-            <div className="flex items-start justify-between">
-              <div><h2 className="text-2xl font-bold text-gray-800">{t('admin.grades.title')}</h2><p className="text-sm text-gray-500 mt-1">{t('admin.grades.subtitle')}</p></div>
-              <button onClick={() => { setFormGrado({ nombre_grado: '' }); setModal({ tipo: 'nuevo-grado' }); }} className="rounded-full bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">{t('admin.grades.add_button')}</button>
+          {tab === 'grados' && (
+            <div id="print-area">
+              <div className="flex items-start justify-between">
+                <div><h2 className="text-2xl font-bold text-gray-800">{t('admin.grades.title')}</h2><p className="text-sm text-gray-500 mt-1">{t('admin.grades.subtitle')}</p></div>
+                <div className="flex gap-2 no-print">
+                  <BtnPDF />
+                  <button onClick={() => { setFormGrado({ nombre_grado: '' }); setModal({ tipo: 'nuevo-grado' }); }} className="rounded-full bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">{t('admin.grades.add_button')}</button>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+                {loadG ? <Skeleton n={4} /> : grados.length === 0 ? <div className="py-12 text-center text-sm text-gray-500">{t('admin.grades.no_results')}</div> : (
+                  <table className="w-full text-sm">
+                    <thead className="border-b border-gray-200 bg-gray-50">
+                      <tr>{[t('admin.grades.table.name'), t('admin.grades.table.actions')].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">{h}</th>)}</tr>
+                    </thead>
+                    <tbody>
+                      {grados.map(g => (
+                        <tr key={g.id_grado} className="border-b border-gray-100 hover:bg-blue-50 transition">
+                          <td className="px-4 py-3 font-medium text-gray-900">{g.nombre_grado}</td>
+                          <td className="px-4 py-3 no-print">
+                            <div className="flex gap-2">
+                              <button onClick={() => { setFormGrado({ nombre_grado: g.nombre_grado }); setModal({ tipo: 'editar-grado', item: g }); }} className="rounded-full border border-gray-300 bg-white text-gray-700 px-3 py-1 text-xs hover:bg-gray-100 transition font-medium">{t('admin.common.edit')}</button>
+                              <button onClick={() => setModal({ tipo: 'eliminar-grado', item: g })} className="rounded-full border border-red-200 bg-white text-red-600 px-3 py-1 text-xs hover:bg-red-50 transition font-medium">{t('admin.common.delete')}</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
             </div>
-            <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-              {loadG ? <Skeleton n={4} /> : grados.length === 0 ? <div className="py-12 text-center text-sm text-gray-500">{t('admin.grades.no_results')}</div> : (
-                <table className="w-full text-sm">
-                  <thead className="border-b border-gray-200 bg-gray-50">
-                    <tr>{[t('admin.grades.table.name'), t('admin.grades.table.actions')].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">{h}</th>)}</tr>
-                  </thead>
-                  <tbody>
-                    {grados.map(g => (
-                      <tr key={g.id_grado} className="border-b border-gray-100 hover:bg-blue-50 transition">
-                        <td className="px-4 py-3 font-medium text-gray-900">{g.nombre_grado}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex gap-2">
-                            <button onClick={() => { setFormGrado({ nombre_grado: g.nombre_grado }); setModal({ tipo: 'editar-grado', item: g }); }} className="rounded-full border border-gray-300 bg-white text-gray-700 px-3 py-1 text-xs hover:bg-gray-100 transition font-medium">{t('admin.common.edit')}</button>
-                            <button onClick={() => setModal({ tipo: 'eliminar-grado', item: g })} className="rounded-full border border-red-200 bg-white text-red-600 px-3 py-1 text-xs hover:bg-red-50 transition font-medium">{t('admin.common.delete')}</button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </>}
+          )}
 
           {/* ══ ANUNCIOS ══ */}
-          {tab === 'anuncios' && <>
-            <div className="flex items-start justify-between">
-              <div><h2 className="text-2xl font-bold text-gray-800">{t('admin.ads.title')}</h2><p className="text-sm text-gray-500 mt-1">{t('admin.ads.subtitle')}</p></div>
-              <button onClick={() => { resetAN(); setModal({ tipo: 'nuevo-anuncio' }); }} className="rounded-full bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">{t('admin.ads.add_button')}</button>
-            </div>
-            {loadAN ? <Skeleton n={3} /> : anuncios.length === 0 ? (
-              <div className="rounded-2xl border border-gray-200 bg-white shadow-sm py-12 text-center text-sm text-gray-500">{t('admin.ads.no_results')}</div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {anuncios.map(a => (
-                  <article key={a.id_anuncio} className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden flex flex-col">
-                    {a.foto_url && <div className="h-36 overflow-hidden"><img src={a.foto_url} alt={a.titulo} className="w-full h-full object-cover" /></div>}
-                    <div className="p-4 flex flex-col gap-2 flex-1">
-                      <h3 className="font-semibold text-gray-900 text-sm">{a.titulo}</h3>
-                      {a.descripcion && <p className="text-xs text-gray-600 line-clamp-2">{a.descripcion}</p>}
-                      <a href={a.url_redireccion} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline truncate">{a.url_redireccion}</a>
-                      <p className="text-xs text-gray-400">{a.creado_en}</p>
-                    </div>
-                    <div className="flex gap-2 px-4 py-3 border-t border-gray-100 bg-gray-50">
-                      <button onClick={() => { setFormAN({ titulo: a.titulo, descripcion: a.descripcion ?? '', url_redireccion: a.url_redireccion }); setPreview(a.foto_url); setFotoFile(null); setFotoEliminada(false); setModal({ tipo: 'editar-anuncio', item: a }); }} className="flex-1 rounded-full border border-gray-300 bg-white text-gray-700 px-3 py-1.5 text-xs font-medium hover:bg-gray-100 transition">{t('admin.common.edit')}</button>
-                      <button onClick={() => setModal({ tipo: 'eliminar-anuncio', item: a })} className="flex-1 rounded-full border border-red-200 bg-white text-red-600 px-3 py-1.5 text-xs font-medium hover:bg-red-50 transition">{t('admin.common.delete')}</button>
-                    </div>
-                  </article>
-                ))}
+          {tab === 'anuncios' && (
+            <div id="print-area">
+              <div className="flex items-start justify-between">
+                <div><h2 className="text-2xl font-bold text-gray-800">{t('admin.ads.title')}</h2><p className="text-sm text-gray-500 mt-1">{t('admin.ads.subtitle')}</p></div>
+                <div className="flex gap-2 no-print">
+                  <BtnPDF />
+                  <button onClick={() => { resetAN(); setModal({ tipo: 'nuevo-anuncio' }); }} className="rounded-full bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">{t('admin.ads.add_button')}</button>
+                </div>
               </div>
-            )}
-          </>}
+              {loadAN ? <Skeleton n={3} /> : anuncios.length === 0 ? (
+                <div className="rounded-2xl border border-gray-200 bg-white shadow-sm py-12 text-center text-sm text-gray-500">{t('admin.ads.no_results')}</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {anuncios.map(a => (
+                    <article key={a.id_anuncio} className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden flex flex-col">
+                      {a.foto_url && <div className="h-36 overflow-hidden"><img src={a.foto_url} alt={a.titulo} className="w-full h-full object-cover" /></div>}
+                      <div className="p-4 flex flex-col gap-2 flex-1">
+                        <h3 className="font-semibold text-gray-900 text-sm">{a.titulo}</h3>
+                        {a.descripcion && <p className="text-xs text-gray-600 line-clamp-2">{a.descripcion}</p>}
+                        <a href={a.url_redireccion} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline truncate">{a.url_redireccion}</a>
+                        <p className="text-xs text-gray-400">{a.creado_en}</p>
+                      </div>
+                      <div className="flex gap-2 px-4 py-3 border-t border-gray-100 bg-gray-50 no-print">
+                        <button onClick={() => { setFormAN({ titulo: a.titulo, descripcion: a.descripcion ?? '', url_redireccion: a.url_redireccion }); setPreview(a.foto_url); setFotoFile(null); setFotoEliminada(false); setModal({ tipo: 'editar-anuncio', item: a }); }} className="flex-1 rounded-full border border-gray-300 bg-white text-gray-700 px-3 py-1.5 text-xs font-medium hover:bg-gray-100 transition">{t('admin.common.edit')}</button>
+                        <button onClick={() => setModal({ tipo: 'eliminar-anuncio', item: a })} className="flex-1 rounded-full border border-red-200 bg-white text-red-600 px-3 py-1.5 text-xs font-medium hover:bg-red-50 transition">{t('admin.common.delete')}</button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ══ BACKUP ══ */}
           {tab === 'backup' && <>
@@ -817,9 +836,9 @@ const AdminUsuarios: React.FC = () => {
           </div>
 
           {([
-            [t('admin.log.type'), <Badge cls={colorTipo(modalCtx.tipo_accion)}>{etiquetaTipo(modalCtx.tipo_accion)}</Badge>],
-            [t('admin.log.dateTime'),   <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2 w-fit"><span>🕐</span><span className="text-sm text-gray-700 font-medium">{modalCtx.fecha_accion}</span></div>],
-            [t('admin.log.status'),  <Badge cls={modalCtx.estado_actual === 'activo' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>{modalCtx.estado_actual === 'activo' ? t('admin.common.status.active') : t('admin.common.status.suspended')}</Badge>],
+            [t('admin.log.type'),     <Badge cls={colorTipo(modalCtx.tipo_accion)}>{etiquetaTipo(modalCtx.tipo_accion)}</Badge>],
+            [t('admin.log.dateTime'), <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2 w-fit"><span>🕐</span><span className="text-sm text-gray-700 font-medium">{modalCtx.fecha_accion}</span></div>],
+            [t('admin.log.status'),   <Badge cls={modalCtx.estado_actual === 'activo' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>{modalCtx.estado_actual === 'activo' ? t('admin.common.status.active') : t('admin.common.status.suspended')}</Badge>],
           ] as [string, React.ReactNode][]).map(([lbl, val]) => (
             <div key={lbl} className="mb-4">
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{lbl}</p>
@@ -832,14 +851,14 @@ const AdminUsuarios: React.FC = () => {
             {modalCtx.contexto && Object.keys(modalCtx.contexto).length > 0 ? (
               <div className="space-y-2">
                 {([
-                  ['🌐', t('admin.bitacora.detail.ip'),     modalCtx.contexto.ip,                         'font-mono bg-white border border-gray-200 px-2 py-0.5 rounded-lg text-gray-700'],
-                  ['💻', t('admin.bitacora.detail.device'),      modalCtx.contexto.dispositivo,                'break-all text-gray-700'],
-                  ['🗂️', t('admin.bitacora.detail.table'),  modalCtx.contexto.tabla_principal_afectada,   'font-mono bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded-lg'],
-                  ['⚡', t('admin.bitacora.detail.action'),           modalCtx.contexto.accion,                     'text-gray-700'],
-                  ['📝', t('admin.bitacora.detail.reason'),           modalCtx.contexto.motivo,                     'text-amber-700'],
-                  ['👤', t('admin.bitacora.detail.executed_by'),    modalCtx.contexto.ejecutado_por,              'font-mono break-all text-gray-700'],
-                  ['🕐', t('admin.bitacora.detail.previous_access'),  modalCtx.contexto.fecha_ult_acceso_anterior,  'text-gray-700'],
-                  ['📁', t('admin.bitacora.detail.file'),          modalCtx.contexto.archivo,                    'text-gray-700'],
+                  ['🌐', t('admin.bitacora.detail.ip'),              modalCtx.contexto.ip,                        'font-mono bg-white border border-gray-200 px-2 py-0.5 rounded-lg text-gray-700'],
+                  ['💻', t('admin.bitacora.detail.device'),          modalCtx.contexto.dispositivo,               'break-all text-gray-700'],
+                  ['🗂️', t('admin.bitacora.detail.table'),           modalCtx.contexto.tabla_principal_afectada,  'font-mono bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded-lg'],
+                  ['⚡', t('admin.bitacora.detail.action'),          modalCtx.contexto.accion,                    'text-gray-700'],
+                  ['📝', t('admin.bitacora.detail.reason'),          modalCtx.contexto.motivo,                    'text-amber-700'],
+                  ['👤', t('admin.bitacora.detail.executed_by'),     modalCtx.contexto.ejecutado_por,             'font-mono break-all text-gray-700'],
+                  ['🕐', t('admin.bitacora.detail.previous_access'), modalCtx.contexto.fecha_ult_acceso_anterior, 'text-gray-700'],
+                  ['📁', t('admin.bitacora.detail.file'),            modalCtx.contexto.archivo,                   'text-gray-700'],
                 ] as [string, string, string, string][]).filter(([,, v]) => v).map(([icon, label, val, cls]) => (
                   <div key={label} className="flex items-start gap-2 bg-gray-50 rounded-xl px-3 py-2">
                     <span className="text-sm shrink-0">{icon}</span>

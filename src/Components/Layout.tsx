@@ -146,16 +146,16 @@ function Layout() {
   }, []);
 
   const cargarAnuncios = async () => {
-  setLoadingAnuncios(true);
-  try {
-    const res = await getAnunciosPublicos();
-    setAnuncios(res.anuncios);
-  } catch (error) {
-    console.error("Error al cargar anuncios:", error);
-    setAnuncios([]);
-  } finally {
-    setLoadingAnuncios(false);
-  }
+    setLoadingAnuncios(true);
+    try {
+      const res = await getAnunciosPublicos();
+      setAnuncios(Array.isArray(res.anuncios) ? res.anuncios : []);
+    } catch (error) {
+      console.error("Error al cargar anuncios:", error);
+      setAnuncios([]);
+    } finally {
+      setLoadingAnuncios(false);
+    }
   };
 
   useEffect(() => {
